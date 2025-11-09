@@ -1,0 +1,222 @@
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ChevronLeft, BookOpen, Code, CheckCircle2, Clock } from 'lucide-react';
+import { courses, tasks, lectures } from '../data/mockData';
+
+export function CourseDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const course = courses.find((c) => c.id === id);
+
+  if (!course) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-white text-2xl mb-4">Course not found</p>
+          <button
+            onClick={() => navigate('/courses')}
+            className="bg-[#6942d5] text-white px-6 py-2 rounded-lg hover:bg-[#7952e5] transition-colors"
+          >
+            Back to Courses
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const courseLectures = lectures.filter((l) => l.courseId === course.id);
+  const courseTasks = tasks.filter((t) => t.courseId === course.id);
+  const completedLectures = courseLectures.filter((l) => l.completed).length;
+  const completedTasks = courseTasks.filter((t) => t.completed).length;
+
+  return (
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <button
+          onClick={() => navigate('/courses')}
+          className="mb-6 flex items-center gap-2 text-[#6942d5] hover:text-[#7952e5] font-['Roboto',sans-serif] transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          Back to Courses
+        </button>
+
+        {/* Course Header */}
+        <div className="bg-gradient-to-br from-[#6942d5] to-[#8b5cf6] rounded-2xl p-8 md:p-12 mb-8">
+          <div className="flex items-start justify-between gap-6 mb-6">
+            <div className="flex-1">
+              <h1 className="font-['Roboto',sans-serif] font-bold text-white text-4xl md:text-5xl mb-4">
+                {course.title}
+              </h1>
+              <p className="font-['Roboto',sans-serif] font-light text-white/90 text-lg mb-6">
+                {course.description}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="bg-white/20 text-white px-4 py-2 rounded-full text-sm font-['Roboto',sans-serif] font-medium">
+                  {course.difficulty}
+                </span>
+                <span className="bg-white/20 text-white px-4 py-2 rounded-full text-sm font-['Roboto',sans-serif] font-medium">
+                  {course.isFree ? 'Free' : 'Premium'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-['Roboto',sans-serif] text-white/90">Overall Progress</span>
+              <span className="font-['Roboto',sans-serif] font-medium text-white">
+                {course.progress}/{course.total} completed
+              </span>
+            </div>
+            <div className="bg-white/20 rounded-full h-4">
+              <div
+                className="bg-white rounded-full h-4 transition-all"
+                style={{ width: `${(course.progress / course.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Lectures Section */}
+          <div className="bg-[#242424] border border-[#3d3d3d] rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#6942d5]/20 rounded-lg">
+                  <BookOpen className="w-5 h-5 text-[#6942d5]" />
+                </div>
+                <div>
+                  <h2 className="font-['Roboto',sans-serif] font-medium text-white text-xl">
+                    Lectures
+                  </h2>
+                  <p className="font-['Roboto',sans-serif] text-[#b0b0b0] text-sm">
+                    {completedLectures}/{courseLectures.length} completed
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {courseLectures.length > 0 ? (
+                courseLectures.map((lecture) => (
+                  <Link
+                    key={lecture.id}
+                    to={`/lectures?id=${lecture.id}`}
+                    className="block bg-[#1a1a1a] hover:bg-[#2a2a2a] border border-[#3d3d3d] hover:border-[#6942d5] rounded-lg p-4 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      {lecture.completed ? (
+                        <CheckCircle2 className="w-5 h-5 text-[#ace798] shrink-0 mt-0.5" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full border-2 border-[#3d3d3d] shrink-0 mt-0.5" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-['Roboto',sans-serif] font-medium text-white mb-1">
+                          {lecture.title}
+                        </p>
+                        <div className="flex items-center gap-2 text-[#b0b0b0]">
+                          <Clock className="w-3 h-3" />
+                          <span className="font-['Roboto',sans-serif] text-xs">
+                            {lecture.readTime}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <p className="font-['Roboto',sans-serif] text-[#b0b0b0] text-center py-8">
+                  No lectures available yet
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Tasks Section */}
+          <div className="bg-[#242424] border border-[#3d3d3d] rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#00eaff]/20 rounded-lg">
+                  <Code className="w-5 h-5 text-[#00eaff]" />
+                </div>
+                <div>
+                  <h2 className="font-['Roboto',sans-serif] font-medium text-white text-xl">
+                    Coding Tasks
+                  </h2>
+                  <p className="font-['Roboto',sans-serif] text-[#b0b0b0] text-sm">
+                    {completedTasks}/{courseTasks.length} completed
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {courseTasks.length > 0 ? (
+                courseTasks.map((task) => (
+                  <Link
+                    key={task.id}
+                    to={`/tasks/${task.id}`}
+                    className="block bg-[#1a1a1a] hover:bg-[#2a2a2a] border border-[#3d3d3d] hover:border-[#6942d5] rounded-lg p-4 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      {task.completed ? (
+                        <CheckCircle2 className="w-5 h-5 text-[#ace798] shrink-0 mt-0.5" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full border-2 border-[#3d3d3d] shrink-0 mt-0.5" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-['Roboto_Mono',sans-serif] font-medium text-white mb-1 truncate">
+                          {task.title}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-3 h-3 rounded-full ${
+                              task.difficulty === 'Easy'
+                                ? 'bg-[#ace798]'
+                                : task.difficulty === 'Medium'
+                                ? 'bg-[#ffee9c]'
+                                : 'bg-[#fe6868]'
+                            }`}
+                          />
+                          <span className="font-['Roboto',sans-serif] text-[#b0b0b0] text-xs">
+                            {task.difficulty}
+                          </span>
+                          <span className="text-[#3d3d3d]">•</span>
+                          <span className="font-['Roboto',sans-serif] text-[#b0b0b0] text-xs">
+                            {task.category}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <p className="font-['Roboto',sans-serif] text-[#b0b0b0] text-center py-8">
+                  No tasks available yet
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-wrap gap-4">
+          <Link
+            to="/lectures"
+            className="bg-[#6942d5] hover:bg-[#7952e5] text-white px-8 py-3 rounded-lg font-['Roboto',sans-serif] font-medium transition-colors"
+          >
+            Start Learning
+          </Link>
+          <Link
+            to="/tasks"
+            className="bg-[#242424] border border-[#3d3d3d] hover:border-[#6942d5] text-white px-8 py-3 rounded-lg font-['Roboto',sans-serif] font-medium transition-colors"
+          >
+            Practice Tasks
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
