@@ -2,6 +2,8 @@ import { Calendar, Award, TrendingUp, Code, CheckCircle2, XCircle, Settings, Log
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { userStats, tasks } from '../data/mockData';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../store';
 
 export function Profile() {
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ export function Profile() {
     localStorage.removeItem('userEmail');
     navigate('/login');
   };
+  const user = useSelector((state: RootState) => state.user.user);
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -26,18 +29,19 @@ export function Profile() {
           <div className="flex items-start gap-6">
             <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center">
               <span className="text-foreground text-4xl font-sans font-bold">
-                {userStats.name.split(' ').map(n => n[0]).join('')}
-              </span>
+                {user
+                  ? `${user.firstName[0] || ''}${user.lastName[0] || ''}`.toUpperCase()
+                  : 'G'}              </span>
             </div>
             <div className="flex-1">
               <h1 className="font-sans font-medium text-foreground text-4xl mb-2">
-                {userStats.name}
+                {`${user?.firstName} ${user?.lastName}`}
               </h1>
               <p className="font-sans text-foreground/80 mb-1">
-                {userStats.email}
+                {user?.email}
               </p>
               <p className="font-sans font-light text-foreground/60">
-                Member since {userStats.joinDate}
+                Member since {user ? new Date(user.createdAt).toLocaleDateString() : '-'}
               </p>
             </div>
           </div>

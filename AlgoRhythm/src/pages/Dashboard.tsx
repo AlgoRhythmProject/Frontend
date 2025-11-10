@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Book, Code, Trophy, TrendingUp } from 'lucide-react';
 import { tasks, courses, userStats } from '../data/mockData';
-// Zamień import na string placeholder
-const imgRectangle34 = "/placeholder.png"; // lub pusty string ""
+const imgRectangle34 = "/placeholder.png";
 
 export function Dashboard() {
   const recentTasks = tasks.slice(0, 3);
@@ -11,7 +10,6 @@ export function Dashboard() {
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Hero Section */}
         <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-primary to-[#8b5cf6] p-8 md:p-12">
           <div className="relative z-10">
             <h1 className="font-sans font-medium text-4xl md:text-6xl text-foreground mb-4" style={{ fontVariationSettings: "'wdth' 100" }}>

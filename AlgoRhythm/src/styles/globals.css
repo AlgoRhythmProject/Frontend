@@ -29,7 +29,6 @@
   --font-mono: 'Roboto Mono', monospace;
   --font-alt: 'Plus Jakarta Sans', sans-serif;
 
-  /* 🖊 Font Sizes */
   --text-xs: 0.75rem;
   /* 12px */
   --text-sm: 0.875rem;
@@ -72,7 +71,6 @@
   --color-error: var(--error);
   --color-info: var(--info);
 
-  /* Misc */
   --color-border: var(--border);
   --shadow-soft: var(--shadow-soft);
 

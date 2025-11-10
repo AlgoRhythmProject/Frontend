@@ -2,8 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Mail } from "lucide-react";
+import { AuthenticationInput } from "../components/Login/AuthenticationInput";
+import { AuthenticationHeader } from "../components/Login/AuthenticationHeader";
+import { AuthenticationBackground } from "../components/Login/AuthenticationBackground";
+import { AuthenticationButton } from "../components/Login/AuthenticationButton";
+import { AuthenticationFooter } from "../components/Login/AuthenticationFooter";
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '../store';
+import { login } from '../store/userSlice';
 
 export function Login() {
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,45 +22,25 @@ export function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login - in real app this would call an API
     setTimeout(() => {
+      const userFromBackend = {
+        id: '123',
+        email,
+        firstName: 'John',
+        lastName: 'Doe',
+        createdAt: new Date().toISOString(),
+        isDeleted: false,
+      };
+
+      dispatch(login(userFromBackend));
       localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", email);
       navigate("/");
     }, 800);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-black to-info/10" />
-
-      {/* Animated background blobs */}
-      <motion.div
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-      <motion.div
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-info/20 rounded-full blur-3xl"
-        animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 4,
-        }}
-      />
+      <AuthenticationBackground />
 
       {/* Login card */}
       <motion.div
@@ -61,127 +50,23 @@ export function Login() {
         className="relative z-10 w-full max-w-md"
       >
         <div className="bg-background/80 backdrop-blur-xl border border-muted rounded-2xl p-8 shadow-2xl">
-          {/* Logo/Title */}
-          <div className="text-center mb-8">
-            <motion.h1
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="font-sans font-bold text-4xl text-foreground mb-2"
-              style={{ fontVariationSettings: "'wdth' 100" }}
-            >
-              AlgoRhythm
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="font-sans text-muted-foreground"
-            >
-              Master data structures and algorithms
-            </motion.p>
-          </div>
-
-          {/* Login form */}
+          <AuthenticationHeader />
           <form onSubmit={handleLogin} className="space-y-5">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <label className="block font-sans text-foreground mb-2 text-sm">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="w-full bg-card border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
-                />
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <label className="block font-sans text-foreground mb-2 text-sm">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full bg-card border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
-                />
-              </div>
-            </motion.div>
-
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-primary to-[#8b5cf6] text-foreground py-3 rounded-lg font-sans font-medium hover:from-[#7952e5] hover:to-[#9c6cf7] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <motion.span
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                  />
-                  Logging in...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  {" "}
-                  Login
-                </span>
-              )}
-            </motion.button>
+            <AuthenticationInput label="Email" type="email" icon={<Mail />} value={email} onChange={setEmail} placeholder="your@email.com" delay={0.4} />
+            <AuthenticationInput label="Password" type="password" icon={<Lock />} value={password} onChange={setPassword} placeholder="••••••••" delay={0.5} />
+            <AuthenticationButton isLoading={isLoading} text="Login" />
           </form>
-
-          {/* Footer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="mt-6 text-center"
-          >
-            <p className="font-sans text-muted-foreground text-sm">
-              Demo app - use any email and password
+          <AuthenticationFooter
+            promptText="Don’t have an account?"
+            linkText="Sign up"
+            onLinkClick={() => navigate("/register")}
+          />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-6 text-center">
+            <p className="font-sans text-[#6b6b6b] text-sm">
+              Your place to learn algorithms and data structures
             </p>
           </motion.div>
         </div>
-
-        {/* Additional info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="mt-6 text-center"
-        >
-          <p className="font-sans text-[#6b6b6b] text-sm">
-            Your place to learn algorithms and data structures
-          </p>
-        </motion.div>
       </motion.div>
     </div>
   );

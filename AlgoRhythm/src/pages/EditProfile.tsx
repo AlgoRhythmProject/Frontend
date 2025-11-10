@@ -1,34 +1,69 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Mail, Lock, User, Save } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { type AppDispatch, type RootState } from '../store';
+import { login } from '../store/userSlice';
 
 export function EditProfile() {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const userState = useSelector((state: RootState) => state.user);
+
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: 'Alex',
-    lastName: 'Johnson',
-    email: localStorage.getItem('userEmail') || 'alex.johnson@example.com',
+    firstName: '',
+    lastName: '',
+    email: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
 
+  useEffect(() => {
+    if (userState.isAuthenticated) {
+      setFormData({
+        ...formData,
+        firstName: userState.user?.firstName || '',
+        lastName: userState.user?.lastName || '',
+        email: userState.user?.email || '',
+      });
+    }
+  }, [userState.user]);
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate save - in real app this would call an API
+    if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
+      alert("New passwords don't match");
+      setIsLoading(false);
+      return;
+    }
+
+    // Symulacja zapisu na backendzie
     setTimeout(() => {
-      localStorage.setItem('userEmail', formData.email);
+      // Tutaj normalnie wywołałbyś API do aktualizacji użytkownika
+      dispatch(
+        login({
+          id: userState.user?.id || '123',
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          createdAt: userState.user?.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isDeleted: false,
+        })
+      );
+
       setIsLoading(false);
       navigate('/profile');
     }, 800);
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
