@@ -2,14 +2,14 @@ import { Link, useLocation } from 'react-router-dom';
 
 export function Navigation() {
   const location = useLocation();
-  
+
   const navItems = [
     { name: 'Dashboard', path: '/' },
     { name: 'Lectures', path: '/lectures' },
     { name: 'Courses', path: '/courses' },
     { name: 'Tasks', path: '/tasks' },
   ];
-  
+
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/';
@@ -24,9 +24,8 @@ export function Navigation() {
           <Link
             key={item.path}
             to={item.path}
-            className={`font-['Roboto',sans-serif] font-medium text-[16px] md:text-[20px] text-center transition-colors ${
-              isActive(item.path) ? 'text-white' : 'text-[#9e9e9e] hover:text-white'
-            }`}
+            className={`font-sans font-medium text-[16px] md:text-[20px] text-center transition-colors ${isActive(item.path) ? 'text-foreground' : 'text-[#9e9e9e] hover:text-foreground'
+              }`}
             style={{ fontVariationSettings: "'wdth' 100" }}
           >
             {item.name}
@@ -35,9 +34,8 @@ export function Navigation() {
       </div>
       <Link
         to="/profile"
-        className={`font-['Roboto',sans-serif] font-medium text-[16px] md:text-[20px] text-center transition-colors ${
-          isActive('/profile') ? 'text-white' : 'text-[#9e9e9e] hover:text-white'
-        }`}
+        className={`font-sans font-medium text-[16px] md:text-[20px] text-center transition-colors ${isActive('/profile') ? 'text-foreground' : 'text-[#9e9e9e] hover:text-foreground'
+          }`}
         style={{ fontVariationSettings: "'wdth' 100" }}
       >
         Profile

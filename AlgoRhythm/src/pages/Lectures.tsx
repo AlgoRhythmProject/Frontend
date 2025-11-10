@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { lectures } from "../data/mockData";
-import { LectureList } from "../components/LectureList";
-import { LectureView } from "../components/LectureView";
+import { LectureList } from "../components/Lectures/LectureList";
+import { LectureView } from "../components/Lectures/LectureView";
 
 export function Lectures() {
   const [searchParams, setSearchParams] = useSearchParams();

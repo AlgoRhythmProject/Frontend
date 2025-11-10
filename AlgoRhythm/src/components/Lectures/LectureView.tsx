@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Clock, CheckCircle2 } from "lucide-react";
-import type { Lecture } from '../types/Lecture';
+import type { Lecture } from '../../types/Lecture';
 
 interface LectureViewProps {
     lecture: Lecture;
@@ -16,27 +16,27 @@ export function LectureView({ lecture, onBack }: LectureViewProps) {
         >
             <button
                 onClick={onBack}
-                className="mb-6 text-primary hover:text-[#7952e5] cursor-pointer font-['Roboto',sans-serif] transition-colors"
+                className="mb-6 text-primary hover:text-[#7952e5] cursor-pointer font-sans transition-colors"
             >
                 ← Back to all lectures
             </button>
 
-            <div className="max-w-4xl mx-auto bg-[#242424] border border-[#3d3d3d] rounded-2xl p-8 md:p-12">
+            <div className="max-w-4xl mx-auto bg-card border border-muted rounded-2xl p-8 md:p-12">
                 <div className="mb-6">
-                    <span className="inline-block bg-[#6942d5]/20 text-[#6942d5] px-3 py-1 rounded-full text-sm font-['Roboto',sans-serif] mb-4">
+                    <span className="inline-block bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-sans mb-4">
                         {lecture.topic}
                     </span>
-                    <div className="flex items-center gap-3 text-[#b0b0b0] mb-2">
+                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
                         <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
-                            <span className="font-['Roboto',sans-serif] text-sm">{lecture.readTime}</span>
+                            <span className="font-sans text-sm">{lecture.readTime}</span>
                         </div>
                         {lecture.completed && (
                             <>
                                 <span>•</span>
-                                <div className="flex items-center gap-1 text-[#ace798]">
+                                <div className="flex items-center gap-1 text-success">
                                     <CheckCircle2 className="w-4 h-4" />
-                                    <span className="font-['Roboto',sans-serif] text-sm">Completed</span>
+                                    <span className="font-sans text-sm">Completed</span>
                                 </div>
                             </>
                         )}
@@ -48,26 +48,26 @@ export function LectureView({ lecture, onBack }: LectureViewProps) {
                     {lecture.content.split('\n\n').map((paragraph, idx) => {
                         if (paragraph.startsWith('# ')) {
                             return (
-                                <h1 key={idx} className="text-4xl font-['Roboto',sans-serif] font-bold text-white mt-0 mb-6">
+                                <h1 key={idx} className="text-4xl font-sans font-bold text-foreground mt-0 mb-6">
                                     {paragraph.replace('# ', '')}
                                 </h1>
                             );
                         } else if (paragraph.startsWith('## ')) {
                             return (
-                                <h2 key={idx} className="text-2xl font-['Roboto',sans-serif] font-bold text-white mt-8 mb-4">
+                                <h2 key={idx} className="text-2xl font-sans font-bold text-foreground mt-8 mb-4">
                                     {paragraph.replace('## ', '')}
                                 </h2>
                             );
                         } else if (paragraph.startsWith('### ')) {
                             return (
-                                <h3 key={idx} className="text-xl font-['Roboto',sans-serif] font-bold text-white mt-6 mb-3">
+                                <h3 key={idx} className="text-xl font-sans font-bold text-foreground mt-6 mb-3">
                                     {paragraph.replace('### ', '')}
                                 </h3>
                             );
                         } else if (paragraph.startsWith('- ')) {
                             const items = paragraph.split('\n');
                             return (
-                                <ul key={idx} className="list-disc list-inside space-y-2 my-4 text-[#d1d1d1] font-['Roboto',sans-serif]">
+                                <ul key={idx} className="list-disc list-inside space-y-2 my-4 text-[#d1d1d1] font-sans">
                                     {items.map((item, i) => (
                                         <li key={i}>{item.replace('- ', '')}</li>
                                     ))}
@@ -75,13 +75,13 @@ export function LectureView({ lecture, onBack }: LectureViewProps) {
                             );
                         } else if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
                             return (
-                                <p key={idx} className="text-[#d1d1d1] font-['Roboto',sans-serif] my-4 font-bold">
+                                <p key={idx} className="text-[#d1d1d1] font-sans my-4 font-bold">
                                     {paragraph.replace(/\*\*/g, '')}
                                 </p>
                             );
                         } else {
                             return (
-                                <p key={idx} className="text-[#d1d1d1] font-['Roboto',sans-serif] leading-relaxed my-4">
+                                <p key={idx} className="text-[#d1d1d1] font-sans leading-relaxed my-4">
                                     {paragraph}
                                 </p>
                             );
@@ -90,8 +90,8 @@ export function LectureView({ lecture, onBack }: LectureViewProps) {
                 </div>
 
                 {/* Mark as Complete Button */}
-                <div className="mt-12 pt-8 border-t border-[#3d3d3d]">
-                    <button className="w-full bg-[#6942d5] hover:bg-[#7952e5] cursor-pointer text-white px-6 py-3 rounded-lg font-['Roboto',sans-serif] font-medium transition-colors">
+                <div className="mt-12 pt-8 border-t border-muted">
+                    <button className="w-full bg-primary hover:bg-[#7952e5] cursor-pointer text-foreground px-6 py-3 rounded-lg font-sans font-medium transition-colors">
                         {lecture.completed ? '✓ Completed' : 'Mark as Complete'}
                     </button>
                 </div>

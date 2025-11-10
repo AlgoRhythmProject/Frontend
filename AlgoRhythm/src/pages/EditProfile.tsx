@@ -42,24 +42,24 @@ export function EditProfile() {
         {/* Header */}
         <button
           onClick={() => navigate('/profile')}
-          className="mb-6 flex items-center gap-2 text-[#6942d5] hover:text-[#7952e5] font-['Roboto',sans-serif] transition-colors group"
+          className="mb-6 flex items-center gap-2 text-primary hover:text-[#7952e5] font-sans transition-colors group"
         >
           <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
           Back to Profile
         </button>
 
-        <div className="bg-[#242424] border border-[#3d3d3d] rounded-2xl p-6 md:p-8">
-          <h1 className="font-['Roboto',sans-serif] font-bold text-3xl text-white mb-2">
+        <div className="bg-card border border-muted rounded-2xl p-6 md:p-8">
+          <h1 className="font-sans font-bold text-3xl text-foreground mb-2">
             Edit Profile
           </h1>
-          <p className="font-['Roboto',sans-serif] text-[#b0b0b0] mb-8">
+          <p className="font-sans text-muted-foreground mb-8">
             Update your personal information and password
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Personal Information Section */}
             <div className="space-y-4">
-              <h2 className="font-['Roboto',sans-serif] font-medium text-xl text-white mb-4">
+              <h2 className="font-sans font-medium text-xl text-foreground mb-4">
                 Personal Information
               </h2>
 
@@ -69,18 +69,18 @@ export function EditProfile() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <label className="block font-['Roboto',sans-serif] text-white mb-2 text-sm">
+                  <label className="block font-sans text-foreground mb-2 text-sm">
                     First Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#b0b0b0]" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="text"
                       value={formData.firstName}
                       onChange={(e) => handleChange('firstName', e.target.value)}
                       placeholder="First name"
                       required
-                      className="w-full bg-[#1a1a1a] border border-[#3d3d3d] rounded-lg px-10 py-3 text-white placeholder-[#6b6b6b] font-['Roboto',sans-serif] outline-none focus:border-[#6942d5] transition-colors"
+                      className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
                     />
                   </div>
                 </motion.div>
@@ -90,18 +90,18 @@ export function EditProfile() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.15 }}
                 >
-                  <label className="block font-['Roboto',sans-serif] text-white mb-2 text-sm">
+                  <label className="block font-sans text-foreground mb-2 text-sm">
                     Last Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#b0b0b0]" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="text"
                       value={formData.lastName}
                       onChange={(e) => handleChange('lastName', e.target.value)}
                       placeholder="Last name"
                       required
-                      className="w-full bg-[#1a1a1a] border border-[#3d3d3d] rounded-lg px-10 py-3 text-white placeholder-[#6b6b6b] font-['Roboto',sans-serif] outline-none focus:border-[#6942d5] transition-colors"
+                      className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
                     />
                   </div>
                 </motion.div>
@@ -112,26 +112,26 @@ export function EditProfile() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <label className="block font-['Roboto',sans-serif] text-white mb-2 text-sm">
+                <label className="block font-sans text-foreground mb-2 text-sm">
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#b0b0b0]" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleChange('email', e.target.value)}
                     placeholder="your@email.com"
                     required
-                    className="w-full bg-[#1a1a1a] border border-[#3d3d3d] rounded-lg px-10 py-3 text-white placeholder-[#6b6b6b] font-['Roboto',sans-serif] outline-none focus:border-[#6942d5] transition-colors"
+                    className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
                   />
                 </div>
               </motion.div>
             </div>
 
             {/* Password Section */}
-            <div className="space-y-4 pt-6 border-t border-[#3d3d3d]">
-              <h2 className="font-['Roboto',sans-serif] font-medium text-xl text-white mb-4">
+            <div className="space-y-4 pt-6 border-t border-muted">
+              <h2 className="font-sans font-medium text-xl text-foreground mb-4">
                 Change Password
               </h2>
 
@@ -140,17 +140,17 @@ export function EditProfile() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.25 }}
               >
-                <label className="block font-['Roboto',sans-serif] text-white mb-2 text-sm">
+                <label className="block font-sans text-foreground mb-2 text-sm">
                   Current Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#b0b0b0]" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <input
                     type="password"
                     value={formData.currentPassword}
                     onChange={(e) => handleChange('currentPassword', e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full bg-[#1a1a1a] border border-[#3d3d3d] rounded-lg px-10 py-3 text-white placeholder-[#6b6b6b] font-['Roboto',sans-serif] outline-none focus:border-[#6942d5] transition-colors"
+                    className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
                   />
                 </div>
               </motion.div>
@@ -161,17 +161,17 @@ export function EditProfile() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <label className="block font-['Roboto',sans-serif] text-white mb-2 text-sm">
+                  <label className="block font-sans text-foreground mb-2 text-sm">
                     New Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#b0b0b0]" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="password"
                       value={formData.newPassword}
                       onChange={(e) => handleChange('newPassword', e.target.value)}
                       placeholder="New password"
-                      className="w-full bg-[#1a1a1a] border border-[#3d3d3d] rounded-lg px-10 py-3 text-white placeholder-[#6b6b6b] font-['Roboto',sans-serif] outline-none focus:border-[#6942d5] transition-colors"
+                      className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
                     />
                   </div>
                 </motion.div>
@@ -181,23 +181,23 @@ export function EditProfile() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.35 }}
                 >
-                  <label className="block font-['Roboto',sans-serif] text-white mb-2 text-sm">
+                  <label className="block font-sans text-foreground mb-2 text-sm">
                     Confirm Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#b0b0b0]" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="password"
                       value={formData.confirmPassword}
                       onChange={(e) => handleChange('confirmPassword', e.target.value)}
                       placeholder="Confirm password"
-                      className="w-full bg-[#1a1a1a] border border-[#3d3d3d] rounded-lg px-10 py-3 text-white placeholder-[#6b6b6b] font-['Roboto',sans-serif] outline-none focus:border-[#6942d5] transition-colors"
+                      className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
                     />
                   </div>
                 </motion.div>
               </div>
 
-              <p className="font-['Roboto',sans-serif] text-[#6b6b6b] text-sm">
+              <p className="font-sans text-[#6b6b6b] text-sm">
                 Leave password fields empty if you don't want to change it
               </p>
             </div>
@@ -214,7 +214,7 @@ export function EditProfile() {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-[#6942d5] to-[#8b5cf6] text-white py-3 px-6 rounded-lg font-['Roboto',sans-serif] font-medium hover:from-[#7952e5] hover:to-[#9c6cf7] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 bg-linear-to-r from-primary to-[#8b5cf6] text-foreground py-3 px-6 rounded-lg font-sans font-medium hover:from-[#7952e5] hover:to-[#9c6cf7] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <Save className="w-5 h-5" />
                 {isLoading ? 'Saving...' : 'Save Changes'}
@@ -225,7 +225,7 @@ export function EditProfile() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => navigate('/profile')}
-                className="sm:w-auto px-6 bg-[#1a1a1a] border border-[#3d3d3d] text-white py-3 rounded-lg font-['Roboto',sans-serif] font-medium hover:border-[#6942d5] transition-colors"
+                className="sm:w-auto px-6 bg-background border border-muted text-foreground py-3 rounded-lg font-sans font-medium hover:border-primary transition-colors"
               >
                 Cancel
               </motion.button>

@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation } from './components/Navigation';
-import { GradientBackground } from './components/GradientBackground';
 import { Dashboard } from './pages/Dashboard';
 import { TaskList } from './pages/TaskList';
 import { TaskDetail } from './pages/TaskDetail';
@@ -55,8 +54,7 @@ function AppContent() {
 export default function App() {
   return (
     <Router>
-      <div className="bg-black min-h-screen text-white">
-        <GradientBackground />
+      <div className="bg-black min-h-screen text-foreground">
         <div className="relative z-10">
           <AppContent />
         </div>
