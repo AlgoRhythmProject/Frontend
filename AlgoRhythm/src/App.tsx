@@ -12,13 +12,14 @@ function Weather() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://backend:8080/WeatherForecast")
+    fetch("http://localhost:7062/WeatherForecast")
       .then((res) => res.json())
       .then((json: WeatherForecast[]) => {
         setData(json);
         setLoading(false);
       })
       .catch((err) => console.error(err));
+      console.log("Code has changed!");
   }, []);
 
   if (loading) return <div>Ładowanie danych...</div>;
