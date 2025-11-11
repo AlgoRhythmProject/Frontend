@@ -1,4 +1,3 @@
-// src/api/apiClient.ts
 import axios from "axios";
 
 const apiClient = axios.create({
@@ -7,10 +6,10 @@ const apiClient = axios.create({
         "Content-Type": "application/json",
         accept: "*/*",
     },
-    withCredentials: true, // jeśli backend używa cookies (opcjonalnie)
+    withCredentials: true,
 });
 
-// Możesz też dodać interceptor do tokenów:
+
 apiClient.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) {

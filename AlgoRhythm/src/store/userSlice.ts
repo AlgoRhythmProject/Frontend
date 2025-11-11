@@ -1,4 +1,3 @@
-// store/userSlice.ts
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { User } from '../types/User';
 
@@ -7,7 +6,6 @@ interface UserState {
     isAuthenticated: boolean;
 }
 
-// Spróbuj wczytać użytkownika z localStorage przy starcie
 const storedUser = localStorage.getItem('user');
 
 const initialState: UserState = {
@@ -22,12 +20,12 @@ const userSlice = createSlice({
         login(state, action: PayloadAction<User>) {
             state.user = action.payload;
             state.isAuthenticated = true;
-            localStorage.setItem('user', JSON.stringify(action.payload)); // zapis do localStorage
+            localStorage.setItem('user', JSON.stringify(action.payload));
         },
         logout(state) {
             state.user = null;
             state.isAuthenticated = false;
-            localStorage.removeItem('user'); // usuń przy logout
+            localStorage.removeItem('user');
         },
     },
 });

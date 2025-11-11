@@ -1,4 +1,3 @@
-// src/components/ui/ProgressBar.tsx
 import { motion } from "framer-motion";
 import clsx from "clsx";
 
