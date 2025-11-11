@@ -7,9 +7,10 @@ import { AuthenticationHeader } from "../components/Authentication/Authenticatio
 import { AuthenticationBackground } from "../components/Authentication/AuthenticationBackground";
 import { AuthenticationButton } from "../components/Authentication/AuthenticationButton";
 import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
-import { useDispatch } from 'react-redux';
-import type { AppDispatch } from '../store';
-import { login } from '../store/userSlice';
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../store";
+import { login } from "../store/userSlice";
+import { authApi } from "../api/authApi";
 import { Particles } from "../components/ui/shadcn-io/particles";
 
 export function Login() {
@@ -18,38 +19,30 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    setTimeout(() => {
-      const userFromBackend = {
-        id: '123',
-        email,
-        firstName: 'John',
-        lastName: 'Doe',
-        createdAt: new Date().toISOString(),
-        isDeleted: false,
-      };
-
-      dispatch(login(userFromBackend));
+    try {
+      const user = await authApi.login({ email, password });
+      dispatch(login(user));
       localStorage.setItem("isAuthenticated", "true");
       navigate("/");
-    }, 800);
+    } catch (err: any) {
+      setError("Invalid email or password");
+      console.error("Login failed:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <AuthenticationBackground />
-      <Particles
-        className="absolute inset-0"
-        quantity={100}
-        ease={80}
-        color="#ffffff"
-        refresh />
-
-      {/* Login card */}
+      <Particles className="absolute inset-0" quantity={100} ease={80} color="#ffffff" refresh />
       <div className="z-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -60,9 +53,25 @@ export function Login() {
           <div className="bg-background/80 backdrop-blur-xl z-20 border border-muted rounded-2xl p-8 shadow-2xl">
             <AuthenticationHeader />
             <form onSubmit={handleLogin} className="space-y-5">
-              <AuthenticationInput label="Email" type="email" icon={<Mail />} value={email} onChange={setEmail} placeholder="your@email.com" delay={0.4} />
-              <AuthenticationInput label="Password" type="password" icon={<Lock />} value={password} onChange={setPassword} placeholder="••••••••" delay={0.5} />
-              <div className="h-1" />
+              <AuthenticationInput
+                label="Email"
+                type="email"
+                icon={<Mail />}
+                value={email}
+                onChange={setEmail}
+                placeholder="your@email.com"
+                delay={0.4}
+              />
+              <AuthenticationInput
+                label="Password"
+                type="password"
+                icon={<Lock />}
+                value={password}
+                onChange={setPassword}
+                placeholder="••••••••"
+                delay={0.5}
+              />
+              {error && <p className="text-error text-sm">{error}</p>}
               <AuthenticationButton isLoading={isLoading} text="Login" />
             </form>
             <AuthenticationFooter
@@ -70,7 +79,12 @@ export function Login() {
               linkText="Sign up"
               onLinkClick={() => navigate("/register")}
             />
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-6 text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="mt-6 text-center"
+            >
               <p className="font-sans text-[#6b6b6b] text-sm">
                 Your place to learn algorithms and data structures
               </p>
@@ -79,6 +93,5 @@ export function Login() {
         </motion.div>
       </div>
     </div>
-
   );
 }

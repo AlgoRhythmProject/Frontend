@@ -7,13 +7,10 @@ import { AuthenticationHeader } from "../components/Authentication/Authenticatio
 import { AuthenticationBackground } from "../components/Authentication/AuthenticationBackground";
 import { AuthenticationButton } from "../components/Authentication/AuthenticationButton";
 import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
-import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../store";
-import { login } from "../store/userSlice";
 import { Particles } from "../components/ui/shadcn-io/particles";
+import { authApi } from "../api/authApi";
 
 export function Register() {
-    const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -22,24 +19,18 @@ export function Register() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleRegister = (e: React.FormEvent) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        setTimeout(() => {
-            const newUser = {
-                id: Math.random().toString(36).substring(2, 9),
-                firstName,
-                lastName,
-                email,
-                createdAt: new Date().toISOString(),
-                isDeleted: false,
-            };
-
-            dispatch(login(newUser));
-            localStorage.setItem("isAuthenticated", "true");
-            navigate("/");
-        }, 800);
+        var response = await authApi.register({ email, password, firstName, lastName });
+        if (response) {
+            navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+        }
+        else {
+            alert("Registration failed. Please try again.");
+            setIsLoading(false);
+        }
     };
 
     return (

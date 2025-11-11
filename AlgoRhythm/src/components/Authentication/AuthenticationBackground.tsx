@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export function AuthenticationBackground() {
     return (
         <>
-            <div className="absolute inset-0 bg-linear-to-br from-primary/20 via-black to-info/10" />
+            <div className="absolute inset-0 pointer-events-none bg-linear-to-br from-primary/20 via-black to-info/10" />
             <motion.div
                 className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
                 animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}

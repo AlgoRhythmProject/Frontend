@@ -5,6 +5,7 @@ import { userStats, tasks } from '../data/mockData';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { ProgressBar } from '../components/ProgressBar';
+import { authApi } from '../api/authApi';
 
 export function Profile() {
   const navigate = useNavigate();
@@ -15,9 +16,10 @@ export function Profile() {
     date: new Date(Date.now() - idx * 86400000).toLocaleDateString(),
   }));
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userEmail');
+    await authApi.logout();
     navigate('/login');
   };
   const user = useSelector((state: RootState) => state.user.user);
@@ -204,7 +206,7 @@ export function Profile() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate('/profile/edit')}
-                  className="w-full text-left px-4 py-3 bg-background hover:bg-card-hover rounded-lg transition-colors flex items-center gap-2"
+                  className="w-full text-left px-4 py-3 bg-background hover:bg-card-hover cursor-pointer rounded-lg transition-colors flex items-center gap-2"
                 >
                   <Settings className="w-4 h-4 text-primary" />
                   <p className="font-sans font-medium text-foreground">Edit Profile</p>
@@ -213,7 +215,7 @@ export function Profile() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-3 bg-background hover:bg-error/20 rounded-lg transition-colors flex items-center gap-2 group"
+                  className="w-full text-left px-4 py-3 bg-background hover:bg-error/20 cursor-pointer rounded-lg transition-colors flex items-center gap-2 group"
                 >
                   <LogOut className="w-4 h-4 text-error" />
                   <p className="font-sans font-medium text-error">Logout</p>
