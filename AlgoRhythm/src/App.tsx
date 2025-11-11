@@ -21,11 +21,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
+  const isEditProfilePage = location.pathname === '/profile/edit'
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
   return (
     <>
-      {!isLoginPage && isAuthenticated && <Navigation />}
+      {!isLoginPage && !isEditProfilePage && isAuthenticated && <Navigation />}
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}

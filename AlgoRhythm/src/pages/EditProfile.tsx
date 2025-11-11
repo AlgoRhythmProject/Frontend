@@ -5,6 +5,8 @@ import { ChevronLeft, Mail, Lock, User, Save } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { type AppDispatch, type RootState } from '../store';
 import { login } from '../store/userSlice';
+import { AuthenticationInput } from '../components/Authentication/AuthenticationInput';
+import { AuthenticationBackground } from '../components/Authentication/AuthenticationBackground';
 
 export function EditProfile() {
   const navigate = useNavigate();
@@ -23,12 +25,12 @@ export function EditProfile() {
 
   useEffect(() => {
     if (userState.isAuthenticated) {
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         firstName: userState.user?.firstName || '',
         lastName: userState.user?.lastName || '',
         email: userState.user?.email || '',
-      });
+      }));
     }
   }, [userState.user]);
 
@@ -46,9 +48,7 @@ export function EditProfile() {
       return;
     }
 
-    // Symulacja zapisu na backendzie
     setTimeout(() => {
-      // Tutaj normalnie wywołałbyś API do aktualizacji użytkownika
       dispatch(
         login({
           id: userState.user?.id || '123',
@@ -68,6 +68,8 @@ export function EditProfile() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
+      <AuthenticationBackground />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -77,13 +79,13 @@ export function EditProfile() {
         {/* Header */}
         <button
           onClick={() => navigate('/profile')}
-          className="mb-6 flex items-center gap-2 text-primary hover:text-[#7952e5] font-sans transition-colors group"
+          className="mb-6 flex items-center gap-2 text-foreground hover:text-[#7952e5] cursor-pointer font-sans transition-colors group"
         >
-          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1  transition-transform" />
           Back to Profile
         </button>
 
-        <div className="bg-card border border-muted rounded-2xl p-6 md:p-8">
+        <div className="bg-background/80 backdrop-blur-xl border border-muted rounded-2xl p-6 md:p-8">
           <h1 className="font-sans font-bold text-3xl text-foreground mb-2">
             Edit Profile
           </h1>
@@ -99,69 +101,35 @@ export function EditProfile() {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <label className="block font-sans text-foreground mb-2 text-sm">
-                    First Name
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={formData.firstName}
-                      onChange={(e) => handleChange('firstName', e.target.value)}
-                      placeholder="First name"
-                      required
-                      className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15 }}
-                >
-                  <label className="block font-sans text-foreground mb-2 text-sm">
-                    Last Name
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={formData.lastName}
-                      onChange={(e) => handleChange('lastName', e.target.value)}
-                      placeholder="Last name"
-                      required
-                      className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
-                </motion.div>
+                <AuthenticationInput
+                  label="First Name"
+                  type="text"
+                  icon={<User />}
+                  value={formData.firstName}
+                  onChange={(val: string) => handleChange('firstName', val)}
+                  placeholder="First name"
+                  delay={0.1}
+                />
+                <AuthenticationInput
+                  label="Last Name"
+                  type="text"
+                  icon={<User />}
+                  value={formData.lastName}
+                  onChange={(val: string) => handleChange('lastName', val)}
+                  placeholder="Last name"
+                  delay={0.15}
+                />
               </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <label className="block font-sans text-foreground mb-2 text-sm">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                    className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
-                  />
-                </div>
-              </motion.div>
+              <AuthenticationInput
+                label="Email"
+                type="email"
+                icon={<Mail />}
+                value={formData.email}
+                onChange={(val: string) => handleChange('email', val)}
+                placeholder="your@email.com"
+                delay={0.2}
+              />
             </div>
 
             {/* Password Section */}
@@ -170,66 +138,35 @@ export function EditProfile() {
                 Change Password
               </h2>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.25 }}
-              >
-                <label className="block font-sans text-foreground mb-2 text-sm">
-                  Current Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="password"
-                    value={formData.currentPassword}
-                    onChange={(e) => handleChange('currentPassword', e.target.value)}
-                    placeholder="Enter current password"
-                    className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
-                  />
-                </div>
-              </motion.div>
+              <AuthenticationInput
+                label="Current Password"
+                type="password"
+                icon={<Lock />}
+                value={formData.currentPassword}
+                onChange={(val: string) => handleChange('currentPassword', val)}
+                placeholder="Enter current password"
+                delay={0.25}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <label className="block font-sans text-foreground mb-2 text-sm">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <input
-                      type="password"
-                      value={formData.newPassword}
-                      onChange={(e) => handleChange('newPassword', e.target.value)}
-                      placeholder="New password"
-                      className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.35 }}
-                >
-                  <label className="block font-sans text-foreground mb-2 text-sm">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <input
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                      placeholder="Confirm password"
-                      className="w-full bg-background border border-muted rounded-lg px-10 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
-                </motion.div>
+                <AuthenticationInput
+                  label="New Password"
+                  type="password"
+                  icon={<Lock />}
+                  value={formData.newPassword}
+                  onChange={(val: string) => handleChange('newPassword', val)}
+                  placeholder="New password"
+                  delay={0.3}
+                />
+                <AuthenticationInput
+                  label="Confirm Password"
+                  type="password"
+                  icon={<Lock />}
+                  value={formData.confirmPassword}
+                  onChange={(val: string) => handleChange('confirmPassword', val)}
+                  placeholder="Confirm password"
+                  delay={0.35}
+                />
               </div>
 
               <p className="font-sans text-[#6b6b6b] text-sm">

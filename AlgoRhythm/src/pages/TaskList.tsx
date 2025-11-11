@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, CheckCircle2, Circle } from 'lucide-react';
 import { tasks, courses } from '../data/mockData';
+import { PageHeader } from '../components/PageHeader';
+import { StatBox } from '../components/StatBox';
 
 export function TaskList() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,19 +38,12 @@ export function TaskList() {
           transition={{ duration: 0.4 }}
         >
           {/* Header */}
+          <PageHeader title='CODING TASKS' subtitle='Practice and master algorithms through hands-on coding challenges>' />
           <div className="mb-8">
-            <h1 className="font-sans font-medium text-foreground text-4xl md:text-5xl mb-4" style={{ fontVariationSettings: "'wdth' 100" }}>
-              CODING TASKS
-            </h1>
-            <p className="font-sans text-muted-foreground text-lg">
-              Practice and master algorithms through hands-on coding challenges
-            </p>
             <div className="mt-4 flex items-center gap-4">
-              <div className="bg-primary/20 border border-primary rounded-xl px-4 py-2">
-                <p className="font-sans font-medium text-primary">
-                  {completedCount} / {totalCount} completed
-                </p>
-              </div>
+              <StatBox color="primary">
+                {completedCount} / {totalCount} completed
+              </StatBox>
             </div>
           </div>
 

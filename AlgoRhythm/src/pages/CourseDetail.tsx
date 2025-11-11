@@ -1,6 +1,7 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, BookOpen, Code, CheckCircle2, Clock } from 'lucide-react';
 import { courses, tasks, lectures } from '../data/mockData';
+import { ProgressBar } from '../components/ProgressBar';
 
 export function CourseDetail() {
   const { id } = useParams();
@@ -60,7 +61,6 @@ export function CourseDetail() {
               </div>
             </div>
           </div>
-
           {/* Progress */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -69,12 +69,7 @@ export function CourseDetail() {
                 {course.progress}/{course.total} completed
               </span>
             </div>
-            <div className="bg-white/20 rounded-full h-4">
-              <div
-                className="bg-white rounded-full h-4 transition-all"
-                style={{ width: `${(course.progress / course.total) * 100}%` }}
-              />
-            </div>
+            <ProgressBar value={course.progress} total={course.total} color='white' height='h-4' backgroundClassName='bg-white/20 rounded-full h-4' ></ProgressBar>
           </div>
         </div>
 
@@ -198,22 +193,6 @@ export function CourseDetail() {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-8 flex flex-wrap gap-4">
-          <Link
-            to="/lectures"
-            className="bg-primary hover:bg-[#7952e5] text-foreground px-8 py-3 rounded-lg font-sans font-medium transition-colors"
-          >
-            Start Learning
-          </Link>
-          <Link
-            to="/tasks"
-            className="bg-card border border-muted hover:border-primary text-foreground px-8 py-3 rounded-lg font-sans font-medium transition-colors"
-          >
-            Practice Tasks
-          </Link>
         </div>
       </div>
     </div>

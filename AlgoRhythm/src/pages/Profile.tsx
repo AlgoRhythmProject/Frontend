@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { userStats, tasks } from '../data/mockData';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
+import { ProgressBar } from '../components/ProgressBar';
 
 export function Profile() {
   const navigate = useNavigate();
@@ -92,42 +93,38 @@ export function Profile() {
                 </p>
               </div>
             </div>
-
-            {/* Progress Chart */}
             <div className="bg-card border border-muted rounded-xl p-6">
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
                 Overall Progress
               </h2>
+
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-2">
                     <span className="font-sans text-muted-foreground">Easy</span>
                     <span className="font-sans font-medium text-success">24/50</span>
                   </div>
-                  <div className="bg-background h-2 rounded-full">
-                    <div className="bg-success h-2 rounded-full" style={{ width: '48%' }} />
-                  </div>
+                  <ProgressBar value={24} total={50} color="success" />
                 </div>
+
                 <div>
                   <div className="flex justify-between mb-2">
                     <span className="font-sans text-muted-foreground">Medium</span>
                     <span className="font-sans font-medium text-warning">18/60</span>
                   </div>
-                  <div className="bg-background h-2 rounded-full">
-                    <div className="bg-warning h-2 rounded-full" style={{ width: '30%' }} />
-                  </div>
+                  <ProgressBar value={18} total={60} color="warning" />
                 </div>
+
                 <div>
                   <div className="flex justify-between mb-2">
                     <span className="font-sans text-muted-foreground">Hard</span>
                     <span className="font-sans font-medium text-error">5/40</span>
                   </div>
-                  <div className="bg-background h-2 rounded-full">
-                    <div className="bg-error h-2 rounded-full" style={{ width: '12.5%' }} />
-                  </div>
+                  <ProgressBar value={5} total={40} color="error" />
                 </div>
               </div>
             </div>
+
 
             {/* Recent Activity */}
             <div className="bg-card border border-muted rounded-xl p-6">

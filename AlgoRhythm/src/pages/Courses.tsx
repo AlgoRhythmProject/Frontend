@@ -2,6 +2,9 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BookOpen, Code, TrendingUp, Award } from 'lucide-react';
 import { courses } from '../data/mockData';
+import { PageHeader } from '../components/PageHeader';
+import { StatBox } from '../components/StatBox';
+import { ProgressBar } from '../components/ProgressBar';
 
 // Icon mapping for courses
 const courseIcons = {
@@ -33,24 +36,18 @@ export function Courses() {
           transition={{ duration: 0.4 }}
           className="mb-12"
         >
-          <h1 className="font-sans font-medium text-foreground text-4xl md:text-5xl mb-4" style={{ fontVariationSettings: "'wdth' 100" }}>
-            YOUR LEARNING PATH
-          </h1>
-          <p className="font-sans text-muted-foreground text-lg mb-6">
-            Master algorithms through structured courses and hands-on practice
-          </p>
+          <PageHeader title='YOUR LEARNING PATH' subtitle='Master algorithms through structured courses and hands-on practice' />
           <div className="flex gap-4">
-            <div className="bg-primary/20 border border-primary rounded-xl px-4 py-2">
-              <p className="font-sans font-medium text-primary">
-                Total progress: {courses.reduce((sum, c) => sum + c.progress, 0)}/{courses.reduce((sum, c) => sum + c.total, 0)}
-              </p>
-            </div>
-            <div className="bg-info/20 border border-info rounded-xl px-4 py-2">
-              <p className="font-sans font-medium text-info">
-                {activeCourses.length} Active Courses
-              </p>
-            </div>
+            <StatBox color="primary">
+              Total progress: {courses.reduce((sum, c) => sum + c.progress, 0)}/
+              {courses.reduce((sum, c) => sum + c.total, 0)}
+            </StatBox>
+
+            <StatBox color="info">
+              {activeCourses.length} Active Courses
+            </StatBox>
           </div>
+
         </motion.div>
 
         {/* Active Courses Section */}
@@ -78,7 +75,7 @@ export function Courses() {
                   >
                     <Link
                       to={`/courses/${course.id}`}
-                      className={`relative h-[320px] rounded-2xl overflow-hidden block group bg-gradient-to-br ${courseColors[course.id as keyof typeof courseColors] || 'from-primary to-[#8b5cf6]'} hover:shadow-2xl transition-shadow`}
+                      className={`relative h-80 rounded-2xl overflow-hidden block group bg-linear-to-br ${courseColors[course.id as keyof typeof courseColors] || 'from-primary to-[#8b5cf6]'} hover:shadow-2xl transition-shadow`}
                     >
                       {/* Content */}
                       <div className="relative h-full p-6 flex flex-col">
@@ -106,14 +103,14 @@ export function Courses() {
                               {Math.round((course.progress / course.total) * 100)}%
                             </span>
                           </div>
-                          <div className="bg-[rgba(248,248,248,0.3)] h-2 rounded-full">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${(course.progress / course.total) * 100}%` }}
-                              transition={{ duration: 0.8, delay: 0.5 + idx * 0.1 }}
-                              className="bg-white h-2 rounded-full"
-                            />
-                          </div>
+                          <ProgressBar
+                            value={course.progress}
+                            total={course.total}
+                            color="white"
+                            backgroundClassName="bg-[rgba(248,248,248,0.3)]"
+                            delay={0.5 + idx * 0.1}
+                          />
+
                           <p className="font-sans text-foreground/70 text-xs mt-2">
                             {course.progress} of {course.total} items completed
                           </p>
@@ -151,7 +148,7 @@ export function Courses() {
                 >
                   <Link
                     to={`/courses/${course.id}`}
-                    className={`relative h-[320px] rounded-2xl overflow-hidden group cursor-pointer block bg-gradient-to-br ${courseColors[course.id as keyof typeof courseColors] || 'from-primary to-[#8b5cf6]'} hover:shadow-2xl transition-shadow`}
+                    className={`relative h-80 rounded-2xl overflow-hidden group cursor-pointer block bg-linear-to-br ${courseColors[course.id as keyof typeof courseColors] || 'from-primary to-[#8b5cf6]'} hover:shadow-2xl transition-shadow`}
                   >
                     {/* Content */}
                     <div className="relative h-full p-6 flex flex-col">
@@ -177,28 +174,7 @@ export function Courses() {
                         {course.description}
                       </p>
 
-                      {/* Footer with tags and CTA */}
-                      <div className="mt-4">
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {course.tags.slice(0, 3).map((tag) => (
-                            <span
-                              key={tag}
-                              className="bg-white/10 text-foreground/70 px-3 py-1 rounded-full font-sans text-xs"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <motion.div
-                          whileHover={{ x: 5 }}
-                          className="flex items-center gap-2 text-foreground group-hover:text-foreground/90 transition-colors"
-                        >
-                          <span className="font-sans font-medium">
-                            {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
-                          </span>
-                          <span>→</span>
-                        </motion.div>
-                      </div>
+
                     </div>
                   </Link>
                 </motion.div>
@@ -207,6 +183,6 @@ export function Courses() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
