@@ -61,7 +61,7 @@ jobs:
 
       - name: Build application
         run: npm run build
-        working-directory: frontend/AlgoRhythm
+        working-directory: AlgoRhythm
         env:
           CI: true
           NODE_ENV: production
