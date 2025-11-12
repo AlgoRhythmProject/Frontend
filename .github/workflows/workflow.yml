@@ -123,20 +123,3 @@ jobs:
 
       - name: Check for outdated dependencies
         run: npm outdated || true
-
-  Sentry:
-    - name: Install Sentry CLI
-      run: npm install -g @sentry/cli
-
-    - name: Create Sentry release
-      env:
-        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-        SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-      run: |
-        sentry-cli releases new -p $SENTRY_PROJECT $GITHUB_SHA
-        sentry-cli releases files $GITHUB_SHA upload-sourcemaps ./build --rewrite
-        sentry-cli releases finalize $GITHUB_SHA
-
-
-
