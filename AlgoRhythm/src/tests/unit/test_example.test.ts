@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { add, average, clamp, calculateGrade } from "./test_example";
+import { add, average, clamp, calculateGrade } from "../../utils/test_example";
 
 describe("sum module", () => {
   test("adds 1 + 2 to equal 3", () => {

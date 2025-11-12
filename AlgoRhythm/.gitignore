@@ -28,3 +28,4 @@ dist-ssr
 
 # Test coverage files
 /coverage/
+/test-results
