@@ -19,7 +19,7 @@ function Weather() {
         setLoading(false);
       })
       .catch((err) => console.error(err));
-      console.log("Code has changed!");
+    console.log("Code has changed!");
   }, []);
 
   if (loading) return <div>Ładowanie danych...</div>;
