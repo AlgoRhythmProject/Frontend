@@ -25,8 +25,8 @@ export function Navigation() {
             key={item.path}
             to={item.path}
             className={`font-sans font-medium text-[16px] md:text-[20px] text-center transition-colors ${isActive(item.path)
-                ? 'text-foreground'
-                : 'text-[#9e9e9e] hover:text-foreground'
+              ? 'text-foreground'
+              : 'text-[#9e9e9e] hover:text-foreground'
               }`}
             style={{ fontVariationSettings: "'wdth' 100" }}
           >
@@ -39,8 +39,8 @@ export function Navigation() {
         <Link
           to="/profile"
           className={`font-sans font-medium text-[16px] md:text-[20px] text-center transition-colors ${isActive('/profile')
-              ? 'text-foreground'
-              : 'text-[#9e9e9e] hover:text-foreground'
+            ? 'text-foreground'
+            : 'text-[#9e9e9e] hover:text-foreground'
             }`}
           style={{ fontVariationSettings: "'wdth' 100" }}
         >

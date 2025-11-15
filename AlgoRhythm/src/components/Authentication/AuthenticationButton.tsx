@@ -10,7 +10,7 @@ export function AuthenticationButton({
     isLoading,
     text = "Submit",
     delay = 0.6,
-}: AuthenticationButtonProps) {
+}: Readonly<AuthenticationButtonProps>) {
     return (
         <motion.button
             initial={{ opacity: 0, y: 10 }}

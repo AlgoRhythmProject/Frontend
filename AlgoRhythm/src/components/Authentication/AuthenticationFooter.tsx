@@ -10,7 +10,7 @@ export function AuthenticationFooter({
     promptText,
     linkText,
     onLinkClick,
-}: LoginFooterProps) {
+}: Readonly<LoginFooterProps>) {
     return (
         <div className="mt-6 text-center">
             <p className="font-sans text-muted-foreground text-sm">{mainText}</p>

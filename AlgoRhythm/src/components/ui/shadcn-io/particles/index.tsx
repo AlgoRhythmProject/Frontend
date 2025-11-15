@@ -20,10 +20,10 @@ function useMousePosition(): MousePosition {
       setMousePosition({ x: event.clientX, y: event.clientY });
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    globalThis.addEventListener("mousemove", handleMouseMove);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      globalThis.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
 
@@ -52,7 +52,7 @@ function hexToRgb(hex: string): number[] {
       .join("");
   }
 
-  const hexInt = parseInt(hex, 16);
+  const hexInt = Number.parseInt(hex, 16);
   const red = (hexInt >> 16) & 255;
   const green = (hexInt >> 8) & 255;
   const blue = hexInt & 255;
@@ -77,7 +77,7 @@ export const Particles: React.FC<ParticlesProps> = ({
   const mousePosition = useMousePosition();
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
-  const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
+  const dpr = typeof globalThis.window === "undefined" ? 1 : window.devicePixelRatio;
 
   useEffect(() => {
     if (canvasRef.current) {

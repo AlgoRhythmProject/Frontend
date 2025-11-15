@@ -33,7 +33,7 @@ export const authApi = {
         try {
             const response = await apiClient.post("/Authentication/register", data);
             return response.status >= 200 && response.status < 300;
-        } catch (error: any) {
+        } catch {
             return false;
         }
     },
@@ -46,7 +46,7 @@ export const authApi = {
         try {
             const response = await apiClient.post("/Authentication/logout");
             return response.status >= 200 && response.status < 300;
-        } catch (error: any) {
+        } catch {
             return false;
         }
     }

@@ -19,7 +19,7 @@ export function ProgressBar({
     delay = 0,
     height = "h-2",
     backgroundClassName = "bg-background",
-}: ProgressBarProps) {
+}: Readonly<ProgressBarProps>) {
     const percentage = total > 0 ? (value / total) * 100 : 0;
 
     const barClass = clsx(`bg-${color}`, height, "rounded-full");

@@ -12,7 +12,7 @@ export function AuthenticationHeader({
     subtitle = "Master data structures and algorithms",
     delayTitle = 0.2,
     delaySubtitle = 0.3,
-}: LoginHeaderProps) {
+}: Readonly<LoginHeaderProps>) {
     return (
         <div className="text-center mb-8">
             <motion.h1

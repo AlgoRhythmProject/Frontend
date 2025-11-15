@@ -11,7 +11,7 @@ interface LoginInputProps {
     delay?: number;
 }
 
-export function AuthenticationInput({ label, type, icon, value, onChange, placeholder, delay = 0 }: LoginInputProps) {
+export function AuthenticationInput({ label, type, icon, value, onChange, placeholder, delay = 0 }: Readonly<LoginInputProps>) {
     return (
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay }}>
             <label className="block font-sans text-foreground mb-2 text-sm">{label}</label>
