@@ -39,7 +39,7 @@ export function VerifyEmail() {
         setError("");
 
         try {
-            var user = await authApi.verifyEmail(email, enteredCode);
+            let user = await authApi.verifyEmail(email, enteredCode);
             dispatch(login(user));
             localStorage.setItem("isAuthenticated", "true");
             navigate("/");

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { difficultyColors } from '../../utils/difficultyColors';
 
 interface Task {
     id: string;
@@ -13,10 +14,9 @@ interface TaskCardProps {
     delay?: number;
 }
 
-export function TaskCard({ task, delay = 0 }: TaskCardProps) {
-    const color = task.difficulty === 'Easy' ? 'bg-success' :
-        task.difficulty === 'Medium' ? 'bg-warning' : 'bg-error';
 
+export function TaskCard({ task, delay = 0 }: TaskCardProps) {
+    const color = difficultyColors[task.difficulty] ?? "bg-error";
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}

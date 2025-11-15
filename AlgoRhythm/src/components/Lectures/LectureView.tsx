@@ -43,51 +43,53 @@ export function LectureView({ lecture, onBack }: LectureViewProps) {
                     </div>
                 </div>
 
-                {/* Lecture Content - Markdown-style rendering */}
                 <div className="prose prose-invert max-w-none">
-                    {lecture.content.split('\n\n').map((paragraph, idx) => {
+                    {lecture.content.split('\n\n').map((paragraph) => {
+                        const key = paragraph.slice(0, 30);
+
                         if (paragraph.startsWith('# ')) {
                             return (
-                                <h1 key={idx} className="text-4xl font-sans font-bold text-foreground mt-0 mb-6">
+                                <h1 key={key} className="text-4xl font-sans font-bold text-foreground mt-0 mb-6">
                                     {paragraph.replace('# ', '')}
                                 </h1>
                             );
                         } else if (paragraph.startsWith('## ')) {
                             return (
-                                <h2 key={idx} className="text-2xl font-sans font-bold text-foreground mt-8 mb-4">
+                                <h2 key={key} className="text-2xl font-sans font-bold text-foreground mt-8 mb-4">
                                     {paragraph.replace('## ', '')}
                                 </h2>
                             );
                         } else if (paragraph.startsWith('### ')) {
                             return (
-                                <h3 key={idx} className="text-xl font-sans font-bold text-foreground mt-6 mb-3">
+                                <h3 key={key} className="text-xl font-sans font-bold text-foreground mt-6 mb-3">
                                     {paragraph.replace('### ', '')}
                                 </h3>
                             );
                         } else if (paragraph.startsWith('- ')) {
                             const items = paragraph.split('\n');
                             return (
-                                <ul key={idx} className="list-disc list-inside space-y-2 my-4 text-[#d1d1d1] font-sans">
-                                    {items.map((item, i) => (
-                                        <li key={i}>{item.replace('- ', '')}</li>
+                                <ul key={key} className="list-disc list-inside space-y-2 my-4 text-[#d1d1d1] font-sans">
+                                    {items.map((item) => (
+                                        <li key={item.slice(0, 30)}>{item.replace('- ', '')}</li>
                                     ))}
                                 </ul>
                             );
                         } else if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
                             return (
-                                <p key={idx} className="text-[#d1d1d1] font-sans my-4 font-bold">
+                                <p key={key} className="text-[#d1d1d1] font-sans my-4 font-bold">
                                     {paragraph.replace(/\*\*/g, '')}
                                 </p>
                             );
                         } else {
                             return (
-                                <p key={idx} className="text-[#d1d1d1] font-sans leading-relaxed my-4">
+                                <p key={key} className="text-[#d1d1d1] font-sans leading-relaxed my-4">
                                     {paragraph}
                                 </p>
                             );
                         }
                     })}
                 </div>
+
 
                 {/* Mark as Complete Button */}
                 <div className="mt-12 pt-8 border-t border-muted">

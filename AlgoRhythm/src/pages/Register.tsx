@@ -23,7 +23,7 @@ export function Register() {
         e.preventDefault();
         setIsLoading(true);
 
-        var response = await authApi.register({ email, password, firstName, lastName });
+        let response = await authApi.register({ email, password, firstName, lastName });
         if (response) {
             navigate(`/verify-email?email=${encodeURIComponent(email)}`);
         }

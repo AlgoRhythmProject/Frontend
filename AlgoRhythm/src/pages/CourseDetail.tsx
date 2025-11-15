@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, BookOpen, Code, CheckCircle2, Clock } from 'lucide-react';
 import { courses, tasks, lectures } from '../data/mockData';
 import { ProgressBar } from '../components/ProgressBar';
+import { difficultyColors } from '@/utils/difficultyColors';
 
 export function CourseDetail() {
   const { id } = useParams();
@@ -167,12 +168,7 @@ export function CourseDetail() {
                         </p>
                         <div className="flex items-center gap-2">
                           <div
-                            className={`w-3 h-3 rounded-full ${task.difficulty === 'Easy'
-                              ? 'bg-success'
-                              : task.difficulty === 'Medium'
-                                ? 'bg-warning'
-                                : 'bg-error'
-                              }`}
+                            className={`w-3 h-3 rounded-full ${difficultyColors[task.difficulty] ?? "bg-error"}`}
                           />
                           <span className="font-sans text-muted-foreground text-xs">
                             {task.difficulty}
