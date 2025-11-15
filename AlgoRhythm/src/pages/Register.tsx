@@ -19,19 +19,37 @@ export function Register() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    const [error, setError] = useState<string | null>(null);
+
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
+        setError(null);
 
-        let response = await authApi.register({ email, password, firstName, lastName });
-        if (response) {
-            navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+        if (!email.includes("@")) {
+            setError("Email must contain @");
+            return;
         }
-        else {
-            alert("Registration failed. Please try again.");
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            let response = await authApi.register({ email, password, firstName, lastName });
+            if (response) {
+                navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+            } else {
+                setError("Registration failed. Please try again.");
+            }
+        } catch (err) {
+            setError("Registration failed. Please try again.");
+            console.error(err);
+        } finally {
             setIsLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -57,6 +75,7 @@ export function Register() {
                         <AuthenticationInput label="Password" type="password" icon={<Lock />} value={password} onChange={setPassword} delay={0.7} />
                         <AuthenticationInput label="Confirm Password" type="password" icon={<Lock />} value={confirmPassword} onChange={setConfirmPassword} delay={0.8} />
                         <div className="h-1" />
+                        {error && <p className="text-error text-sm">{error}</p>}
                         <AuthenticationButton text="Register" isLoading={isLoading} />
                     </form>
                     <AuthenticationFooter

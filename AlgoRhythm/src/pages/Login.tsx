@@ -23,9 +23,18 @@ export function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
 
+    if (!email.includes("@")) {
+      setError("Email must contain @");
+      return;
+    }
+    if (!password) {
+      setError("Password is required");
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const user = await authApi.login({ email, password });
       dispatch(login(user));
@@ -38,6 +47,7 @@ export function Login() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
