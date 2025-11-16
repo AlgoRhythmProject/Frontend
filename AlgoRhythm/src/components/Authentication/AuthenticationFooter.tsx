@@ -6,14 +6,12 @@ interface LoginFooterProps {
 }
 
 export function AuthenticationFooter({
-    mainText = "Demo app - use any email and password",
     promptText,
     linkText,
     onLinkClick,
 }: Readonly<LoginFooterProps>) {
     return (
         <div className="mt-6 text-center">
-            <p className="font-sans text-muted-foreground text-sm">{mainText}</p>
             {linkText && onLinkClick && promptText && (
                 <p className="font-sans text-muted-foreground text-sm mt-2">
                     {promptText}{" "}
