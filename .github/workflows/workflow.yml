@@ -19,7 +19,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-
+      - name: Clean install workaround
+        run: rm -rf node_modules package-lock.json
+        working-directory: AlgoRhythm
       - name: Install dependencies
         run: npm install
         working-directory: AlgoRhythm
@@ -83,7 +85,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-
+      - name: Clean install workaround
+        run: rm -rf node_modules package-lock.json
+        working-directory: AlgoRhythm
       - name: Install dependencies
         run: npm install
         working-directory: AlgoRhythm
@@ -119,7 +123,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-
+      - name: Clean install workaround
+        run: rm -rf node_modules package-lock.json
+        working-directory: AlgoRhythm
       - name: Install dependencies
         run: npm install
         working-directory: AlgoRhythm
