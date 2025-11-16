@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #6942d5;
+  --primary-foreground: #ffffff;
+
+  --background: #1a1a1a;
+  --card: #242424;
+  --card-hover: #2a2a2a;
+  --muted: #3d3d3d;
+
+  --foreground: #ffffff;
+  --muted-foreground: #b0b0b0;
+  --secondary-foreground: #6a6a6a;
+
+  --success: #ace798;
+  --warning: #ffee9c;
+  --error: #fe6868;
+  --info: #00eaff;
+
+  --border: #3d3d3d;
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+  --radius: 0.625rem;
+
+  --font-sans: 'Roboto', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+  --font-alt: 'Plus Jakarta Sans', sans-serif;
+
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+  --text-5xl: 3rem;
+  /* 48px */
+}
+
+@theme inline {
+  /* Backgrounds */
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-muted: var(--muted);
+
+  /* Foregrounds */
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  /* Brand */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  /* Status */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+
+  --color-border: var(--border);
+  --shadow-soft: var(--shadow-soft);
+
+  /* Radius scales */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer utilities {
+  .font-sans {
+    font-family: var(--font-sans);
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  .font-alt {
+    font-family: var(--font-alt);
+  }
+}

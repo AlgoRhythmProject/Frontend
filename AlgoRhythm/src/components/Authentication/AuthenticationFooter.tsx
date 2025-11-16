@@ -1,0 +1,28 @@
+interface LoginFooterProps {
+    mainText?: string;
+    linkText?: string;
+    onLinkClick?: () => void;
+    promptText?: string;
+}
+
+export function AuthenticationFooter({
+    promptText,
+    linkText,
+    onLinkClick,
+}: Readonly<LoginFooterProps>) {
+    return (
+        <div className="mt-6 text-center">
+            {linkText && onLinkClick && promptText && (
+                <p className="font-sans text-muted-foreground text-sm mt-2">
+                    {promptText}{" "}
+                    <button
+                        onClick={onLinkClick}
+                        className="text-primary font-medium hover:underline cursor-pointer"
+                    >
+                        {linkText}
+                    </button>
+                </p>
+            )}
+        </div>
+    );
+}
