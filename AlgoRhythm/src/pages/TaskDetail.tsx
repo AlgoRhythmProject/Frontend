@@ -12,6 +12,7 @@ export function TaskDetail() {
   const [code, setCode] = useState(task?.starterCode || '');
   const [testResults, setTestResults] = useState<Array<{ passed: boolean; message: string }> | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   if (!task) {
     return (
@@ -30,8 +31,17 @@ export function TaskDetail() {
   }
 
   const handleReset = () => {
+    setShowResetConfirm(true);
+  };
+
+  const confirmReset = () => {
     setCode(task.starterCode);
     setTestResults(null);
+    setShowResetConfirm(false);
+  };
+
+  const cancelReset = () => {
+    setShowResetConfirm(false);
   };
 
   const handleRunCode = () => {
@@ -57,6 +67,14 @@ export function TaskDetail() {
 
   return (
     <div className="h-screen flex flex-col">
+      {/* Overlay to close popover */}
+      {showResetConfirm && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={cancelReset}
+        />
+      )}
+      
       {/* Header */}
       <div className="bg-background border-b border-muted px-6 py-4 flex items-center gap-4">
         <button
@@ -131,14 +149,40 @@ export function TaskDetail() {
           {/* Editor Header */}
           <div className="border-b border-muted px-6 py-3 flex items-center justify-between">
             <p className="font-sans font-medium text-foreground">Code Editor</p>
-            <div className="flex gap-2">
-              <button
-                onClick={handleReset}
-                className="flex items-center gap-2 px-4 py-2 bg-card-hover hover:bg-[#3a3a3a] text-foreground rounded-lg transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Reset
-              </button>
+            <div className="flex gap-2 relative">
+              <div className="relative">
+                <button
+                  onClick={handleReset}
+                  className="flex items-center gap-2 px-4 py-2 bg-card-hover hover:bg-[#3a3a3a] text-foreground rounded-lg transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset
+                </button>
+                
+                {/* Reset Confirmation Popover */}
+                {showResetConfirm && (
+                  <div className="absolute top-full mt-2 right-0 bg-background border border-muted rounded-lg shadow-xl p-4 w-72 z-50">
+                    <p className="font-sans text-foreground text-sm mb-3">
+                      Are you sure? All progress will be lost.
+                    </p>
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={cancelReset}
+                        className="px-3 py-1.5 text-sm bg-card-hover hover:bg-[#3a3a3a] text-foreground rounded transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={confirmReset}
+                        className="px-3 py-1.5 text-sm bg-primary hover:bg-[#7952e5] text-foreground rounded transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
               <button
                 onClick={handleRunCode}
                 disabled={isRunning}
