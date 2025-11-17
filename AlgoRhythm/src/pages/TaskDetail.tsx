@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Play, RotateCcw, Check, X } from 'lucide-react';
 import { tasks } from '../data/mockData';
+import { CodeEditor } from '../components/CodeEditor';
 
 export function TaskDetail() {
   const { id } = useParams();
@@ -150,12 +151,11 @@ export function TaskDetail() {
           </div>
 
           {/* Code Editor Area */}
-          <div className="flex-1 overflow-auto">
-            <textarea
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
               value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="w-full h-full bg-[#1e1e1e] text-foreground p-6 font-mono text-sm outline-none resize-none"
-              spellCheck={false}
+              onChange={(value) => setCode(value || '')}
+              language="csharp"
             />
           </div>
 
