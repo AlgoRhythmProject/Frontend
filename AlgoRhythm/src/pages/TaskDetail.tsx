@@ -72,6 +72,10 @@ export function TaskDetail() {
         <div 
           className="fixed inset-0 z-40" 
           onClick={cancelReset}
+          onKeyDown={(e) => e.key === 'Escape' && cancelReset()}
+          role="button"
+          tabIndex={0}
+          aria-label="Close confirmation dialog"
         />
       )}
       
