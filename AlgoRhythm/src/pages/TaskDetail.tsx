@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Play, RotateCcw, Check, X } from 'lucide-react';
 import { tasks } from '../data/mockData';
+import { CodeEditor } from '../components/CodeEditor';
 
 export function TaskDetail() {
   const { id } = useParams();
@@ -11,6 +12,7 @@ export function TaskDetail() {
   const [code, setCode] = useState(task?.starterCode || '');
   const [testResults, setTestResults] = useState<Array<{ passed: boolean; message: string }> | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   if (!task) {
     return (
@@ -19,7 +21,7 @@ export function TaskDetail() {
           <p className="text-foreground text-2xl mb-4">Task not found</p>
           <button
             onClick={() => navigate('/tasks')}
-            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-[#7952e5] transition-colors"
+            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-[#7952e5] transition-colors cursor-pointer"
           >
             Back to Tasks
           </button>
@@ -29,8 +31,17 @@ export function TaskDetail() {
   }
 
   const handleReset = () => {
+    setShowResetConfirm(true);
+  };
+
+  const confirmReset = () => {
     setCode(task.starterCode);
     setTestResults(null);
+    setShowResetConfirm(false);
+  };
+
+  const cancelReset = () => {
+    setShowResetConfirm(false);
   };
 
   const handleRunCode = () => {
@@ -56,11 +67,23 @@ export function TaskDetail() {
 
   return (
     <div className="h-screen flex flex-col">
+      {/* Overlay to close popover */}
+      {showResetConfirm && (
+        <div 
+          className="fixed inset-0 z-40 cursor-pointer" 
+          onClick={cancelReset}
+          onKeyDown={(e) => e.key === 'Escape' && cancelReset()}
+          role="button"
+          tabIndex={0}
+          aria-label="Close confirmation dialog"
+        />
+      )}
+      
       {/* Header */}
       <div className="bg-background border-b border-muted px-6 py-4 flex items-center gap-4">
         <button
           onClick={() => navigate('/tasks')}
-          className="p-2 hover:bg-card-hover rounded-lg transition-colors"
+          className="p-2 hover:bg-card-hover rounded-lg transition-colors cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
@@ -130,18 +153,44 @@ export function TaskDetail() {
           {/* Editor Header */}
           <div className="border-b border-muted px-6 py-3 flex items-center justify-between">
             <p className="font-sans font-medium text-foreground">Code Editor</p>
-            <div className="flex gap-2">
-              <button
-                onClick={handleReset}
-                className="flex items-center gap-2 px-4 py-2 bg-card-hover hover:bg-[#3a3a3a] text-foreground rounded-lg transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Reset
-              </button>
+            <div className="flex gap-2 relative">
+              <div className="relative">
+                <button
+                  onClick={handleReset}
+                  className="flex items-center gap-2 px-4 py-2 bg-card-hover hover:bg-[#3a3a3a] text-foreground rounded-lg transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset
+                </button>
+                
+                {/* Reset Confirmation Popover */}
+                {showResetConfirm && (
+                  <div className="absolute top-full mt-2 right-0 bg-background border border-muted rounded-lg shadow-xl p-4 w-72 z-50">
+                    <p className="font-sans text-foreground text-sm mb-3">
+                      Are you sure? All progress will be lost.
+                    </p>
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={cancelReset}
+                        className="px-3 py-1.5 text-sm bg-card-hover hover:bg-[#3a3a3a] text-foreground rounded transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={confirmReset}
+                        className="px-3 py-1.5 text-sm bg-primary hover:bg-[#7952e5] text-foreground rounded transition-colors cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
               <button
                 onClick={handleRunCode}
                 disabled={isRunning}
-                className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-[#7952e5] text-foreground rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-[#7952e5] text-foreground rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Play className="w-4 h-4" />
                 {isRunning ? 'Running...' : 'Run Code'}
@@ -150,12 +199,11 @@ export function TaskDetail() {
           </div>
 
           {/* Code Editor Area */}
-          <div className="flex-1 overflow-auto">
-            <textarea
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
               value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="w-full h-full bg-[#1e1e1e] text-foreground p-6 font-mono text-sm outline-none resize-none"
-              spellCheck={false}
+              onChange={(value) => setCode(value || '')}
+              language="csharp"
             />
           </div>
 
