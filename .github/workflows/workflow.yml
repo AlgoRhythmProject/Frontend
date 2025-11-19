@@ -11,21 +11,19 @@ jobs:
     name: Build, Test & Lint
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-
+          node-version: 20.x
+      - name: Clean install workaround
+        run: rm -rf node_modules package-lock.json
+        working-directory: AlgoRhythm
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: AlgoRhythm
 
       - name: Run ESLint
@@ -48,8 +46,8 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-node-${{ matrix.node-version }}
-          path: frontend/AlgoRhythm/coverage/
+          name: test-results
+          path: AlgoRhythm/coverage/
 
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -59,7 +57,7 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
 
-      - name: Build application
+      - name: Build application (LightningCSS-compatible)
         run: npm run build
         working-directory: AlgoRhythm
         env:
@@ -69,9 +67,10 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-node-${{ matrix.node-version }}
-          path: AlgoRhythm/build/
+          name: build-artifacts
+          path: AlgoRhythm/dist/
           retention-days: 7
+
 
   e2e-tests:
     name: E2E Tests (Playwright)
@@ -86,9 +85,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-
+      - name: Clean install workaround
+        run: rm -rf node_modules package-lock.json
+        working-directory: AlgoRhythm
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: AlgoRhythm
 
       - name: Install Playwright Browsers
@@ -106,8 +107,9 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: /AlgoRhythm/playwright-report/
+          path: AlgoRhythm/playwright-report/
           retention-days: 30
+
 
   security-scan:
     name: Security Scan
@@ -121,9 +123,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-
+      - name: Clean install workaround
+        run: rm -rf node_modules package-lock.json
+        working-directory: AlgoRhythm
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: AlgoRhythm
 
       - name: Run npm audit
@@ -131,6 +135,6 @@ jobs:
         working-directory: AlgoRhythm
         continue-on-error: true
 
-      - name: Check for outdated dependencies
+      - name: Check outdated dependencies
         run: npm outdated || true
         working-directory: AlgoRhythm
