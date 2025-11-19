@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Reinstall dependencies from scratch for Linux
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copy the rest of the app
 COPY . .
