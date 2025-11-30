@@ -1,17 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, CheckCircle2, Circle } from 'lucide-react';
-import { tasks, courses } from '../data/mockData';
+import { Search, CheckCircle2, Circle, Loader2 } from 'lucide-react';
+import { courses } from '../data/mockData';
 import { PageHeader } from '../components/PageHeader';
 import { StatBox } from '../components/StatBox';
+import { taskApi, type Task } from '../api/taskApi';
 
 export function TaskList() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  // Pobierz taski z API przy montowaniu komponentu
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await taskApi.getAll();
+        setTasks(data);
+      } catch (err: any) {
+        console.error('Failed to fetch tasks:', err);
+        setError(err.response?.data?.message || 'Failed to load tasks. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
 
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -29,6 +53,35 @@ export function TaskList() {
   const completedCount = tasks.filter(t => t.completed).length;
   const totalCount = tasks.length;
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+          <p className="text-muted-foreground font-sans">Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="max-w-md text-center">
+          <p className="text-error text-xl mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-[#7952e5] transition-colors cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -38,7 +91,7 @@ export function TaskList() {
           transition={{ duration: 0.4 }}
         >
           {/* Header */}
-          <PageHeader title='CODING TASKS' subtitle='Practice and master algorithms through hands-on coding challenges>' />
+          <PageHeader title='CODING TASKS' subtitle='Practice and master algorithms through hands-on coding challenges' />
           <div className="mb-8">
             <div className="mt-4 flex items-center gap-4">
               <StatBox color="primary">
