@@ -13,6 +13,8 @@ import { Admin } from './pages/Admin';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { VerifyEmail } from './pages/VerifyEmail';
+import VideoPlayer from "@/pages/VidePlayerTest.tsx";
+import ImageViewer from "@/pages/ImageViewer.tsx";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -49,7 +51,8 @@ function AppContent() {
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
-
+            <Route path="/video-player-test" element={<VideoPlayer fileName="Example.mp4"/>}/>
+            <Route path="/image-viewer-test" element={<ImageViewer fileName={"Zrzut ekranu.png"} />}/>
           </Routes>
         </motion.div>
       </AnimatePresence>
