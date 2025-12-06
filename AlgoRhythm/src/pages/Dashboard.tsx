@@ -13,7 +13,6 @@ export function Dashboard() {
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-
         {/* HERO SECTION */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

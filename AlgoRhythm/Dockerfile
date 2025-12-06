@@ -1,20 +1,16 @@
-FROM node:20 AS build
+# --- STAGE 1: Build the React Application ---
+FROM node:20-alpine AS build
+
 WORKDIR /app
-
-# Copy package files - leverage caching
-COPY package.json ./
-
-# Reinstall dependencies from scratch for Linux
-RUN npm install --ignore-scripts
-
-# Copy the rest of the app
+COPY package*.json ./
+RUN npm install
 COPY . .
+RUN npm run build # Tworzy skompilowane pliki w /app/dist
 
-# Build
-RUN npm run build
-
-# Serve with nginx
-FROM nginx:alpine
+# --- STAGE 2: Serve the Static Files with Nginx ---
+FROM nginx:stable-alpine AS final
+# Kopiujemy skompilowane pliki z fazy 'build' do domyślnego katalogu Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
