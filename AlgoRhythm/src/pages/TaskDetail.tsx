@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Play, RotateCcw, Check, X, Loader2 } from "lucide-react";
 import { CodeEditor } from "../components/CodeEditor";
 import { submissionApi, type SubmissionResponse, type TestResult } from "../api/submissionApi";
-import { taskApi, type Task } from "../api/taskApi";
+import type { Task } from "@/types/Task";
+import { taskApi } from "@/api/taskApi";
 
 export function TaskDetail() {
   const { id } = useParams();

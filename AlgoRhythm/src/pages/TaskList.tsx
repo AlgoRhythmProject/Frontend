@@ -2,13 +2,23 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, CheckCircle2, Circle, Loader2 } from 'lucide-react';
-import { courses } from '../data/mockData';
+
 import { PageHeader } from '../components/PageHeader';
 import { StatBox } from '../components/StatBox';
-import { taskApi, type Task } from '../api/taskApi';
+
+import { taskApi } from '../api/taskApi';
+import { courseApi } from '../api/courseApi';
+import type { Course } from '@/types/Course';
+import type { Task } from '@/types/Task';
+
+type TaskWithCourses = Task & {
+  courseIds: string[];
+};
 
 export function TaskList() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<TaskWithCourses[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,29 +28,60 @@ export function TaskList() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // Pobierz taski z API przy montowaniu komponentu
+  // FETCH TASKS + COURSES
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchAll = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await taskApi.getAll();
-        setTasks(data);
+
+        const [taskResp, courseResp] = await Promise.all([
+          taskApi.getAll(),
+          courseApi.getAll(),
+        ]);
+
+        const tasks = taskResp;
+        const courses = courseResp;
+
+        const taskToCourses: Record<string, string[]> = {};
+
+        courses.forEach(course => {
+          course.tasks.forEach(taskInCourse => {
+            if (!taskToCourses[taskInCourse.id]) {
+              taskToCourses[taskInCourse.id] = [];
+            }
+            taskToCourses[taskInCourse.id].push(course.id);
+          });
+        });
+
+        const tasksWithCourseIds: TaskWithCourses[] = tasks.map(t => ({
+          ...t,
+          courseIds: taskToCourses[t.id] ?? []
+        }));
+
+        setTasks(tasksWithCourseIds);
+        setCourses(courses);
       } catch (err: any) {
-        console.error('Failed to fetch tasks:', err);
-        setError(err.response?.data?.message || 'Failed to load tasks. Please try again.');
+        console.error('Failed to load tasks or courses:', err);
+        setError(err.response?.data?.message || 'Failed to load data. Please try again.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchTasks();
+    fetchAll();
   }, []);
 
+  // FILTERING
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCourse = !selectedCourse || task.courseId === selectedCourse;
-    const matchesDifficulty = !selectedDifficulty || task.difficulty === selectedDifficulty;
+
+    const matchesCourse =
+      !selectedCourse || task.courseIds.includes(selectedCourse);
+
+    const matchesDifficulty =
+      !selectedDifficulty || task.difficulty === selectedDifficulty;
+
     return matchesSearch && matchesCourse && matchesDifficulty;
   });
 
@@ -53,19 +94,19 @@ export function TaskList() {
   const completedCount = tasks.filter(t => t.completed).length;
   const totalCount = tasks.length;
 
-  // Loading state
+  // LOADING
   if (isLoading) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 text-primary animate-spin" />
-          <p className="text-muted-foreground font-sans">Loading tasks...</p>
+          <p className="text-muted-foreground font-sans">Loading tasks & courses...</p>
         </div>
       </div>
     );
   }
 
-  // Error state
+  // ERROR
   if (error) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
@@ -82,125 +123,92 @@ export function TaskList() {
     );
   }
 
+  // RENDER
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          {/* Header */}
-          <PageHeader title='CODING TASKS' subtitle='Practice and master algorithms through hands-on coding challenges' />
-          <div className="mb-8">
-            <div className="mt-4 flex items-center gap-4">
-              <StatBox color="primary">
-                {completedCount} / {totalCount} completed
-              </StatBox>
-            </div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+
+          {/* HEADER */}
+          <PageHeader
+            title='CODING TASKS'
+            subtitle='Practice and master algorithms through hands-on coding challenges'
+          />
+
+          <div className="mb-8 flex">
+            <StatBox color="primary">
+              {completedCount} / {totalCount} completed
+            </StatBox>
           </div>
 
-          {/* Main Layout with Sidebar */}
           <div className="flex gap-6">
-            {/* Left Filter Sidebar */}
-            <motion.div
+
+            {/* LEFT FILTER SIDEBAR */}
+            <motion.div className="hidden lg:block w-64 shrink-0"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="hidden lg:block w-64 shrink-0"
             >
               <div className="bg-card border border-muted rounded-2xl p-6 sticky top-4">
-                <h2 className="font-sans font-medium text-foreground text-xl mb-6">
-                  Filters
-                </h2>
 
-                {/* Course Filter */}
+                <h2 className="font-sans font-medium text-foreground text-xl mb-6">Filters</h2>
+
+                {/* COURSE FILTER */}
                 <div className="mb-6">
-                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">
-                    COURSE
-                  </h3>
+                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">COURSE</h3>
+
                   <div className="space-y-2">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setSelectedCourse(null);
-                        setCurrentPage(1);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-lg font-sans transition-colors ${selectedCourse === null
-                        ? 'bg-primary text-foreground'
-                        : 'text-muted-foreground hover:bg-background'
-                        }`}
+                    {/* ALL */}
+                    <FilterButton
+                      active={selectedCourse === null}
+                      onClick={() => { setSelectedCourse(null); setCurrentPage(1); }}
                     >
                       All Courses
-                    </motion.button>
+                    </FilterButton>
+
+                    {/* REAL COURSES FROM BACKEND */}
                     {courses.map((course) => {
-                      const courseTaskCount = tasks.filter(t => t.courseId === course.id).length;
+                      const count = tasks.filter(t => t.courseIds.includes(course.id)).length;
+
+                      if (count === 0) return null;
+
                       return (
-                        <motion.button
+                        <FilterButton
                           key={course.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            setSelectedCourse(course.id);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-lg font-sans transition-colors flex items-center justify-between ${selectedCourse === course.id
-                            ? 'bg-primary text-foreground'
-                            : 'text-muted-foreground hover:bg-background'
-                            }`}
+                          active={selectedCourse === course.id}
+                          onClick={() => { setSelectedCourse(course.id); setCurrentPage(1); }}
                         >
-                          <span className="truncate">{course.title}</span>
-                          <span className="text-xs ml-2">({courseTaskCount})</span>
-                        </motion.button>
+                          <span className="truncate">{course.name}</span>
+                          <span className="text-xs ml-2">({count})</span>
+                        </FilterButton>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Difficulty Filter */}
+                {/* DIFFICULTY FILTER */}
                 <div>
-                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">
-                    DIFFICULTY
-                  </h3>
+                  <h3 className=" font-sans font-medium text-foreground text-sm mb-3">DIFFICULTY</h3>
+
                   <div className="space-y-2">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setSelectedDifficulty(null);
-                        setCurrentPage(1);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-lg font-sans transition-colors ${selectedDifficulty === null
-                        ? 'bg-primary text-foreground'
-                        : 'text-muted-foreground hover:bg-background'
-                        }`}
+                    <FilterButton
+                      active={selectedDifficulty === null}
+                      onClick={() => { setSelectedDifficulty(null); setCurrentPage(1); }}
                     >
                       All Levels
-                    </motion.button>
-                    {['Easy', 'Medium', 'Hard'].map((difficulty) => {
-                      const difficultyCount = tasks.filter(t => t.difficulty === difficulty).length;
-                      const color = difficulty === 'Easy' ? '#ACE798' : difficulty === 'Medium' ? '#FFEE9C' : '#FE6868';
+                    </FilterButton>
+
+                    {['Easy', 'Medium', 'Hard'].map(d => {
+                      const count = tasks.filter(t => t.difficulty === d).length;
+
                       return (
-                        <motion.button
-                          key={difficulty}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            setSelectedDifficulty(difficulty);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-lg font-sans transition-colors flex items-center justify-between ${selectedDifficulty === difficulty
-                            ? 'bg-primary text-foreground'
-                            : 'text-muted-foreground hover:bg-background'
-                            }`}
+                        <FilterButton
+                          key={d}
+                          active={selectedDifficulty === d}
+                          onClick={() => { setSelectedDifficulty(d); setCurrentPage(1); }}
                         >
-                          <span className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                            {difficulty}
-                          </span>
-                          <span className="text-xs">({difficultyCount})</span>
-                        </motion.button>
+                          {d} ({count})
+                        </FilterButton>
                       );
                     })}
                   </div>
@@ -208,140 +216,165 @@ export function TaskList() {
               </div>
             </motion.div>
 
-            {/* Main Content */}
+            {/* MAIN CONTENT */}
             <div className="flex-1 min-w-0">
-              {/* Search Bar */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="mb-6"
-              >
-                <div className="box-border content-stretch flex items-center justify-between px-4 py-3 relative rounded-xl shrink-0 w-full bg-transparent">
-                  <div aria-hidden="true" className="absolute border border-muted border-solid inset-0 pointer-events-none rounded-xl" />
-                  <input
-                    type="text"
-                    placeholder="Search tasks by name..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-transparent border-none outline-none text-foreground placeholder-[#6b6b6b] flex-1 font-sans"
-                  />
-                  <Search className="w-5 h-5 text-muted-foreground" />
-                </div>
-              </motion.div>
 
-              {/* Tasks List */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="bg-card content-stretch flex flex-col items-start relative rounded-2xl shrink-0 w-full border border-muted overflow-hidden mb-6"
-              >
-                {displayedTasks.length > 0 ? (
-                  displayedTasks.map((task, index) => (
-                    <div key={task.id} className="w-full">
-                      <Link
-                        to={`/tasks/${task.id}`}
-                        className="content-stretch flex items-center relative shrink-0 w-full hover:bg-card-hover transition-colors group"
-                      >
-                        {/* Completion Indicator */}
-                        <div className="px-4 py-4">
-                          {task.completed ? (
-                            <CheckCircle2 className="w-5 h-5 text-success" />
-                          ) : (
-                            <Circle className="w-5 h-5 text-muted group-hover:text-primary transition-colors" />
-                          )}
-                        </div>
+              {/* SEARCH */}
+              <SearchBox
+                value={searchQuery}
+                onChange={setSearchQuery}
+              />
 
-                        {/* Task Info */}
-                        <div className="box-border content-stretch flex gap-2 h-full items-center py-4 pr-4 relative flex-1 min-w-0">
-                          <div className="content-stretch flex flex-col gap-1 items-start relative shrink-0 min-w-0 flex-1">
-                            <p className="font-['Plus_Jakarta_Sans',sans-serif] font-normal leading-[1.4] relative shrink-0 text-primary text-xs">
-                              {task.id}
-                            </p>
-                            <p className="font-mono font-medium leading-normal relative text-[#f6f6f6] text-base md:text-lg truncate w-full">
-                              {task.title}
-                            </p>
-                            <p className="font-sans text-[#6b6b6b] text-sm">
-                              {task.category}
-                            </p>
-                          </div>
-                        </div>
+              {/* TASKS LIST */}
+              <TaskListBox tasks={displayedTasks} />
 
-                        {/* Difficulty Badge */}
-                        <div className="px-4 py-4 flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{
-                                backgroundColor:
-                                  task.difficulty === 'Easy'
-                                    ? '#ACE798'
-                                    : task.difficulty === 'Medium'
-                                      ? '#FFEE9C'
-                                      : '#FE6868'
-                              }}
-                            />
-                            <p className="font-sans font-normal text-[#f6f6f6] text-sm hidden md:block">
-                              {task.difficulty}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
+              {/* PAGINATION */}
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onChange={setCurrentPage}
+              />
 
-                      {/* Separator */}
-                      {index < displayedTasks.length - 1 && (
-                        <div className="h-px bg-muted w-full" />
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="w-full py-16 text-center">
-                    <p className="font-sans text-[#6b6b6b] text-lg">
-                      No tasks found matching your filters
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
-                  className="flex items-center justify-between"
-                >
-                  <div className="font-sans text-muted-foreground">
-                    Page <span className="text-primary">{currentPage}</span> of {totalPages}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 bg-card border border-muted rounded-lg font-sans text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary transition-colors"
-                    >
-                      Previous
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 bg-card border border-muted rounded-lg font-sans text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary transition-colors"
-                    >
-                      Next
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
             </div>
           </div>
+
         </motion.div>
       </div>
     </div>
+  );
+}
+
+/* ----------- Reusable Small Components ----------- */
+
+function FilterButton({ active, onClick, children }: any) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`
+        w-full cursor-pointer text-left px-3 py-2 rounded-lg font-sans transition-colors flex items-center justify-between
+        ${active ? 'bg-primary text-foreground' : 'text-muted-foreground hover:bg-background'}
+      `}
+    >
+      {children}
+    </motion.button>
+  );
+}
+
+function SearchBox({ value, onChange }: any) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.2 }}
+      className="mb-6"
+    >
+      <div className="box-border flex items-center px-4 py-3 relative rounded-xl bg-transparent">
+        <div aria-hidden="true" className="absolute border border-muted inset-0 pointer-events-none rounded-xl" />
+        <input
+          type="text"
+          placeholder="Search tasks by name..."
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="bg-transparent border-none outline-none text-foreground placeholder-[#6b6b6b] flex-1"
+        />
+        <Search className="w-5 h-5 text-muted-foreground" />
+      </div>
+    </motion.div>
+  );
+}
+
+function TaskListBox({ tasks }: { tasks: TaskWithCourses[] }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.3 }}
+      className="bg-card flex flex-col rounded-2xl border border-muted overflow-hidden mb-6"
+    >
+      {tasks.length > 0 ? (
+        tasks.map((task, index) => (
+          <div key={task.id} className="w-full">
+            <Link
+              to={`/tasks/${task.id}`}
+              className="flex items-center hover:bg-card-hover transition-colors group"
+            >
+              {/* Completion */}
+              <div className="px-4 py-4">
+                {task.completed ? (
+                  <CheckCircle2 className="w-5 h-5 text-success" />
+                ) : (
+                  <Circle className="w-5 h-5 text-muted group-hover:text-primary" />
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="flex flex-col flex-1 min-w-0 py-4 pr-4">
+                <p className="text-primary text-xs">{task.id}</p>
+                <p className="text-[#f6f6f6] text-lg truncate">{task.title}</p>
+                <p className="text-[#6b6b6b] text-sm">{task.category}</p>
+              </div>
+
+              {/* Difficulty */}
+              <div className="px-4 py-4 flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{
+                      backgroundColor:
+                        task.difficulty === 'Easy'
+                          ? '#ACE798'
+                          : task.difficulty === 'Medium'
+                            ? '#FFEE9C'
+                            : '#FE6868'
+                    }}
+                  />
+                  <p className="text-[#f6f6f6] text-sm hidden md:block">{task.difficulty}</p>
+                </div>
+              </div>
+            </Link>
+
+            {index < tasks.length - 1 && <div className="h-px bg-muted w-full" />}
+          </div>
+        ))
+      ) : (
+        <div className="w-full py-16 text-center">
+          <p className="text-[#6b6b6b] text-lg">No tasks found</p>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+function Pagination({ totalPages, currentPage, onChange }: any) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-between">
+      <div className="text-muted-foreground">Page <span className="text-primary">{currentPage}</span> of {totalPages}</div>
+
+      <div className="flex gap-2">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-card border border-muted rounded-lg disabled:opacity-30 hover:border-primary"
+        >
+          Previous
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-card border border-muted rounded-lg disabled:opacity-30 hover:border-primary"
+        >
+          Next
+        </motion.button>
+      </div>
+    </motion.div>
   );
 }

@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { lectures } from "../data/mockData";
-import { LectureList } from "../components/Lectures/LectureList";
+import { lectureApi } from "../api/lectureApi";
+import type { Lecture } from "../types/Lecture";
 import { LectureView } from "../components/Lectures/LectureView";
+import LectureList from "@/components/Lectures/LectureList";
 
 export function Lectures() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedLecture, setSelectedLecture] = useState<string | null>(null);
+  const [lectures, setLectures] = useState<Lecture[]>([]);
+
+  useEffect(() => {
+    lectureApi.getAll().then(setLectures);
+  }, []);
 
   useEffect(() => {
     const lectureId = searchParams.get("id");
