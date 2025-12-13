@@ -97,7 +97,7 @@ jobs:
         working-directory: AlgoRhythm
 
       - name: Run Playwright tests
-        run: npm run test:e2e
+        run: npx playwright test
         working-directory: AlgoRhythm
         env:
           CI: true
