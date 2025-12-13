@@ -38,9 +38,9 @@ test.describe("Login component - adapted tests", () => {
     });
 
     test("should disable the button during loading (mocked slow API)", async ({ page }) => {
-        await page.route("**/api/auth/login", async (route) => {
+        await page.route("**/api/Authentication/login", async (route) => {
             // opóźnienie aby sprawdzić stan ładowania
-            await new Promise((r) => setTimeout(r, 1000));
+            await new Promise((r) => setTimeout(r, 2000));
             await route.fulfill({
                 status: 200,
                 contentType: "application/json",
@@ -55,7 +55,7 @@ test.describe("Login component - adapted tests", () => {
         await loginBtn.click();
 
         // sprawdź standardowy disabled
-        await expect(loginBtn).toBeDisabled({ timeout: 1500 });
+        await expect(loginBtn).toBeDisabled();
     });
 
     test("should show invalid credentials message on API 401 and keep button enabled", async ({ page }) => {

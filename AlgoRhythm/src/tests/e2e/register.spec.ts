@@ -63,8 +63,8 @@ test.describe("Register Component Tests", () => {
     // --- Test 3: Stan ładowania (Loading State) ---
     test("should disable button during API call", async ({ page }) => {
         // Mockujemy API z opóźnieniem, żeby zdążyć sprawdzić stan disabled
-        await page.route("**/api/authentication/register", async (route) => {
-            await new Promise(r => setTimeout(r, 5000)); // 5s opóźnienia
+        await page.route("**/api/Authentication/register", async (route) => {
+            await new Promise(r => setTimeout(r, 2000)); // 2s opóźnienia
             await route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) });
         });
 
