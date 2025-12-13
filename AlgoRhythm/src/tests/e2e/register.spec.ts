@@ -60,11 +60,11 @@ test.describe("Register Component Tests", () => {
         await expect(errorMsg).toHaveText("Passwords do not match");
     });
 
-    // --- Test 4: Stan ładowania (Loading State) ---
+    // --- Test 3: Stan ładowania (Loading State) ---
     test("should disable button during API call", async ({ page }) => {
         // Mockujemy API z opóźnieniem, żeby zdążyć sprawdzić stan disabled
         await page.route("**/api/authentication/register", async (route) => {
-            await new Promise(r => setTimeout(r, 1500)); // 1.5s opóźnienia
+            await new Promise(r => setTimeout(r, 5000)); // 5s opóźnienia
             await route.fulfill({ status: 200, body: JSON.stringify({ ok: true }) });
         });
 
@@ -74,16 +74,15 @@ test.describe("Register Component Tests", () => {
         await page.locator('input[type="password"]').first().fill("password123");
         await page.locator('input[type="password"]').nth(1).fill("password123");
         await page.locator('label:has-text("Email")').locator('..').locator('input').fill("test@example.com");
-        await page.getByRole("button", { name: REGISTER_BTN_NAME }).click();
 
         const btn = page.getByRole("button", { name: REGISTER_BTN_NAME });
+
         await btn.click();
 
-        // Sprawdzamy czy przycisk jest nieaktywny w trakcie requestu
         await expect(btn).toBeDisabled();
     });
 
-    // --- Test 5: Obsługa błędu API (Generic Error) ---
+    // --- Test 4: Obsługa błędu API (Generic Error) ---
     test("should show generic error message on API failure", async ({ page }) => {
         // Mockujemy błąd 500
         await page.route("**/api/authentication/register", async (route) => {
@@ -109,7 +108,7 @@ test.describe("Register Component Tests", () => {
         await expect(errorMsg).toHaveText("Registration failed. Please try again.");
     });
 
-    // --- Test 6: Sukces i Przekierowanie (Happy Path) ---
+    // --- Test 5: Sukces i Przekierowanie (Happy Path) ---
     test("should register successfully and redirect to verify-email page", async ({ page }) => {
         const testEmail = "test@example.com";
 
