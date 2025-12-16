@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Play, RotateCcw, Check, X, Loader2 } from "lucide-react";
 import { CodeEditor } from "../components/CodeEditor";
-import { submissionApi, type SubmissionResponse, type TestResult } from "../api/submissionApi";
+import {type ExecutionError, submissionApi, type SubmissionResponse, type TestResult} from "../api/submissionApi";
 import type { Task } from "@/types/Task";
 import { taskApi } from "@/api/taskApi";
 
@@ -19,6 +19,7 @@ export function TaskDetail() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [executionErrors, setExecutionErrors] = useState<ExecutionError[]>([]);
 
   // Pobierz task z API
   useEffect(() => {
@@ -105,6 +106,7 @@ export function TaskDetail() {
     setRunStatus(null);
     setErrorMsg(null);
     setTestResults(null);
+    setExecutionErrors([]);
 
     try {
       // 1) Wyślij kod do backendu - używamy task.id z API
@@ -149,6 +151,17 @@ export function TaskDetail() {
       if (finalResult.testResults && finalResult.testResults.length > 0) {
         setTestResults(finalResult.testResults);
       }
+      const allErrors: ExecutionError[] = [];
+      finalResult.testResults.forEach(test => {
+        if (test.errors) {
+          allErrors.push(...test.errors);
+        }
+      });
+
+      // Ustawiamy błędy w edytorze
+      setExecutionErrors(allErrors);
+
+
     } catch (err: any) {
       // Obsługa błędów sieciowych i walidacji
       if (err.response) {
@@ -330,11 +343,12 @@ export function TaskDetail() {
           </div>
 
           {/* Code Editor Area */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1">
             <CodeEditor
               value={code}
               onChange={(value) => setCode(value || "")}
               language="csharp"
+              errors={executionErrors}
             />
           </div>
 
