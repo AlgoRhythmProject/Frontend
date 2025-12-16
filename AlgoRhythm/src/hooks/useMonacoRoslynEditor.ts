@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import type { Monaco } from '@monaco-editor/react';
-import type { editor, IDisposable } from 'monaco-editor';
+import type { editor, IDisposable, Position } from 'monaco-editor';
 import type { CompletionItemDto, QuickInfoDto, DiagnosticDto } from "@/types/CodeAnalysis.ts";
 
 export function useMonacoRoslyn(
@@ -28,7 +28,7 @@ export function useMonacoRoslyn(
         // 1. Completion Provider
         const completionProvider = monaco.languages.registerCompletionItemProvider('csharp', {
             triggerCharacters: ['.', ' '],
-            provideCompletionItems: async (model, position) => {
+            provideCompletionItems: async (model: editor.ITextModel, position: Position) => {
                 try {
                     const completions = await connection.invoke<CompletionItemDto[]>(
                         'GetCompletions',
@@ -46,7 +46,7 @@ export function useMonacoRoslyn(
                     };
 
                     return {
-                        suggestions: completions.map(c => ({
+                        suggestions: completions.map((c: CompletionItemDto) => ({
                             label: c.label,
                             kind: c.kind ?? monaco.languages.CompletionItemKind.Property,
                             insertText: c.insertText ?? c.label,
@@ -63,7 +63,7 @@ export function useMonacoRoslyn(
 
         // 2. Hover Provider
         const hoverProvider = monaco.languages.registerHoverProvider('csharp', {
-            provideHover: async (model, position) => {
+            provideHover: async (model: editor.ITextModel, position: Position) => {
                 try {
                     const info = await connection.invoke<QuickInfoDto | null>(
                         'GetQuickInfo',
@@ -98,7 +98,7 @@ export function useMonacoRoslyn(
             const model = editor.getModel();
             if (!model) return;
 
-            const markers = diagnostics.map(d => ({
+            const markers = diagnostics.map((d: DiagnosticDto) => ({
                 startLineNumber: d.startLine + 1,
                 startColumn: d.startColumn + 1,
                 endLineNumber: d.endLine + 1,
@@ -108,7 +108,7 @@ export function useMonacoRoslyn(
             }));
 
             monaco.editor.setModelMarkers(model, 'roslyn', markers);
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("LSP Diagnostics error", err);
         }
     };

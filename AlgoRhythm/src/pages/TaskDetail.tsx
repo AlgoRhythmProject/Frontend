@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Play, RotateCcw, Check, X, Loader2 } from "lucide-react";
 import { CodeEditor } from "../components/CodeEditor";
-import {type ExecutionError, submissionApi, type SubmissionResponse, type TestResult} from "../api/submissionApi";
+import { submissionApi, type SubmissionResponse, type TestResult} from "../api/submissionApi";
 import type { Task } from "@/types/Task";
 import { taskApi } from "@/api/taskApi";
+import type {ExecutionError} from "@/types/CodeAnalysis.ts";
 
 export function TaskDetail() {
   const { id } = useParams();
@@ -343,7 +344,7 @@ export function TaskDetail() {
           </div>
 
           {/* Code Editor Area */}
-          <div className="flex-1">
+          <div className="flex-1 h-9/12">
             <CodeEditor
               value={code}
               onChange={(value) => setCode(value || "")}

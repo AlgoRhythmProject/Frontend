@@ -14,9 +14,9 @@ export function useRoslynLanguageServer() {
                 transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling
             })
             .withAutomaticReconnect({
-                nextRetryDelayInMilliseconds: (retryContext) => {
+                nextRetryDelayInMilliseconds: (retryContext: signalR.RetryContext) => {  // ← TUTAJ
                     if (retryContext.previousRetryCount >= maxReconnectAttempts) {
-                        return null; // Stop reconnecting
+                        return null;
                     }
                     return Math.min(1000 * Math.pow(2, retryContext.previousRetryCount), 30000);
                 }
@@ -36,11 +36,10 @@ export function useRoslynLanguageServer() {
             reconnectAttempts.current = 0;
         });
 
-        hubConnection.onclose((error) => {
+        hubConnection.onclose((error: Error | undefined) => {  // ← TUTAJ
             console.log('SignalR: Connection closed', error);
             setIsConnected(false);
 
-            // Automatic reconnection attempt after close
             if (reconnectAttempts.current < maxReconnectAttempts) {
                 reconnectAttempts.current++;
                 const delay = Math.min(1000 * reconnectAttempts.current, 5000);
@@ -54,7 +53,7 @@ export function useRoslynLanguageServer() {
                                 setIsConnected(true);
                                 reconnectAttempts.current = 0;
                             })
-                            .catch(err => console.error('SignalR: Reconnect failed', err));
+                            .catch((err: Error) => console.error('SignalR: Reconnect failed', err));  // ← TUTAJ
                     }
                 }, delay);
             }
@@ -68,7 +67,7 @@ export function useRoslynLanguageServer() {
                 setConnection(hubConnection);
                 reconnectAttempts.current = 0;
             })
-            .catch((err) => {
+            .catch((err: Error) => {  // ← TUTAJ
                 console.error('SignalR: Connection failed', err);
                 setIsConnected(false);
             });
@@ -78,7 +77,7 @@ export function useRoslynLanguageServer() {
             console.log('SignalR: Cleaning up connection');
             if (hubConnection.state !== signalR.HubConnectionState.Disconnected) {
                 hubConnection.stop()
-                    .catch(err => console.error('SignalR: Error during cleanup', err));
+                    .catch((err: Error) => console.error('SignalR: Error during cleanup', err));  // ← TUTAJ
             }
         };
     }, []);
