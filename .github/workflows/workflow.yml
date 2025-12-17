@@ -155,8 +155,8 @@ jobs:
       - name: Download all blobs
         uses: actions/download-artifact@v4
         with:
-          path: all-blobs
-          pattern: all-blob-reports-*
+          path: AlgoRhythm/all-blob-reports
+          pattern: blob-report-*
           merge-multiple: true
 
       - name: Merge into HTML Report
