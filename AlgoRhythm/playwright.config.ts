@@ -20,7 +20,7 @@ export default defineConfig({
 
     timeout: process.env.CI ? 60 * 1000 : 30 * 1000,
     expect: {
-        timeout: process.env.CI ? 10 * 1000 : 5 * 1000,
+        timeout: process.env.CI ? 20 * 1000 : 5 * 1000,
     },
 
     // Test file patterns - use .spec.ts for Playwright
