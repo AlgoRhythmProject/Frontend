@@ -77,7 +77,7 @@ test.describe("Login component - adapted tests", () => {
         await expect(loginBtn).not.toBeDisabled({ timeout: 5000 });
 
         await expect(page.locator(ERROR_SELECTOR))
-            .toHaveText("Invalid credentials");
+            .toHaveText("Invalid email or password");;
 
         await expect(page).toHaveURL(/\/login$/);
     });
