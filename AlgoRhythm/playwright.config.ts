@@ -85,7 +85,7 @@ export default defineConfig({
     // Run local dev server before starting the tests
     webServer: [isE2E ?
         {
-            command: `cd ${BACKEND_DIR} && docker-compose -f docker-compose.dev.yml up`,
+            command: `cd ${BACKEND_DIR} && docker compose -f docker-compose.dev.yml up`,
             url: 'http://localhost:5173',
             reuseExistingServer: !process.env.CI,
             stdout: 'pipe',
