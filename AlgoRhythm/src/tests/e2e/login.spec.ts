@@ -34,7 +34,7 @@ test.describe("Login E2E", () => {
         }).toPass();
     });
 
-    test("successful login with real backend", async ({ page }) => {
+    test("successful login with backend", async ({ page }) => {
         await login(page);
     });
 
