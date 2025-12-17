@@ -16,6 +16,7 @@ const __dirname = path.dirname(__filename);
 const BACKEND_DIR = process.env.BACKEND_PATH || path.resolve(__dirname, '../../Backend/AlgoRhythm');
 
 export default defineConfig({
+    globalTeardown: './playwright-global-teardown.ts',
 
     // Test file patterns - use .spec.ts for Playwright
     testMatch: '**/*.spec.ts',
@@ -89,7 +90,7 @@ export default defineConfig({
             url: 'http://localhost:5173',
             reuseExistingServer: !process.env.CI,
             stdout: 'pipe',
-            timeout: 180 * 1000,
+            timeout: 300_000,
         } :
         {
             command: 'npm run dev',
