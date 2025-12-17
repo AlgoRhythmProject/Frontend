@@ -161,13 +161,13 @@ jobs:
 
       - name: Merge into HTML Report
         run: npx playwright merge-reports --reporter html ./all-blobs
-        working-directory: AlgoRhythmProject/Frontend/AlgoRhythm
+        working-directory: AlgoRhythm
 
       - name: Upload Final HTML Report
         uses: actions/upload-artifact@v4
         with:
           name: final-playwright-report
-          path: AlgoRhythmProject/Frontend/AlgoRhythm/playwright-report/
+          path: AlgoRhythm/playwright-report/
           retention-days: 30
 
   security-scan:
