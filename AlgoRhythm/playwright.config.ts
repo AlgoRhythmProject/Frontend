@@ -18,6 +18,11 @@ const BACKEND_DIR = process.env.BACKEND_PATH || path.resolve(__dirname, '../../B
 export default defineConfig({
     //globalTeardown: './playwright-global-teardown.ts',
 
+    timeout: process.env.CI ? 60 * 1000 : 30 * 1000,
+    expect: {
+        timeout: process.env.CI ? 10 * 1000 : 5 * 1000,
+    },
+
     // Test file patterns - use .spec.ts for Playwright
     testMatch: '**/*.spec.ts',
 
