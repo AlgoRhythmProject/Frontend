@@ -13,7 +13,7 @@ const isE2E = process.env.TEST_MODE === 'E2E';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const backendPath = path.resolve(__dirname, '../../Backend/AlgoRhythm');
+const backendPath = path.resolve(__dirname, '../Backend/AlgoRhythm');
 
 export default defineConfig({
 
