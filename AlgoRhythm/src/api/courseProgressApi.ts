@@ -5,7 +5,7 @@ export interface CourseProgress {
     userId: string;
     courseId: string;
     courseName: string;
-    percentage: number; // 0..100
+    percentage: number;
     startedAt?: string | null;
     completedAt?: string | null;
 }

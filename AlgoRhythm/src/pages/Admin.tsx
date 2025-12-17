@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Users, FileCode, Activity, Plus, Edit, Trash2 } from 'lucide-react';
 import { tasks } from '../data/mockData';
-import { difficultyColors } from '@/utils/difficultyColors';
 
 interface User {
   id: string;
@@ -182,7 +181,7 @@ export function Admin() {
                         <td className="p-4">
                           <div className="flex items-center gap-2">
                             <div
-                              className={`w-3 h-3 rounded-full ${difficultyColors[task.difficulty] ?? "bg-error"}`}
+                              className={`w-3 h-3 rounded-full bg-error`}
                             />
                             <span className="font-sans text-foreground">{task.difficulty}</span>
                           </div>

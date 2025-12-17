@@ -5,6 +5,7 @@ import { CodeEditor } from "../components/CodeEditor";
 import { submissionApi, type SubmissionResponse, type TestResult } from "../api/submissionApi";
 import type { Task } from "@/types/Task";
 import { taskApi } from "@/api/taskApi";
+import { DifficultyColor, DifficultyLabel } from "@/utils/difficulty";
 
 export function TaskDetail() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export function TaskDetail() {
   const [isLoadingTask, setIsLoadingTask] = useState(true);
   const [taskError, setTaskError] = useState<string | null>(null);
 
-  const [code, setCode] = useState(task?.starterCode || "");
+  const [code, setCode] = useState(task?.templateCode || "");
   const [testResults, setTestResults] = useState<TestResult[] | null>(null);
   const [runStatus, setRunStatus] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export function TaskDetail() {
         console.log('✅ Task fetched successfully:', data);
         setTask(data);
         // Fallback dla starterCode jeśli backend nie zwraca
-        setCode(data.starterCode || '// Write your solution here\n');
+        setCode(data.templateCode || '// Write your solution here\n');
       } catch (err: any) {
         console.error('❌ Failed to fetch task:', err);
         console.error('Error details:', {
@@ -90,7 +91,7 @@ export function TaskDetail() {
 
   const handleReset = () => setShowResetConfirm(true);
   const confirmReset = () => {
-    setCode(task.starterCode);
+    setCode(task.templateCode);
     setTestResults(null);
     setRunStatus(null);
     setErrorMsg(null);
@@ -174,12 +175,6 @@ export function TaskDetail() {
     }
   };
 
-  const difficultyColor = {
-    Easy: "bg-success",
-    Medium: "bg-warning",
-    Hard: "bg-error",
-  }[task.difficulty];
-
   return (
     <div className="h-screen flex flex-col">
       {showResetConfirm && (
@@ -208,8 +203,8 @@ export function TaskDetail() {
           <p className="font-mono font-medium text-foreground">{task.title}</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${difficultyColor}`} />
-          <span className="font-sans text-foreground">{task.difficulty}</span>
+          <div className={`w-3 h-3 rounded-full ${DifficultyColor[task.difficulty]}`} />
+          <span className="font-sans text-foreground">{DifficultyLabel[task.difficulty]}</span>
         </div>
       </div>
 

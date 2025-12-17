@@ -1,7 +1,6 @@
 import type { Course } from "@/types/Course";
 import apiClient from "./apiClient";
 
-
 export const courseApi = {
     getAll: async (): Promise<Course[]> => {
         const res = await apiClient.get<Course[]>("/Course");

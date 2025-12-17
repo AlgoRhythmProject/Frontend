@@ -10,7 +10,7 @@ import { AuthenticationFooter } from "../components/Authentication/Authenticatio
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store";
 import { login } from "../store/userSlice";
-import { authApi } from "../api/authApi";
+import { authApi, ApiError } from "../api/authApi";
 import { Particles } from "@/components/ui/shadcn-io/particles";
 
 export function Login() {
@@ -41,13 +41,31 @@ export function Login() {
       localStorage.setItem("isAuthenticated", "true");
       navigate("/");
     } catch (err: any) {
-      setError("Invalid email or password");
+      if (err instanceof ApiError) {
+        switch (err.code) {
+          case 'USER_NOT_FOUND':
+            setError("Invalid email. Try again or make a new account.");
+            break;
+          case 'INVALID_PASSWORD':
+            setError("Invalid password. Try again.");
+            break;
+          case 'EMAIL_NOT_VERIFIED':
+            setError("Please verify your email address before logging in.");
+            setTimeout(() => {
+              navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+            }, 2000);
+            break;
+          default:
+            setError(err.message || "Login failed. Please try again.");
+        }
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
       console.error("Login failed:", err);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -85,7 +103,7 @@ export function Login() {
               <AuthenticationButton isLoading={isLoading} text="Login" />
             </form>
             <AuthenticationFooter
-              promptText="Don’t have an account?"
+              promptText="Don't have an account?"
               linkText="Sign up"
               onLinkClick={() => navigate("/register")}
             />

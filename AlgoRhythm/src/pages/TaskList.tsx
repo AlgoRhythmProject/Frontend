@@ -10,6 +10,7 @@ import { taskApi } from '../api/taskApi';
 import { courseApi } from '../api/courseApi';
 import type { Course } from '@/types/Course';
 import type { Task } from '@/types/Task';
+import { DifficultyLabel, type Difficulty } from '@/utils/difficulty';
 
 type TaskWithCourses = Task & {
   courseIds: string[];
@@ -24,7 +25,7 @@ export function TaskList() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -198,16 +199,19 @@ export function TaskList() {
                       All Levels
                     </FilterButton>
 
-                    {['Easy', 'Medium', 'Hard'].map(d => {
-                      const count = tasks.filter(t => t.difficulty === d).length;
+                    {[0, 1, 2].map(difficulty => {
+                      const count = tasks.filter(t => t.difficulty === difficulty).length;
 
                       return (
                         <FilterButton
-                          key={d}
-                          active={selectedDifficulty === d}
-                          onClick={() => { setSelectedDifficulty(d); setCurrentPage(1); }}
+                          key={difficulty}
+                          active={selectedDifficulty === difficulty}
+                          onClick={() => {
+                            setSelectedDifficulty(difficulty as Difficulty);
+                            setCurrentPage(1);
+                          }}
                         >
-                          {d} ({count})
+                          {DifficultyLabel[difficulty as Difficulty]} ({count})
                         </FilterButton>
                       );
                     })}
@@ -323,14 +327,14 @@ function TaskListBox({ tasks }: { tasks: TaskWithCourses[] }) {
                     className="w-3 h-3 rounded-full"
                     style={{
                       backgroundColor:
-                        task.difficulty === 'Easy'
+                        task.difficulty === 0
                           ? '#ACE798'
-                          : task.difficulty === 'Medium'
+                          : task.difficulty === 1
                             ? '#FFEE9C'
                             : '#FE6868'
                     }}
                   />
-                  <p className="text-[#f6f6f6] text-sm hidden md:block">{task.difficulty}</p>
+                  <p className="text-[#f6f6f6] text-sm hidden md:block">{DifficultyLabel[task.difficulty]}</p>
                 </div>
               </div>
             </Link>

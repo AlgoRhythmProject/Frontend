@@ -7,13 +7,11 @@ export interface TaskListResponse {
 }
 
 export const taskApi = {
-    // Pobierz wszystkie taski
     getAll: async (): Promise<Task[]> => {
         const res = await apiClient.get<Task[]>("/Task");
         return res.data;
     },
 
-    // Pobierz jeden task po ID
     getById: async (id: string): Promise<Task> => {
         const res = await apiClient.get<Task>(`/Task/${id}`);
         return res.data;

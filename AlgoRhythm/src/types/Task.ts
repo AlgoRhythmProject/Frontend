@@ -1,14 +1,17 @@
+import type { Difficulty } from "@/utils/difficulty";
+import type { taskType } from "@/utils/taskType";
+
 export interface Task {
-    taskType: "Programming" | "Interactive";
+    taskType: taskType;
     isPublished: any;
     id: string;
     title: string;
     description: string;
-    difficulty: "Easy" | "Medium" | "Hard";
+    difficulty: Difficulty;
     category: string;
     tags: string[];
     completed: boolean;
-    starterCode: string;
+    templateCode: string;
     examples: {
         input: string;
         output: string;
@@ -17,6 +20,7 @@ export interface Task {
     constraints: string[];
     courses: TaskCourse[];
 }
+
 export interface TaskCourse {
     id: string;
     name: string;
