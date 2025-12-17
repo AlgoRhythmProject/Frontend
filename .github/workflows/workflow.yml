@@ -5,7 +5,6 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
-
 jobs:
   build-and-test:
     name: Build, Test & Lint
@@ -73,43 +72,57 @@ jobs:
 
 
   e2e-tests:
-    name: E2E Tests (Playwright)
+    name: E2E & UI Tests (Playwright)
     runs-on: ubuntu-latest
     needs: build-and-test
 
     steps:
+      # Repo frontendu
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          path: AlgoRhythmProject/Frontend
+
+      # Repo backendu
+      - name: Checkout backend code
+        uses: actions/checkout@v5
+        with:
+          repository: 'AlgoRhythmProject/Backend'
+          path: AlgoRhythmProject/Backend
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-      - name: Clean install workaround
-        run: rm -rf node_modules package-lock.json
-        working-directory: AlgoRhythm
+
       - name: Install dependencies
         run: npm install
-        working-directory: AlgoRhythm
+        working-directory: AlgoRhythmProject/Frontend/AlgoRhythm
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-        working-directory: AlgoRhythm
+        working-directory: AlgoRhythmProject/Frontend/AlgoRhythm
 
-      - name: Run Playwright tests
-        run: npx playwright test
-        working-directory: AlgoRhythm
+      - name: Run Playwright tests (UI)
+        run: npx playwright test --project=UI --reporter=blob
+        working-directory: AlgoRhythmProject/Frontend/AlgoRhythm
         env:
           CI: true
+
+      - name: Run Playwright tests (E2E)
+        run: npx playwright test --project=E2E --reporter=blob
+        working-directory: AlgoRhythmProject/Frontend/AlgoRhythm
+        env:
+          CI: true
+          TEST_MODE: E2E
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
-          path: AlgoRhythm/playwright-report/
+          path: AlgoRhythmProject/Frontend/AlgoRhythm/playwright-report/
           retention-days: 30
-
 
   security-scan:
     name: Security Scan
