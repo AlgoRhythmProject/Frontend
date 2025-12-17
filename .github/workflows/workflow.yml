@@ -116,7 +116,7 @@ jobs:
           TEST_MODE: E2E
           BACKEND_PATH: ${{ github.workspace }}/AlgoRhythmProject/Backend/AlgoRhythm
 
-          SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           JWT_KEY: ${{ secrets.JWT_KEY }}
           CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
