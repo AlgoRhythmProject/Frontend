@@ -1,4 +1,5 @@
-import {expect, test} from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { login } from "../test_helpers/login";
 
 const EMAIL_PLACEHOLDER = "your@email.com";
 const PASSWORD_PLACEHOLDER = "••••••••";
@@ -13,27 +14,29 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Login E2E", () => {
-
-    test("successful login with real backend", async ({ page }) => {
-
+    test("unsuccessful login with invalid credentials", async ({ page }) => {
         const emailInput = page.getByPlaceholder(EMAIL_PLACEHOLDER);
         await expect(emailInput).toBeVisible({ timeout: 10000 });
 
         await emailInput.fill("john.doe@algorhythm.dev");
-        await page.getByPlaceholder(PASSWORD_PLACEHOLDER).fill("Student123!");
+        await page.getByPlaceholder(PASSWORD_PLACEHOLDER).fill("SOME_PASSWORD!");
 
         const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
 
         await Promise.all([
-            page.waitForResponse(resp => resp.url().includes('/api/Authentication/login') && resp.status() === 200),
+            page.waitForResponse(resp => resp.url().includes('/api/Authentication/login') && resp.status() !== 200),
             loginBtn.click(),
         ]);
 
-        await page.waitForURL("**/", { timeout: 10000 });
-
         await expect(async () => {
             const isAuth = await page.evaluate(() => localStorage.getItem("isAuthenticated"));
-            expect(isAuth).toBe("true");
+            expect(isAuth).toBeFalsy();
         }).toPass();
     });
+
+    test("successful login with real backend", async ({ page }) => {
+        await login(page);
+    });
+
+
 });
