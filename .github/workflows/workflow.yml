@@ -116,6 +116,11 @@ jobs:
           TEST_MODE: E2E
           BACKEND_PATH: ${{ github.workspace }}/AlgoRhythmProject/Backend/AlgoRhythm
 
+          SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
+          CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
