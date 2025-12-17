@@ -1,12 +1,21 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Playwright E2E Test Configuration
  * Separate from Jest unit tests
  */
+
+const isE2E = process.env.TEST_MODE === 'E2E';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const backendPath = path.resolve(__dirname, '../../Backend/AlgoRhythm');
+
 export default defineConfig({
-    // Test directory - separate from Jest tests
-    testDir: './src/tests/e2e',
 
     // Test file patterns - use .spec.ts for Playwright
     testMatch: '**/*.spec.ts',
@@ -42,7 +51,7 @@ export default defineConfig({
     use: {
 
         // Base URL for your application
-        baseURL: 'http://localhost:5173', // Adjust to your dev server port
+        baseURL: 'http://localhost:5173',
 
         // Collect trace when retrying the failed test
         trace: 'on-first-retry',
@@ -57,15 +66,34 @@ export default defineConfig({
     // Configure projects for major browsers
     projects: [
         {
-            name: 'chromium',
-            use: { ...devices['Desktop Chrome'] },
+            testDir: './src/tests/ui',
+            name: 'UI',
+            use: {
+                ...devices['Desktop Chrome'],
+                baseURL: 'http://localhost:5173'
+            },
         },
+        {
+            testDir: './src/tests/e2e',
+            name: 'E2E',
+            use: {
+                ...devices['Desktop Chrome'],
+            }
+        }
     ],
 
-    // Run your local dev server before starting the tests
-    webServer: {
-        command: 'npm run dev',
-        url: 'http://localhost:5173',
-        reuseExistingServer: !process.env.CI,
-    },
+    // Run local dev server before starting the tests
+    webServer: [isE2E ?
+        {
+            command: `cd ${backendPath} && docker-compose -f docker-compose.dev.yml up`,
+            url: 'http://localhost:5173',
+            reuseExistingServer: !process.env.CI,
+            stdout: 'pipe',
+            timeout: 180 * 1000,
+        } :
+        {
+            command: 'npm run dev',
+            url: 'http://localhost:5173',
+            reuseExistingServer: !process.env.CI,
+        }],
 });
