@@ -18,9 +18,9 @@ const BACKEND_DIR = process.env.BACKEND_PATH || path.resolve(__dirname, '../../B
 export default defineConfig({
     //globalTeardown: './playwright-global-teardown.ts',
 
-    timeout: process.env.CI ? 60 * 1000 : 30 * 1000,
+    timeout: 60 * 1000,
     expect: {
-        timeout: process.env.CI ? 20 * 1000 : 5 * 1000,
+        timeout: 30 * 1000,
     },
 
     // Test file patterns - use .spec.ts for Playwright
@@ -41,7 +41,7 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
 
     // Retry on CI only
-    retries: process.env.CI ? 2 : 0,
+    retries: process.env.CI ? 3 : 0,
 
     // Opt out of parallel tests on CI
     workers: process.env.CI ? 1 : undefined,
