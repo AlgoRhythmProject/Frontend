@@ -8,10 +8,10 @@ import { AuthenticationBackground } from "../components/Authentication/Authentic
 import { AuthenticationButton } from "../components/Authentication/AuthenticationButton";
 import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
 import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../store";
+import type { AppDispatch } from "@/store";
 import { login } from "../store/userSlice";
 import { authApi } from "../api/authApi";
-import { Particles } from "../components/ui/shadcn-io/particles";
+import { Particles } from "@/components/ui/shadcn-io/particles";
 
 export function Login() {
   const dispatch = useDispatch<AppDispatch>();
