@@ -5,6 +5,9 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  repository_dispatch:
+    types: [backend_push]
+
 jobs:
   build-and-test:
     name: Build, Test & Lint
@@ -88,6 +91,7 @@ jobs:
         with:
           repository: 'AlgoRhythmProject/Backend'
           path: AlgoRhythmProject/Backend
+          ref: ${{ github.event.client_payload.ref || 'develop' }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
