@@ -32,8 +32,8 @@ test.describe("Correct tasks flow", () => {
             await expect(resultsHeader).toBeVisible({ timeout: 20000 });
             const firstTestResult = page.locator('div').filter({ hasText: /Test 1/i }).first();
             await expect(firstTestResult).toContainText('Accepted');
-            const successIcon = firstTestResult.locator('svg.text-success');
-            await expect(successIcon).toBeVisible();
+            const error = firstTestResult.locator('svg.text-success').first();
+            await expect(error).toBeVisible();
         });
     });
 });
@@ -69,7 +69,7 @@ test.describe("Incorrect tasks flow", () => {
             await expect(resultsHeader).toBeVisible({ timeout: 20000 });
             const firstTestResult = page.locator('div').filter({ hasText: /Test 1/i }).first();
             await expect(firstTestResult).toContainText('Rejected');
-            const successIcon = firstTestResult.locator('svg.text-error');
+            const successIcon = firstTestResult.locator('svg.text-error').first();
             await expect(successIcon).toBeVisible();
         });
     });
@@ -106,8 +106,8 @@ test.describe("Parse error tasks flow", () => {
             await expect(resultsHeader).toBeVisible({ timeout: 20000 });
             const firstTestResult = page.locator('div').filter({ hasText: /Test 1/i }).first();
             await expect(firstTestResult).toContainText('Error');
-            const successIcon = firstTestResult.locator('svg.text-error');
-            await expect(successIcon).toBeVisible();
+            const errorIcon = firstTestResult.locator('svg.text-error').first();
+            await expect(errorIcon).toBeVisible();
         });
     });
 });
