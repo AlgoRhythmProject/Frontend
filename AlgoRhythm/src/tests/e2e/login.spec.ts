@@ -1,9 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { login } from "../test_helpers/login";
 
 const EMAIL_PLACEHOLDER = "your@email.com";
 const PASSWORD_PLACEHOLDER = "••••••••";
-//const ERROR_SELECTOR = ".text-error";
+const ERROR_SELECTOR = ".text-error";
 const LOGIN_BUTTON_NAME = "Login";
 //const HEADER_TEXT = "AlgoRhythm";
 //const FOOTER_PROMPT = "Don’t have an account?";
