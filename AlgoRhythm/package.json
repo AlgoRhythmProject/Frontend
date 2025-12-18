@@ -13,7 +13,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "test:e2e": "playwright test"
+    "test:e2e": "cross-env TEST_MODE=E2E npx playwright test --project=E2E",
+    "test:ui": "npx playwright test --project=UI"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
