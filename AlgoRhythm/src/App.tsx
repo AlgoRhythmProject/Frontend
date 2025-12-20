@@ -13,6 +13,8 @@ import { Admin } from './pages/Admin';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { VerifyEmail } from './pages/VerifyEmail';
+import { ResetPassword } from './pages/ResetPassword';
+import { ForgotPassword } from './pages/ForgotPassword';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -49,7 +51,8 @@ function AppContent() {
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
-
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
         </motion.div>
       </AnimatePresence>
@@ -60,7 +63,7 @@ function AppContent() {
 export default function App() {
   return (
     <Router>
-      <div className="bg-black min-h-screen text-foreground">
+      <div className="bg-primary-background min-h-screen text-foreground">
         <div className="relative z-10">
           <AppContent />
         </div>

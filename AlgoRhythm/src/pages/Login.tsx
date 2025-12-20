@@ -99,6 +99,23 @@ export function Login() {
                 placeholder="••••••••"
                 delay={0.5}
               />
+
+              {/* Forgot Password Link */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-right"
+              >
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="font-sans text-sm text-primary-light hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </motion.div>
+
               {error && <p className="text-error text-sm">{error}</p>}
               <AuthenticationButton isLoading={isLoading} text="Login" />
             </form>
@@ -113,7 +130,7 @@ export function Login() {
               transition={{ delay: 0.8 }}
               className="mt-6 text-center"
             >
-              <p className="font-sans text-[#6b6b6b] text-sm">
+              <p className="font-sans text-secondary-foreground text-sm">
                 Your place to learn algorithms and data structures
               </p>
             </motion.div>

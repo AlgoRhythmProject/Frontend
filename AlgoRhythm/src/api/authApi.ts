@@ -37,6 +37,27 @@ export interface ResendVerificationCodeRequest {
     email: string;
 }
 
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface ResetPasswordRequest {
+    email: string;
+    code: string;
+    newPassword: string;
+}
+
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+}
+
+export interface UpdateProfileRequest {
+    firstName: string;
+    lastName: string;
+    email: string;
+}
+
 export class ApiError extends Error {
     code: string;
     status?: number;
@@ -104,6 +125,59 @@ export const authApi = {
             throw new ApiError(
                 errorData?.code || 'UNKNOWN_ERROR',
                 errorData?.message || 'Failed to resend verification code. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    forgotPassword: async (email: string): Promise<void> => {
+        try {
+            await apiClient.post("/Authentication/forgot-password", { email });
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to send reset code. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
+        try {
+            await apiClient.post("/Authentication/reset-password", data);
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to reset password. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    changePassword: async (data: ChangePasswordRequest): Promise<void> => {
+        try {
+            await apiClient.post("/Authentication/change-password", data);
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to change password. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    updateProfile: async (data: UpdateProfileRequest): Promise<User> => {
+        try {
+            const response = await apiClient.put<User>("/Authentication/update-profile", data);
+            return response.data;
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to update profile. Please try again.',
                 error.response?.status
             );
         }

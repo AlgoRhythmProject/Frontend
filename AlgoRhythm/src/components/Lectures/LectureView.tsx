@@ -15,7 +15,7 @@ export function LectureView({ lecture, onBack }: LectureViewProps) {
         >
             <button
                 onClick={onBack}
-                className="mb-6 text-primary hover:text-[#7952e5] cursor-pointer font-sans transition-colors"
+                className="mb-6 text-primary hover:text-primary-hover cursor-pointer font-sans transition-colors"
             >
                 ← Back to all lectures
             </button>

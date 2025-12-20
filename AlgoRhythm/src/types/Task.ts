@@ -25,3 +25,6 @@ export interface TaskCourse {
     id: string;
     name: string;
 }
+export type TaskWithCourses = Task & {
+    courseIds: string[];
+};

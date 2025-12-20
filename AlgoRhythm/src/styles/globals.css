@@ -1,32 +1,45 @@
 @import "tailwindcss";
 
+/* ============================================
+   DARK THEME (Default)
+   ============================================ */
 :root {
+  /* Brand Colors */
   --primary: #6942d5;
+  --primary-hover: #7952e5;
+  --primary-light: #8b5cf6;
+  --primary-light-hover: #9c6cf7;
   --primary-foreground: #ffffff;
 
+  /* Backgrounds */
+  --primary-background: #000000;
   --background: #1a1a1a;
   --card: #242424;
   --card-hover: #2a2a2a;
   --muted: #3d3d3d;
 
+  /* Foregrounds */
   --foreground: #ffffff;
   --muted-foreground: #b0b0b0;
   --secondary-foreground: #6a6a6a;
 
+  /* Status Colors */
   --success: #ace798;
   --warning: #ffee9c;
   --error: #fe6868;
   --info: #00eaff;
 
+  /* UI Elements */
   --border: #3d3d3d;
   --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
-
   --radius: 0.625rem;
 
+  /* Typography */
   --font-sans: 'Roboto', sans-serif;
   --font-mono: 'Roboto Mono', monospace;
   --font-alt: 'Plus Jakarta Sans', sans-serif;
 
+  /* Font Sizes */
   --text-xs: 0.75rem;
   /* 12px */
   --text-sm: 0.875rem;
@@ -45,10 +58,123 @@
   /* 36px */
   --text-5xl: 3rem;
   /* 48px */
+
+  --on-primary: #ffffff;
+  --always-primary: #6942d5;
+
+  /* Course Gradients - stonowane */
+  --course-1-from: #7c5cd6;
+  --course-1-to: #9d7ee8;
+  --course-2-from: #14b8d4;
+  --course-2-to: #0891b2;
+  --course-3-from: #86d070;
+  --course-3-to: #22c55e;
+  --course-4-from: #fcd34d;
+  --course-4-to: #eab308;
+  --course-5-from: #9333ea;
+  --course-5-to: #db2777;
+  --course-6-from: #0891b2;
+  --course-6-to: #2563eb;
+  --course-7-from: #ea580c;
+  --course-7-to: #dc2626;
+  --course-8-from: #059669;
+  --course-8-to: #0d9488;
+
+  /* Fallback Gradients - stonowane */
+  --fallback-1-from: #7c3aed;
+  --fallback-1-to: #9333ea;
+  --fallback-2-from: #e11d48;
+  --fallback-2-to: #db2777;
+  --fallback-3-from: #059669;
+  --fallback-3-to: #22c55e;
+  --fallback-4-from: #0284c7;
+  --fallback-4-to: #3b82f6;
+  --fallback-5-from: #d97706;
+  --fallback-5-to: #ea580c;
+  --fallback-6-from: #7c3aed;
+  --fallback-6-to: #7c3aed;
+  --fallback-7-from: #0d9488;
+  --fallback-7-to: #0891b2;
+  --fallback-8-from: #dc2626;
+  --fallback-8-to: #e11d48;
 }
 
+/* ============================================
+   LIGHT THEME
+   ============================================ */
+[data-theme="light"] {
+  /* Brand Colors - pozostają takie same */
+  --primary: #9072e0;
+  --primary-hover: rgb(121, 83, 226);
+  --primary-foreground: #ffffff;
+  --primary-light: #9072e0;
+  --primary-light-hover: #9c6cf7;
+  --primary-foreground: #ffffff;
+
+  /* Backgrounds */
+  --primary-background: #eeeeee;
+  --background: #ffffff;
+  --card: #f8f8f8;
+  --card-hover: #ffffff;
+  --muted: #cdc3e9;
+
+  /* Foregrounds */
+  --foreground: #111111;
+  --muted-foreground: #555555;
+  --secondary-foreground: #757575;
+
+  /* Status Colors - slightly adjusted for light mode */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #06b6d4;
+
+  /* UI Elements */
+  --border: #e5e5e5;
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --course-1-from: #8b70dc;
+  --course-1-to: #a78bfa;
+  --course-2-from: #22d3ee;
+  --course-2-to: #38bdf8;
+  --course-3-from: #4ade80;
+  --course-3-to: #86efac;
+  --course-4-from: #facc15;
+  --course-4-to: #fde047;
+  --course-5-from: #a855f7;
+  --course-5-to: #f472b6;
+  --course-6-from: #22d3ee;
+  --course-6-to: #60a5fa;
+  --course-7-from: #fb923c;
+  --course-7-to: #f87171;
+  --course-8-from: #34d399;
+  --course-8-to: #2dd4bf;
+
+  /* Fallback Gradients - bardziej nasycone wersje */
+  --fallback-1-from: #818cf8;
+  --fallback-1-to: #a78bfa;
+  --fallback-2-from: #fb7185;
+  --fallback-2-to: #f472b6;
+  --fallback-3-from: #34d399;
+  --fallback-3-to: #6ee7b7;
+  --fallback-4-from: #38bdf8;
+  --fallback-4-to: #60a5fa;
+  --fallback-5-from: #fbbf24;
+  --fallback-5-to: #fb923c;
+  --fallback-6-from: #a855f7;
+  --fallback-6-to: #818cf8;
+  --fallback-7-from: #2dd4bf;
+  --fallback-7-to: #22d3ee;
+  --fallback-8-from: #f87171;
+  --fallback-8-to: #fb7185;
+}
+
+/* ============================================
+   TAILWIND THEME INTEGRATION
+   ============================================ */
 @theme inline {
   /* Backgrounds */
+  --color-primary-background: var(--primary-background);
   --color-background: var(--background);
   --color-card: var(--card);
   --color-card-hover: var(--card-hover);
@@ -62,14 +188,21 @@
   /* Brand */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-primary-light-hover: var(--primary-light-hover);
+
 
   /* Status */
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
   --color-info: var(--info);
-
   --color-border: var(--border);
+
+  --color-on-primary: var(--on-primary);
+  --color-always-primary: var(--always-primary);
+
   --shadow-soft: var(--shadow-soft);
 
   /* Radius scales */
@@ -77,111 +210,48 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+
+  /* Course Colors */
+  --color-course-1-from: var(--course-1-from);
+  --color-course-1-to: var(--course-1-to);
+  --color-course-2-from: var(--course-2-from);
+  --color-course-2-to: var(--course-2-to);
+  --color-course-3-from: var(--course-3-from);
+  --color-course-3-to: var(--course-3-to);
+  --color-course-4-from: var(--course-4-from);
+  --color-course-4-to: var(--course-4-to);
+  --color-course-5-from: var(--course-5-from);
+  --color-course-5-to: var(--course-5-to);
+  --color-course-6-from: var(--course-6-from);
+  --color-course-6-to: var(--course-6-to);
+  --color-course-7-from: var(--course-7-from);
+  --color-course-7-to: var(--course-7-to);
+  --color-course-8-from: var(--course-8-from);
+  --color-course-8-to: var(--course-8-to);
+
+  /* Fallback Colors */
+  --color-fallback-1-from: var(--fallback-1-from);
+  --color-fallback-1-to: var(--fallback-1-to);
+  --color-fallback-2-from: var(--fallback-2-from);
+  --color-fallback-2-to: var(--fallback-2-to);
+  --color-fallback-3-from: var(--fallback-3-from);
+  --color-fallback-3-to: var(--fallback-3-to);
+  --color-fallback-4-from: var(--fallback-4-from);
+  --color-fallback-4-to: var(--fallback-4-to);
+  --color-fallback-5-from: var(--fallback-5-from);
+  --color-fallback-5-to: var(--fallback-5-to);
+  --color-fallback-6-from: var(--fallback-6-from);
+  --color-fallback-6-to: var(--fallback-6-to);
+  --color-fallback-7-from: var(--fallback-7-from);
+  --color-fallback-7-to: var(--fallback-7-to);
+  --color-fallback-8-from: var(--fallback-8-from);
+  --color-fallback-8-to: var(--fallback-8-to);
 }
 
-@layer utilities {
-  .font-sans {
-    font-family: var(--font-sans);
-  }
-
-  .font-mono {
-    font-family: var(--font-mono);
-  }
-
-  .font-alt {
-    font-family: var(--font-alt);
-  }
+body {
+  font-family: var(--font-sans);
 }
 
-/* Prose styles for lecture content */
-.lecture-content h1 {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 1rem;
-  margin-top: 2rem;
-  line-height: 1.2;
-}
-
-.lecture-content h2 {
-  font-size: 1.875rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 0.75rem;
-  margin-top: 2rem;
-  line-height: 1.3;
-}
-
-.lecture-content h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
-  margin-top: 1.5rem;
-}
-
-.lecture-content p {
-  color: #d1d1d1;
-  margin-bottom: 1rem;
-  line-height: 1.75;
-}
-
-.lecture-content ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-  color: #d1d1d1;
-}
-
-.lecture-content ol {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-  color: #d1d1d1;
-}
-
-.lecture-content li {
-  margin-bottom: 0.5rem;
-  line-height: 1.75;
-}
-
-.lecture-content strong {
-  color: #9b87f5;
-  font-weight: 600;
-}
-
-.lecture-content code {
-  color: #9b87f5;
-  background-color: #1a1a1a;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
-  font-size: 0.875em;
-}
-
-.lecture-content pre {
-  background-color: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin-bottom: 1rem;
-}
-
-.lecture-content pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.lecture-content a {
-  color: #9b87f5;
-  text-decoration: underline;
-}
-
-.lecture-content a:hover {
-  color: #7952e5;
-}
-
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
+@import "./lectureContent.css";
+@import "./scrollbar.css";

@@ -80,7 +80,7 @@ export function TaskDetail() {
           </p>
           <button
             onClick={() => navigate("/tasks")}
-            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-[#7952e5] transition-colors cursor-pointer"
+            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-primary-hover transition-colors cursor-pointer"
           >
             Back to Tasks
           </button>
@@ -211,12 +211,12 @@ export function TaskDetail() {
       {/* LAYOUT */}
       <div className="flex-1 flex overflow-hidden">
         {/* LEFT — TASK DESCRIPTION */}
-        <div className="w-full lg:w-1/2 overflow-y-auto bg-[#0d0d0d] p-6">
+        <div className="w-full lg:w-1/2 overflow-y-auto bg-background p-6">
           <div className="max-w-2xl">
             <h2 className="font-sans font-medium text-foreground text-2xl mb-4">
               Description
             </h2>
-            <p className="font-sans text-[#d1d1d1] mb-6 whitespace-pre-wrap">
+            <p className="font-sans text-foreground mb-6 whitespace-pre-wrap">
               {task.description}
             </p>
 
@@ -284,7 +284,7 @@ export function TaskDetail() {
               <div className="relative">
                 <button
                   onClick={handleReset}
-                  className="flex items-center gap-2 px-4 py-2 bg-card-hover hover:bg-[#3a3a3a] text-foreground rounded-lg transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 bg-card-hover hover:bg-muted text-foreground rounded-lg transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Reset
@@ -298,13 +298,13 @@ export function TaskDetail() {
                     <div className="flex gap-2 justify-end">
                       <button
                         onClick={cancelReset}
-                        className="px-3 py-1.5 text-sm bg-card-hover hover:bg-[#3a3a3a] text-foreground rounded transition-colors cursor-pointer"
+                        className="px-3 py-1.5 text-sm bg-card-hover hover:bg-muted text-foreground rounded transition-colors cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={confirmReset}
-                        className="px-3 py-1.5 text-sm bg-primary hover:bg-[#7952e5] text-foreground rounded transition-colors cursor-pointer"
+                        className="px-3 py-1.5 text-sm bg-primary hover:bg-primary-hover text-foreground rounded transition-colors cursor-pointer"
                       >
                         Reset
                       </button>
@@ -316,7 +316,7 @@ export function TaskDetail() {
               <button
                 onClick={handleRunCode}
                 disabled={isRunning}
-                className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-[#7952e5] text-foreground rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Play className="w-4 h-4" />
                 {isRunning ? "Running..." : "Run Code"}

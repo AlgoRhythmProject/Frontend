@@ -9,6 +9,7 @@ import { AuthenticationButton } from "../components/Authentication/Authenticatio
 import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
 import { Particles } from "../components/ui/shadcn-io/particles";
 import { authApi, ApiError } from "../api/authApi";
+import { validateName, validateEmail, validatePassword, sanitizeInput } from "@/utils/validationUtils";
 
 export function Register() {
     const navigate = useNavigate();
@@ -24,34 +25,62 @@ export function Register() {
         e.preventDefault();
         setError(null);
 
-        // Client-side validation
-        if (!email.includes("@")) {
-            setError("Email must contain @");
+        // Validate first name
+        const firstNameValidation = validateName(firstName, "First name");
+        if (!firstNameValidation.isValid) {
+            setError(firstNameValidation.error!);
             return;
         }
+
+        // Validate last name
+        const lastNameValidation = validateName(lastName, "Last name");
+        if (!lastNameValidation.isValid) {
+            setError(lastNameValidation.error!);
+            return;
+        }
+
+        // Validate email
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.isValid) {
+            setError(emailValidation.error!);
+            return;
+        }
+
+        // Validate password
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+            setError(passwordValidation.error!);
+            return;
+        }
+
+        // Check password match
         if (password !== confirmPassword) {
             setError("Passwords do not match");
-            return;
-        }
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters long");
             return;
         }
 
         setIsLoading(true);
         try {
-            await authApi.register({ email, password, firstName, lastName });
+            // Sanitize inputs before sending to backend
+            const sanitizedData = {
+                firstName: sanitizeInput(firstName),
+                lastName: sanitizeInput(lastName),
+                email: email.trim().toLowerCase(),
+                password: password
+            };
+
+            await authApi.register(sanitizedData);
+
             // Registration successful - redirect to verification page
-            navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+            navigate(`/verify-email?email=${encodeURIComponent(sanitizedData.email)}`);
         } catch (err: any) {
             if (err instanceof ApiError) {
-                // Handle specific error codes from backend
                 switch (err.code) {
                     case 'EMAIL_EXISTS':
                         setError("An account with this email already exists.");
                         break;
                     case 'VALIDATION_ERROR':
-                        setError(err.message); // Use backend validation message
+                        setError(err.message);
                         break;
                     case 'REGISTRATION_FAILED':
                         setError(err.message);
@@ -76,7 +105,8 @@ export function Register() {
                 quantity={100}
                 ease={80}
                 color="#ffffff"
-                refresh />
+                refresh
+            />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -96,6 +126,7 @@ export function Register() {
                             icon={<User />}
                             value={firstName}
                             onChange={setFirstName}
+                            placeholder="John"
                             delay={0.4}
                         />
                         <AuthenticationInput
@@ -104,6 +135,7 @@ export function Register() {
                             icon={<User />}
                             value={lastName}
                             onChange={setLastName}
+                            placeholder="Doe"
                             delay={0.5}
                         />
                         <AuthenticationInput
@@ -112,6 +144,7 @@ export function Register() {
                             icon={<Mail />}
                             value={email}
                             onChange={setEmail}
+                            placeholder="your@email.com"
                             delay={0.6}
                         />
                         <AuthenticationInput
@@ -120,6 +153,7 @@ export function Register() {
                             icon={<Lock />}
                             value={password}
                             onChange={setPassword}
+                            placeholder="Min 8 characters"
                             delay={0.7}
                         />
                         <AuthenticationInput
@@ -128,10 +162,19 @@ export function Register() {
                             icon={<Lock />}
                             value={confirmPassword}
                             onChange={setConfirmPassword}
+                            placeholder="Repeat password"
                             delay={0.8}
                         />
                         <div className="h-1" />
-                        {error && <p className="text-error text-sm">{error}</p>}
+                        {error && (
+                            <motion.p
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-error text-sm"
+                            >
+                                {error}
+                            </motion.p>
+                        )}
                         <AuthenticationButton text="Register" isLoading={isLoading} />
                     </form>
                     <AuthenticationFooter

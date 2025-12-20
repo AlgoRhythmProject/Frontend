@@ -76,7 +76,7 @@ export function CourseDetail() {
           </p>
           <button
             onClick={() => navigate('/courses')}
-            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-[#7952e5] transition-colors"
+            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-primary-hover transition-colors"
           >
             Back to Courses
           </button>
@@ -103,14 +103,14 @@ export function CourseDetail() {
           {/* Header */}
           <button
             onClick={() => navigate('/courses')}
-            className="mb-6 flex items-center gap-2 text-primary hover:text-[#7952e5] font-sans transition-colors"
+            className="mb-6 flex items-center gap-2 text-primary hover:text-primary-hover font-sans transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Courses
           </button>
 
           {/* Course Header */}
-          <div className="bg-linear-to-br from-primary to-[#8b5cf6] rounded-2xl p-8 md:p-12 mb-8">
+          <div className="bg-linear-to-br from-primary to-primary-light rounded-2xl p-8 md:p-12 mb-8">
             <div className="flex items-start justify-between gap-6 mb-6">
               <div className="flex-1">
                 <h1 className="font-sans font-bold text-foreground text-4xl md:text-5xl mb-4">
@@ -120,13 +120,13 @@ export function CourseDetail() {
                   {course.description}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <span className="bg-white/20 text-foreground px-4 py-2 rounded-full text-sm font-sans font-medium">
+                  <span className="bg-primary-foreground/20 text-foreground px-4 py-2 rounded-full text-sm font-sans font-medium">
                     {course.isPublished ? 'Published' : 'Draft'}
                   </span>
-                  <span className="bg-white/20 text-foreground px-4 py-2 rounded-full text-sm font-sans font-medium">
+                  <span className="bg-primary-foreground/20 text-foreground px-4 py-2 rounded-full text-sm font-sans font-medium">
                     {courseLectures.length} Lectures
                   </span>
-                  <span className="bg-white/20 text-foreground px-4 py-2 rounded-full text-sm font-sans font-medium">
+                  <span className="bg-primary-foreground/20 text-foreground px-4 py-2 rounded-full text-sm font-sans font-medium">
                     {courseTasks.length} Tasks
                   </span>
                 </div>
@@ -147,7 +147,7 @@ export function CourseDetail() {
                   total={totalItems}
                   color='white'
                   height='h-4'
-                  backgroundClassName='bg-white/20 rounded-full h-4'
+                  backgroundClassName='bg-primary-foreground/20 rounded-full h-4'
                 />
               </div>
             )}

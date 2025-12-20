@@ -1,3 +1,4 @@
+import { useTheme } from '@/hooks/useTheme';
 import { Editor } from '@monaco-editor/react';
 
 interface CodeEditorProps {
@@ -8,13 +9,15 @@ interface CodeEditorProps {
 }
 
 export function CodeEditor({ value, onChange, language = 'csharp', height = '100%' }: CodeEditorProps) {
+  const { isDark } = useTheme();
   return (
     <Editor
+      key={isDark ? 'dark' : 'light'}
       height={height}
       defaultLanguage={language}
       value={value}
       onChange={onChange}
-      theme="vs-dark"
+      theme={isDark ? 'vs-dark' : 'vs-light'}
       options={{
         minimap: { enabled: true },
         fontSize: 14,

@@ -28,22 +28,22 @@ export function Profile() {
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Profile Header */}
-        <div className="bg-linear-to-br from-primary to-[#8b5cf6] rounded-2xl p-8 mb-8">
+        <div className="bg-linear-to-br from-primary to-primary-light rounded-2xl p-8 mb-8">
           <div className="flex items-start gap-6">
-            <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center">
-              <span className="text-foreground text-4xl font-sans font-bold">
+            <div className="w-24 h-24 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+              <span className="text-on-primary text-4xl font-sans font-bold">
                 {user
                   ? `${user.firstName[0] || ''}${user.lastName[0] || ''}`.toUpperCase()
                   : 'G'}              </span>
             </div>
             <div className="flex-1">
-              <h1 className="font-sans font-medium text-foreground text-4xl mb-2">
+              <h1 className="font-sans font-medium text-on-primary text-4xl mb-2">
                 {`${user?.firstName} ${user?.lastName}`}
               </h1>
-              <p className="font-sans text-foreground/80 mb-1">
+              <p className="font-sans text-on-primary/80 mb-1">
                 {user?.email}
               </p>
-              <p className="font-sans font-light text-foreground/60">
+              <p className="font-sans font-light text-on-primary/60">
                 Member since {user ? new Date(user.createdAt).toLocaleDateString() : '-'}
               </p>
             </div>
@@ -175,14 +175,14 @@ export function Profile() {
                         className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${badge.earned ? 'bg-primary' : 'bg-muted'
                           }`}
                       >
-                        <Award className={`w-5 h-5 ${badge.earned ? 'text-foreground' : 'text-[#6a6a6a]'}`} />
+                        <Award className={`w-5 h-5 ${badge.earned ? 'text-on-primary' : 'text-secondary-foreground'}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`font-sans font-medium mb-1 ${badge.earned ? 'text-foreground' : 'text-[#6a6a6a]'
+                        <p className={`font-sans font-medium mb-1 ${badge.earned ? 'text-foreground' : 'text-secondary-foreground'
                           }`}>
                           {badge.name}
                         </p>
-                        <p className={`font-sans text-sm ${badge.earned ? 'text-muted-foreground' : 'text-[#6a6a6a]'
+                        <p className={`font-sans text-sm ${badge.earned ? 'text-muted-foreground' : 'text-secondary-foreground'
                           }`}>
                           {badge.description}
                         </p>

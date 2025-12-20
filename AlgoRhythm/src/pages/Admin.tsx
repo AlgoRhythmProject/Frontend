@@ -102,7 +102,7 @@ export function Admin() {
             <div>
               <div className="p-6 border-b border-muted flex items-center justify-between">
                 <h2 className="font-sans font-medium text-foreground text-xl">User Management</h2>
-                <button className="flex items-center gap-2 bg-primary hover:bg-[#7952e5] text-foreground px-4 py-2 rounded-lg transition-colors">
+                <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors">
                   <Plus className="w-4 h-4" />
                   Add User
                 </button>
@@ -156,7 +156,7 @@ export function Admin() {
             <div>
               <div className="p-6 border-b border-muted flex items-center justify-between">
                 <h2 className="font-sans font-medium text-foreground text-xl">Task Management</h2>
-                <button className="flex items-center gap-2 bg-primary hover:bg-[#7952e5] text-foreground px-4 py-2 rounded-lg transition-colors">
+                <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors">
                   <Plus className="w-4 h-4" />
                   Add Task
                 </button>

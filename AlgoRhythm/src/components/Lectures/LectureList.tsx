@@ -100,7 +100,7 @@ export default function LectureList({ lectures, onSelectLecture }: LectureListPr
                 <div className="relative mt-6">
                     {/* Left indicator/button */}
                     {canScrollTagsLeft && (
-                        <div className="absolute left-0 top-0 bottom-0 w-16 bg-linear-to-r from-black to-transparent pointer-events-none z-10 flex items-center">
+                        <div className="absolute left-0 top-0 bottom-0 w-16 bg-linear-to-r from-primary-background to-transparent pointer-events-none z-10 flex items-center">
                             <button
                                 aria-label="Scroll tags left"
                                 onClick={() => scrollTags("left")}
@@ -119,7 +119,7 @@ export default function LectureList({ lectures, onSelectLecture }: LectureListPr
                     >
                         <button
                             onClick={() => setSelectedTag(null)}
-                            className={`px-6 py-2 cursor-pointer rounded-lg text-sm transition-colors whitespace-nowrap shrink-0 ${selectedTag === null ? "bg-primary text-foreground" : "bg-card text-muted-foreground hover:bg-muted"
+                            className={`px-6 py-2 cursor-pointer  rounded-lg text-sm transition-colors whitespace-nowrap shrink-0 ${selectedTag === null ? "bg-primary text-on-primary" : "bg-card text-muted-foreground hover:bg-muted"
                                 }`}
                         >
                             All tags
@@ -139,7 +139,7 @@ export default function LectureList({ lectures, onSelectLecture }: LectureListPr
 
                     {/* Right indicator/button */}
                     {canScrollTagsRight && (
-                        <div className="absolute  right-0 top-0 bottom-0 w-16 bg-linear-to-l from-black to-transparent pointer-events-none z-10 flex items-center justify-end">
+                        <div className="absolute  right-0 top-0 bottom-0 w-16 bg-linear-to-l from-primary-background to-transparent pointer-events-none z-10 flex items-center justify-end">
                             <button
                                 aria-label="Scroll tags right"
                                 onClick={() => scrollTags("right")}
@@ -163,7 +163,7 @@ export default function LectureList({ lectures, onSelectLecture }: LectureListPr
                         >
                             <div className="flex items-start gap-4">
                                 <div className="shrink-0">
-                                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center group-hover:bg-[#7952e5] transition-colors">
+                                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center group-hover:bg-primary-hover transition-colors">
                                         <BookOpen className="w-6 h-6 text-foreground" />
                                     </div>
                                 </div>

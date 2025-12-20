@@ -127,23 +127,23 @@ export function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="relative overflow-hidden rounded-3xl bg-linear-to-br from-primary to-[#8b5cf6] p-8 md:p-12"
+          className="relative overflow-hidden rounded-3xl bg-linear-to-br from-always-primary to-primary-light p-8 md:p-12"
         >
           <div className="relative z-10">
             <div
-              className="font-sans font-medium text-4xl md:text-6xl text-foreground mb-4"
+              className="font-sans font-medium text-4xl md:text-6xl text-on-primary mb-4"
               style={{ fontVariationSettings: "'wdth' 100" }}
             >
               YOUR PLACE TO<br />LEARN ALGORITHMS
             </div>
 
-            <div className="font-sans text-foreground/90 max-w-2xl mb-6">
+            <div className="font-sans text-on-primary/90 text-lg max-w-2xl mb-6">
               Master data structures and algorithms through interactive coding challenges, comprehensive courses, and hands-on practice.
             </div>
 
             <Link
               to="/tasks"
-              className="inline-block bg-white text-primary px-8 py-3 rounded-lg font-sans font-medium hover:bg-white/90 transition-colors"
+              className="inline-block bg-primary-foreground text-always-primary px-8 py-3 rounded-lg font-sans font-medium hover:bg-primary-foreground/90 transition-colors"
             >
               Start Practicing
             </Link>
@@ -252,36 +252,36 @@ export function Dashboard() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="bg-linear-to-br from-primary to-[#8b5cf6] rounded-2xl p-6 text-foreground"
+            className="bg-linear-to-br from-always-primary to-primary-light rounded-2xl p-6 text-foreground"
           >
             {activeCourse ? (
               <>
-                <h2 className="font-sans font-medium text-2xl mb-4">
+                <h2 className="font-sans font-medium text-2xl text-on-primary mb-4">
                   {activeCourse.progress && (activeCourse.progress.percentage ?? 0) > 0
                     ? 'Continue Learning'
                     : 'Start Learning'}
                 </h2>
-                <p className="font-sans font-bold text-3xl mb-3">{activeCourse.name}</p>
-                <p className="font-sans font-light text-foreground/90 mb-4">{activeCourse.description}</p>
+                <p className="font-sans font-bold text-3xl mb-3 text-on-primary">{activeCourse.name}</p>
+                <p className="font-sans font-light text-on-primary/90 mb-4">{activeCourse.description}</p>
 
                 {/* Progress Bar */}
-                <div className="bg-white/20 rounded-full h-3 mb-2 overflow-hidden">
+                <div className="bg-primary-foreground/20 rounded-full h-3 mb-2 overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${activeCourse.progress?.percentage ?? 0}%` }}
                     transition={{ duration: 1, delay: 0.7 }}
-                    className="bg-white rounded-full h-3"
+                    className="bg-primary-foreground rounded-full h-3"
                   />
                 </div>
 
-                <p className="font-sans font-light text-sm mb-4">
+                <p className="font-sans font-light text-sm mb-4 text-on-primary">
                   Progress: {Math.round(activeCourse.progress?.percentage ?? 0)}%
                 </p>
 
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link
                     to={`/courses/${activeCourse.id}`}
-                    className="inline-block bg-white text-primary px-6 py-2 rounded-lg font-sans font-medium hover:bg-white/90 transition-colors"
+                    className="inline-block bg-primary-foreground text-always-primary px-6 py-2 rounded-lg font-sans font-medium hover:bg-primary-foreground/90 transition-colors"
                   >
                     {activeCourse.progress && (activeCourse.progress.percentage ?? 0) > 0
                       ? 'Continue Course'
@@ -297,7 +297,7 @@ export function Dashboard() {
                 </p>
                 <Link
                   to="/courses"
-                  className="inline-block bg-white text-primary px-6 py-2 rounded-lg font-sans font-medium hover:bg-white/90 transition-colors"
+                  className="inline-block bg-primary-foreground text-primary px-6 py-2 rounded-lg font-sans font-medium hover:bg-primary-foreground/90 transition-colors"
                 >
                   Browse Courses
                 </Link>
