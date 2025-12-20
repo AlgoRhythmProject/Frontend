@@ -79,7 +79,7 @@ test.describe("Register Component Tests", () => {
 
         await btn.click();
 
-        await expect(btn).toBeDisabled();
+        await expect(btn).toBeDisabled({timeout: 2000});
     });
 
     // --- Test 4: Obsługa błędu API (Generic Error) ---
