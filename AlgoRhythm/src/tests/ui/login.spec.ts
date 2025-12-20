@@ -18,17 +18,17 @@ test.beforeEach(async ({ page }) => {
 test.describe("Login component - adapted tests", () => {
     test("renders login form correctly", async ({ page }) => {
         await expect(page.getByRole("heading", { name: HEADER_TEXT })).toBeVisible();
-        await expect(page.getByText("Email")).toBeVisible();
-        await expect(page.getByText("Password")).toBeVisible();
+
+        // Zamiast getByText użyj locator dla label
+        await expect(page.locator('label', { hasText: "Email" })).toBeVisible();
+        await expect(page.locator('label', { hasText: "Password" })).toBeVisible();
 
         await expect(page.getByPlaceholder(EMAIL_PLACEHOLDER)).toBeVisible();
         await expect(page.getByPlaceholder(PASSWORD_PLACEHOLDER)).toBeVisible();
 
-        // przycisk (najpierw role)
         const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
         await expect(loginBtn).toBeVisible();
 
-        // footer / sign up
         await expect(page.getByText(FOOTER_PROMPT)).toBeVisible();
         await expect(page.getByText(SIGNUP_TEXT)).toBeVisible();
 
@@ -36,7 +36,6 @@ test.describe("Login component - adapted tests", () => {
             page.getByText("Your place to learn algorithms and data structures")
         ).toBeVisible();
     });
-
     test("should disable the button during loading (mocked slow API)", async ({ page }) => {
         await page.route("**/api/Authentication/login", async (route) => {
             // opóźnienie aby sprawdzić stan ładowania
