@@ -29,10 +29,10 @@ test.describe("Register Component Tests", () => {
         await expect(page.getByText(HEADER_SUBTITLE)).toBeVisible();
 
         // Pola formularza
-        await expect(page.locator('label', { hasText: FIRST_NAME_LABEL})).toBeVisible();
+        await expect(page.locator('label', { hasText: FIRST_NAME_LABEL })).toBeVisible();
         await expect(page.locator('label', { hasText: LAST_NAME_LABEL })).toBeVisible();
         await expect(page.locator('label', { hasText: EMAIL_LABEL })).toBeVisible();
-        await expect(page.locator('label', { hasText: PASSWORD_LABEL, hasNotText : CONFIRM_PASSWORD_LABEL })).toBeVisible();
+        await expect(page.locator('label', { hasText: PASSWORD_LABEL, hasNotText: CONFIRM_PASSWORD_LABEL })).toBeVisible();
         await expect(page.locator('label', { hasText: CONFIRM_PASSWORD_LABEL })).toBeVisible();
 
         // Przycisk i stopka
@@ -79,7 +79,7 @@ test.describe("Register Component Tests", () => {
 
         await btn.click();
 
-        await expect(btn).toBeDisabled({timeout: 2000});
+        await expect(btn).toBeDisabled({ timeout: 2000 });
     });
 
     // --- Test 4: Obsługa błędu API (Generic Error) ---
@@ -129,5 +129,6 @@ test.describe("Register Component Tests", () => {
         await page.locator('label:has-text("Email")').locator('..').locator('input').fill(testEmail);
         await page.getByRole("button", { name: REGISTER_BTN_NAME }).click();
 
-        await expect(page).toHaveURL(/\/verify-email\?email=/, { timeout: 5000 });    });
+        await expect(page).toHaveURL(/\/verify-email\?email=/, { timeout: 5000 });
+    });
 });

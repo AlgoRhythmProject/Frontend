@@ -5,7 +5,7 @@ const PASSWORD_PLACEHOLDER = "••••••••";
 const ERROR_SELECTOR = ".text-error";
 const LOGIN_BUTTON_NAME = "Login";
 const HEADER_TEXT = "AlgoRhythm";
-const FOOTER_PROMPT = "Don’t have an account?";
+const FOOTER_PROMPT = "Don't have an account?";
 const SIGNUP_TEXT = "Sign up";
 
 test.beforeEach(async ({ page }) => {
