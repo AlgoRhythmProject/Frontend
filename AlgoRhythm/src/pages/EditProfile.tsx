@@ -288,7 +288,7 @@ export function EditProfile() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isLoadingProfile}
-              className="w-full bg-linear-to-r from-primary to-primary-light text-foreground py-3 px-6 rounded-lg font-sans font-medium hover:from-primary-hover hover:to-primary-light-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full cursor-pointer bg-linear-to-r from-primary to-primary-light text-on-primary py-3 px-6 rounded-lg font-sans font-medium hover:from-primary-hover hover:to-primary-light-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Save className="w-5 h-5" />
               {isLoadingProfile ? 'Saving...' : 'Save Profile Changes'}
@@ -298,7 +298,7 @@ export function EditProfile() {
           {/* Password Section */}
           <form onSubmit={handlePasswordSubmit} className="space-y-6 pt-6 border-t border-muted">
             <div className="space-y-4">
-              <h2 className="font-sans font-medium text-xl text-foreground mb-4">
+              <h2 className="font-sans font-medium text-xl text-on-primary mb-4">
                 Change Password
               </h2>
 
@@ -343,7 +343,7 @@ export function EditProfile() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isLoadingPassword || !passwordData.currentPassword}
-              className="w-full bg-linear-to-r from-primary to-primary-light text-foreground py-3 px-6 rounded-lg font-sans font-medium hover:from-primary-hover hover:to-primary-light-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-linear-to-r cursor-pointer from-primary to-primary-light text-foreground py-3 px-6 rounded-lg font-sans font-medium hover:from-primary-hover hover:to-primary-light-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Lock className="w-5 h-5" />
               {isLoadingPassword ? 'Changing...' : 'Change Password'}
@@ -362,7 +362,7 @@ export function EditProfile() {
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={() => navigate('/profile')}
-              className="w-full bg-background border border-muted text-foreground py-3 rounded-lg font-sans font-medium hover:border-primary transition-colors"
+              className="w-full bg-background/70 cursor-pointer border border-muted text-foreground py-3 rounded-lg font-sans font-medium hover:border-primary transition-colors"
             >
               Cancel
             </motion.button>

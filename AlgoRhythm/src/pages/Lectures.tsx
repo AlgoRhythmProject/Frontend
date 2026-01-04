@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { lectureApi } from "../api/lectureApi";
 import type { Lecture } from "../types/Lecture";
 import { LectureView } from "../components/Lectures/LectureView";
@@ -8,10 +8,18 @@ import { LoadingState } from "@/components/LoadingState";
 
 export function Lectures() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [selectedLecture, setSelectedLecture] = useState<string | null>(null);
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0); // Klucz do force refresh
+
+  // Pobierz informację o source z location state
+  const fromCourse = location.state?.fromCourse;
+  const courseId = location.state?.courseId;
 
   useEffect(() => {
     const fetchLectures = async () => {
@@ -27,14 +35,29 @@ export function Lectures() {
         setIsLoading(false);
       }
     };
-
     fetchLectures();
-  }, []);
+  }, [refreshKey]); // Dodaj refreshKey jako dependency
 
   useEffect(() => {
     const lectureId = searchParams.get("id");
     if (lectureId) setSelectedLecture(lectureId);
   }, [searchParams]);
+
+  const handleBack = () => {
+    if (fromCourse && courseId) {
+      // Wróć do strony kursu
+      navigate(`/courses/${courseId}`);
+    } else {
+      // Wróć do listy wykładów
+      setSelectedLecture(null);
+      setSearchParams({});
+    }
+  };
+
+  const handleProgressUpdate = () => {
+    // Zamiast przeładowywać całą stronę, po prostu odśwież listę wykładów
+    setRefreshKey(prev => prev + 1);
+  };
 
   const activeLecture = selectedLecture
     ? lectures.find((l) => l.id === selectedLecture)
@@ -45,22 +68,24 @@ export function Lectures() {
       isLoading={isLoading}
       error={error}
       loadingText="Loading lectures..."
-      onRetry={() => window.location.reload()}
+      onRetry={() => setRefreshKey(prev => prev + 1)}
     >
       <div className="min-h-screen p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           {activeLecture ? (
             <LectureView
               lecture={activeLecture}
-              onBack={() => {
-                setSelectedLecture(null);
-                setSearchParams({});
-              }}
+              courseId={courseId}
+              onBack={handleBack}
+              onProgressUpdate={handleProgressUpdate}
             />
           ) : (
             <LectureList
               lectures={lectures}
-              onSelectLecture={(id) => setSelectedLecture(id)}
+              onSelectLecture={(id) => {
+                setSelectedLecture(id);
+                setSearchParams({ id });
+              }}
             />
           )}
         </div>

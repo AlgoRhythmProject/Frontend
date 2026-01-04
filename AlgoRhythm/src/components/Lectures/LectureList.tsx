@@ -16,7 +16,7 @@ interface LectureListProps {
     onSelectLecture: (id: string) => void;
 }
 
-export default function LectureList({ lectures, onSelectLecture }: LectureListProps) {
+export default function LectureList({ lectures, onSelectLecture }: Readonly<LectureListProps>) {
     // Tags + selection
     const [tags, setTags] = useState<Tag[]>([]);
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -164,7 +164,7 @@ export default function LectureList({ lectures, onSelectLecture }: LectureListPr
                             <div className="flex items-start gap-4">
                                 <div className="shrink-0">
                                     <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center group-hover:bg-primary-hover transition-colors">
-                                        <BookOpen className="w-6 h-6 text-foreground" />
+                                        <BookOpen className="w-6 h-6 text-on-primary" />
                                     </div>
                                 </div>
 

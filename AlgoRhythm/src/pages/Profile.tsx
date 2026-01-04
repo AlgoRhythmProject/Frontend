@@ -106,7 +106,7 @@ export function Profile() {
                     <span className="font-sans text-muted-foreground">Easy</span>
                     <span className="font-sans font-medium text-success">24/50</span>
                   </div>
-                  <ProgressBar value={24} total={50} color="success" />
+                  <ProgressBar value={24} total={50} color="bg-success" />
                 </div>
 
                 <div>
@@ -114,7 +114,7 @@ export function Profile() {
                     <span className="font-sans text-muted-foreground">Medium</span>
                     <span className="font-sans font-medium text-warning">18/60</span>
                   </div>
-                  <ProgressBar value={18} total={60} color="warning" />
+                  <ProgressBar value={18} total={60} color="bg-warning" />
                 </div>
 
                 <div>
@@ -122,7 +122,7 @@ export function Profile() {
                     <span className="font-sans text-muted-foreground">Hard</span>
                     <span className="font-sans font-medium text-error">5/40</span>
                   </div>
-                  <ProgressBar value={5} total={40} color="error" />
+                  <ProgressBar value={5} total={40} color="bg-error" />
                 </div>
               </div>
             </div>

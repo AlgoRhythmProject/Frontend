@@ -1,0 +1,95 @@
+import { useState } from "react";
+import { MessageSquare } from "lucide-react";
+import type { Task } from "@/types/Task";
+import { CommentsSection } from "./CommentSection";
+
+interface TaskDescriptionProps {
+    task: Task;
+    currentUserId?: string;
+}
+
+type TabType = "description" | "discussion";
+
+export function TaskDescription({ task }: TaskDescriptionProps) {
+    const [activeTab, setActiveTab] = useState<TabType>("description");
+
+    return (
+        <div className="w-full lg:w-1/2 overflow-hidden bg-background flex flex-col">
+            {/* Tabs Header */}
+            <div className="border-b border-muted flex">
+                <button
+                    onClick={() => setActiveTab("description")}
+                    className={`flex-1 px-6 py-3 font-sans cursor-pointer font-medium transition-colors relative ${activeTab === "description"
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
+                >
+                    Description
+                    {activeTab === "description" && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                </button>
+                <button
+                    onClick={() => setActiveTab("discussion")}
+                    className={`flex-1 px-6 py-3 font-sans cursor-pointer font-medium transition-colors relative flex items-center justify-center gap-2 ${activeTab === "discussion"
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
+                >
+                    <MessageSquare className="w-4 h-4" />
+                    Discussion
+                    {activeTab === "discussion" && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+                {activeTab === "description" ? (
+                    <div className="max-w-2xl">
+                        <h2 className="font-sans font-medium text-foreground text-2xl mb-4">
+                            Description
+                        </h2>
+                        <p className="font-sans text-foreground mb-6 whitespace-pre-wrap">
+                            {task.description}
+                        </p>
+
+                        {task.examples && task.examples.length > 0 && (
+                            <>
+                                <h3 className="font-sans font-medium text-foreground text-xl mb-3">
+                                    Examples
+                                </h3>
+                                <div className="space-y-4 mb-6">
+                                    {task.examples.map((example, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="bg-background border border-muted rounded-lg p-4"
+                                        >
+                                            <p className="font-mono text-success mb-2">
+                                                Input: {example.input}
+                                            </p>
+                                            <p className="font-mono text-warning mb-2">
+                                                Output: {example.output}
+                                            </p>
+                                            {example.explanation && (
+                                                <p className="font-sans text-muted-foreground text-sm">
+                                                    {example.explanation}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                    </div>
+                ) : (
+                    <div className="max-w-2xl">
+                        <CommentsSection taskId={task.id} />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

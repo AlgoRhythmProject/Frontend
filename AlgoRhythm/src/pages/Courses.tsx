@@ -8,9 +8,10 @@ import { ProgressBar } from "../components/ProgressBar";
 import { LoadingState } from "../components/LoadingState";
 
 import { courseApi } from "@/api/courseApi";
-import { courseProgressApi, type CourseProgress } from "@/api/courseProgressApi";
+import { courseProgressApi } from "@/api/courseProgressApi";
 import type { Course } from "@/types/Course";
 import { getCourseVisualConfig } from "@/config/courseConfig";
+import type { CourseProgress } from "@/types/CourseProgress";
 
 type UICourse = Course & {
   progress?: CourseProgress | null;
@@ -30,13 +31,13 @@ export function Courses() {
         const allCourses = await courseApi.getAll();
 
         const settled = await Promise.allSettled(
-          allCourses.map((c) => courseProgressApi.getMyProgress(c.id))
+          allCourses.map((c) => courseProgressApi.getMyCourseProgress(c.id))
         );
 
         const mapped: UICourse[] = allCourses.map((c, idx) => {
           const result = settled[idx];
           if (result.status === "fulfilled") {
-            return { ...c, progress: result.value as CourseProgress };
+            return { ...c, progress: result.value };
           } else {
             return { ...c, progress: null };
           }
@@ -55,7 +56,7 @@ export function Courses() {
   }, []);
 
   const continueLearning = courses.filter(
-    (c) => c.progress !== null && c.progress !== undefined
+    (c) => c.progress && c.progress !== undefined && c.progress.percentage > 0
   );
 
   const progressCourses = continueLearning.filter(
@@ -75,7 +76,7 @@ export function Courses() {
       isLoading={isLoading}
       error={error}
       loadingText="Loading courses..."
-      onRetry={() => window.location.reload()}
+      onRetry={() => globalThis.location.reload()}
     >
       <div className="min-h-screen p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
@@ -128,26 +129,26 @@ export function Courses() {
                         <div className="relative h-full p-6 flex flex-col">
                           <div className="mb-4">
                             <div className="inline-flex p-3 bg-primary-foreground/20 rounded-xl">
-                              <Icon className="w-6 h-6 text-foreground" />
+                              <Icon className="w-6 h-6 text-on-primary" />
                             </div>
                           </div>
 
                           <p
-                            className="font-sans font-bold text-foreground text-2xl md:text-3xl mb-3 tracking-[-1.2px]"
+                            className="font-sans font-bold text-on-primary text-2xl md:text-3xl mb-3 tracking-[-1.2px]"
                             style={{ fontVariationSettings: "'wdth' 100" }}
                           >
                             {course.name}
                           </p>
-                          <p className="font-sans font-light text-foreground/90 text-base mb-6 flex-1 line-clamp-2">
+                          <p className="font-sans font-light text-on-primary/90 text-base mb-6 flex-1 line-clamp-2">
                             {course.description}
                           </p>
 
                           <div>
                             <div className="flex items-center justify-between mb-2">
-                              <span className="font-sans text-foreground/80 text-sm">
+                              <span className="font-sans text-on-primary/80 text-sm">
                                 Progress
                               </span>
-                              <span className="font-sans font-medium text-foreground text-sm">
+                              <span className="font-sans font-medium text-on-primary text-sm">
                                 {Math.round(percentage)}%
                               </span>
                             </div>
@@ -155,12 +156,12 @@ export function Courses() {
                             <ProgressBar
                               value={percentage}
                               total={100}
-                              color="white"
+                              color="bg-white"
                               backgroundClassName="bg-[rgba(248,248,248,0.3)]"
                               delay={0.5 + idx * 0.05}
                             />
 
-                            <p className="font-sans text-foreground/70 text-xs mt-2">
+                            <p className="font-sans text-on-primary/70 text-xs mt-2">
                               {percentage}% • {totalLectures} lectures
                             </p>
                           </div>

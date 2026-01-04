@@ -17,7 +17,6 @@ export interface Task {
         output: string;
         explanation?: string;
     }[];
-    constraints: string[];
     courses: TaskCourse[];
 }
 

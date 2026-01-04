@@ -10,7 +10,7 @@ import { courseApi } from '../api/courseApi';
 import { courseProgressApi } from '@/api/courseProgressApi';
 import type { Task } from '@/types/Task';
 import type { Course } from '@/types/Course';
-import type { CourseProgress } from '@/api/courseProgressApi';
+import type { CourseProgress } from '@/types/CourseProgress';
 
 type TaskWithCourses = Task & {
   courseIds: string[];
@@ -24,6 +24,7 @@ export function Dashboard() {
   const [tasks, setTasks] = useState<TaskWithCourses[]>([]);
   const [activeCourse, setActiveCourse] = useState<UICourse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [coursesWithProgressCount, setCoursesWithProgressCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,13 +57,13 @@ export function Dashboard() {
 
         // Pobierz progressy dla wszystkich kursów
         const settled = await Promise.allSettled(
-          courseResp.map((c) => courseProgressApi.getMyProgress(c.id))
+          courseResp.map((c) => courseProgressApi.getMyCourseProgress(c.id))
         );
 
         const coursesWithProgress: UICourse[] = courseResp.map((c, idx) => {
           const result = settled[idx];
           if (result.status === "fulfilled") {
-            return { ...c, progress: result.value as CourseProgress };
+            return { ...c, progress: result.value };
           } else {
             return { ...c, progress: null };
           }
@@ -72,6 +73,8 @@ export function Dashboard() {
         const coursesInProgress = coursesWithProgress.filter(
           c => c.progress !== null && c.progress !== undefined && (c.progress.percentage ?? 0) > 0
         );
+
+        setCoursesWithProgressCount(coursesInProgress.length);
 
         // Wybierz pierwszy kurs w toku lub pierwszy dostępny
         if (coursesInProgress.length > 0) {
@@ -189,7 +192,7 @@ export function Dashboard() {
               icon: <Book className="w-5 h-5 text-success" />,
               bg: "bg-success/20",
               label: "Courses Active",
-              value: activeCourse?.progress ? 1 : 0,
+              value: coursesWithProgressCount,
               sub: "in progress",
               color: "text-success"
             },

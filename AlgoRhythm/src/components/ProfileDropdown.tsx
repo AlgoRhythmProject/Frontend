@@ -81,7 +81,7 @@ export function ProfileDropdown() {
                     >
                         {/* Header */}
                         <div className="flex items-center gap-3 p-2 border-b border-muted mb-2">
-                            <div className="w-10 h-10 rounded-full bg-primary text-foreground font-bold flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-primary text-on-primary font-bold flex items-center justify-center">
                                 {initials}
                             </div>
                             <div className="flex-1 min-w-0">

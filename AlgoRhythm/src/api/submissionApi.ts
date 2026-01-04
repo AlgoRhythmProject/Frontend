@@ -1,17 +1,9 @@
+import type { TestResult } from "@/types/TestResult";
 import apiClient from "./apiClient";
 
 export interface SubmissionRequest {
     taskId: string;
     code: string;
-}
-
-export interface TestResult {
-    testCaseId: string;
-    passed: boolean;
-    points: number;
-    executionTimeMs: number;
-    stdOut: string | null;
-    stdErr: string | null;
 }
 
 export interface SubmissionResponse {
