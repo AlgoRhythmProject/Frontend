@@ -30,3 +30,11 @@ jobs:
     # Push frontend image
     - name: Push backend
       run: docker push ${{ env.REGISTRY }}/algorhythmproject/algorhythm-frontend:latest
+
+    # Deploy pushed image
+    - name: Deploy to Azure Container Apps
+      run: |
+        az containerapp update \
+          --name frontend \
+          --resource-group myapp-rg \
+          --image ${{ env.REGISTRY }}/algorhythmproject/algorhythm-frontend:latest
