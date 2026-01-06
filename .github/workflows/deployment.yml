@@ -24,11 +24,3 @@ jobs:
         run: |
           docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest -f ./AlgoRhythm/Dockerfile ./AlgoRhythm
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest
-
-      # Aktualizacja Container App
-      - name: Deploy to Azure Container Apps
-        run: |
-          az containerapp update \
-           --name frontend \
-           --resource-group algorhythm-app \
-           --image ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest
