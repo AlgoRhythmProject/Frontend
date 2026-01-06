@@ -31,4 +31,7 @@ jobs:
           az containerapp update \
             --name frontend \
             --resource-group algorhythm-app \
-            --image ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest
+            --image ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest \
+            --registry-server ${{ secrets.ACR_LOGIN_SERVER }} \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }}
