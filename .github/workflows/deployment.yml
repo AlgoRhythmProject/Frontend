@@ -1,40 +1,37 @@
-name: Build and Push Docker Images
+name: Build and Push to ACR
 on:
   push:
     branches: [ "main" ]
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    # Log in to GitHub Container Registry
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    # Build frontend image
-    - name: Build backend
-      run: docker build -t ${{ env.REGISTRY }}/algorhythmproject/algorhythm-frontend:latest -f ./AlgoRhythm/Dockerfile ./AlgoRhythm
-    
-    # Push frontend image
-    - name: Push backend
-      run: docker push ${{ env.REGISTRY }}/algorhythmproject/algorhythm-frontend:latest
+  pull_request:
+    branches: [ "main" ]
 
-    # Deploy pushed image
-    - name: Deploy to Azure Container Apps
-      run: |
-        az containerapp update \
-          --name frontend \
-          --resource-group myapp-rg \
-          --image ${{ env.REGISTRY }}/algorhythmproject/algorhythm-frontend:latest
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Logowanie do ACR
+      - name: Login to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # Budowanie i wypchnięcie obrazu
+      - name: Build and Push Image
+        run: |
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest -f ./AlgoRhythm/Dockerfile ./AlgoRhythm
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest
+
+      # Aktualizacja Container App
+      - name: Deploy to Azure Container Apps
+        run: |
+          az containerapp update \
+            --name frontend \
+            --resource-group algorhythm-app \
+            --image ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest \
+            --registry-server ${{ secrets.ACR_LOGIN_SERVER }} \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }}
