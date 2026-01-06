@@ -5,7 +5,6 @@ import { CommentsSection } from "./CommentSection";
 
 interface TaskDescriptionProps {
     task: Task;
-    currentUserId?: string;
 }
 
 type TabType = "description" | "discussion";

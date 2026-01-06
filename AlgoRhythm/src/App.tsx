@@ -15,6 +15,7 @@ import { Register } from './pages/Register';
 import { VerifyEmail } from './pages/VerifyEmail';
 import { ResetPassword } from './pages/ResetPassword';
 import { ForgotPassword } from './pages/ForgotPassword';
+import { AchievementNotificationProvider } from './components/AchievementNotification';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -62,12 +63,14 @@ function AppContent() {
 
 export default function App() {
   return (
-    <Router>
-      <div className="bg-primary-background min-h-screen text-foreground">
-        <div className="relative z-10">
-          <AppContent />
+    <AchievementNotificationProvider>
+      <Router>
+        <div className="bg-primary-background min-h-screen text-foreground">
+          <div className="relative z-10">
+            <AppContent />
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </AchievementNotificationProvider>
   );
 }

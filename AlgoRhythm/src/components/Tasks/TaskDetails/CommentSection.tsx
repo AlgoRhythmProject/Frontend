@@ -7,10 +7,9 @@ import { useSelector } from "react-redux";
 
 interface CommentsSectionProps {
     taskId: string;
-    currentUserId?: string; // Do sprawdzenia czy użytkownik może edytować/usuwać
 }
 
-export function CommentsSection({ taskId }: CommentsSectionProps) {
+export function CommentsSection({ taskId }: Readonly<CommentsSectionProps>) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -28,7 +27,6 @@ export function CommentsSection({ taskId }: CommentsSectionProps) {
             setLoading(true);
             setError(null);
             const data = await commentApi.getByTaskId(taskId);
-            // Sortuj od najnowszych
             setComments(data.sort((a, b) =>
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             ));
@@ -47,7 +45,7 @@ export function CommentsSection({ taskId }: CommentsSectionProps) {
         try {
             setIsSubmitting(true);
             const dto: CommentInputDto = {
-                taskItemId: taskId, // ← Poprawione pole
+                taskItemId: taskId,
                 content: newComment.trim()
             };
 
@@ -56,7 +54,7 @@ export function CommentsSection({ taskId }: CommentsSectionProps) {
             console.log("✅ Comment created:", result);
 
             setNewComment("");
-            await fetchComments(); // Odśwież listę
+            await fetchComments();
         } catch (err: any) {
             console.error("❌ Failed to create comment:", err);
             console.error("Error details:", {
@@ -65,7 +63,6 @@ export function CommentsSection({ taskId }: CommentsSectionProps) {
                 message: err.message
             });
 
-            // Pokaż bardziej szczegółowy błąd
             const errorMsg = err.response?.data?.error
                 || err.response?.data?.message
                 || err.response?.data?.title
@@ -210,7 +207,7 @@ export function CommentsSection({ taskId }: CommentsSectionProps) {
                                     </div>
                                 </div>
 
-                                {/* Edit/Delete buttons (tylko dla własnych komentarzy) */}
+                                {/* Edit/Delete buttons*/}
                                 {user?.id === comment.authorId && (
                                     <div className="flex gap-2">
                                         {editingId === comment.id ? (
@@ -257,7 +254,7 @@ export function CommentsSection({ taskId }: CommentsSectionProps) {
                                 <textarea
                                     value={editContent}
                                     onChange={(e) => setEditContent(e.target.value)}
-                                    className="w-full bg-background text-foreground border border-muted rounded-lg p-3 min-h-[80px] resize-y focus:outline-none focus:ring-2 focus:ring-primary font-sans text-sm"
+                                    className="w-full bg-background text-foreground border border-muted rounded-lg p-3 min-h-20 resize-y focus:outline-none focus:ring-2 focus:ring-primary font-sans text-sm"
                                 />
                             ) : (
                                 <p className="font-sans text-foreground text-sm whitespace-pre-wrap">

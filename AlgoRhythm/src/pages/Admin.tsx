@@ -1,6 +1,14 @@
-import { useState } from 'react';
-import { Users, FileCode, Activity, Plus, Edit, Trash2 } from 'lucide-react';
-import { tasks } from '../data/mockData';
+import { useState, useEffect } from 'react';
+import { Users, FileCode, Activity, BookOpen, Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { taskApi } from '@/api/taskApi';
+import { lectureApi } from '@/api/lectureApi';
+import { courseApi, type CourseListItem } from '@/api/courseApi';
+import type { Task } from '@/types/Task';
+import type { Lecture } from '@/types/Lecture';
+import { DifficultyLabel, DifficultyColor } from '@/utils/difficulty';
+import { LectureFormModal } from '@/components/Admin/LectureFormModal';
+import { TaskFormModal } from '@/components/Admin/TaskFormModal';
+import { LectureContentModal } from '@/components/Admin/LectureContentModal';
 
 interface User {
   id: string;
@@ -19,7 +27,118 @@ const mockUsers: User[] = [
 ];
 
 export function Admin() {
-  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'activity'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'lectures' | 'activity'>('users');
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [lectures, setLectures] = useState<Lecture[]>([]);
+  const [courses, setCourses] = useState<CourseListItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isLectureModalOpen, setIsLectureModalOpen] = useState(false);
+  const [isContentModalOpen, setIsContentModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedLecture, setSelectedLecture] = useState<Lecture | null>(null);
+
+  useEffect(() => {
+    loadCourses();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'tasks') {
+      loadTasks();
+    } else if (activeTab === 'lectures') {
+      loadLectures();
+    }
+  }, [activeTab]);
+
+  const loadCourses = async () => {
+    try {
+      const data = await courseApi.getListItems();
+      setCourses(data);
+    } catch (error) {
+      console.error('Failed to load courses:', error);
+    }
+  };
+
+  const loadTasks = async () => {
+    setLoading(true);
+    try {
+      const data = await taskApi.getAll();
+      setTasks(data);
+    } catch (error) {
+      console.error('Failed to load tasks:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadLectures = async () => {
+    setLoading(true);
+    try {
+      const data = await lectureApi.getAll();
+      setLectures(data);
+    } catch (error) {
+      console.error('Failed to load lectures:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddTask = () => {
+    setSelectedTask(null);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+
+    try {
+      await taskApi.delete(taskId);
+      await loadTasks();
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      alert('Failed to delete task');
+    }
+  };
+
+  const handleTaskSuccess = () => {
+    loadTasks();
+  };
+
+  const handleAddLecture = () => {
+    setSelectedLecture(null);
+    setIsLectureModalOpen(true);
+  };
+
+  const handleEditLecture = (lecture: Lecture) => {
+    setSelectedLecture(lecture);
+    setIsLectureModalOpen(true);
+  };
+
+  const handleDeleteLecture = async (lectureId: string) => {
+    if (!confirm('Are you sure you want to delete this lecture?')) return;
+
+    try {
+      await lectureApi.delete(lectureId);
+      await loadLectures();
+    } catch (error) {
+      console.error('Failed to delete lecture:', error);
+      alert('Failed to delete lecture');
+    }
+  };
+
+  const handleLectureSuccess = () => {
+    loadLectures();
+  };
+
+  const handleManageContent = (lecture: Lecture) => {
+    setSelectedLecture(lecture);
+    setIsContentModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -30,12 +149,12 @@ export function Admin() {
             Admin Panel
           </h1>
           <p className="font-sans text-muted-foreground">
-            Manage users, tasks, and monitor platform activity
+            Manage users, tasks, lectures, and monitor platform activity
           </p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-card border border-muted rounded-xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-primary/20 rounded-lg">
@@ -54,6 +173,16 @@ export function Admin() {
               <p className="font-sans text-muted-foreground">Total Tasks</p>
             </div>
             <p className="font-sans font-medium text-foreground text-3xl">{tasks.length}</p>
+          </div>
+
+          <div className="bg-card border border-muted rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-warning/20 rounded-lg">
+                <BookOpen className="w-5 h-5 text-warning" />
+              </div>
+              <p className="font-sans text-muted-foreground">Total Lectures</p>
+            </div>
+            <p className="font-sans font-medium text-foreground text-3xl">{lectures.length}</p>
           </div>
 
           <div className="bg-card border border-muted rounded-xl p-6">
@@ -84,6 +213,14 @@ export function Admin() {
           >
             <FileCode className="w-4 h-4" />
             Tasks
+          </button>
+          <button
+            onClick={() => setActiveTab('lectures')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'lectures' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+          >
+            <BookOpen className="w-4 h-4" />
+            Lectures
           </button>
           <button
             onClick={() => setActiveTab('activity')}
@@ -151,56 +288,172 @@ export function Admin() {
           )}
 
           {/* Tasks Tab */}
-
           {activeTab === 'tasks' && (
             <div>
               <div className="p-6 border-b border-muted flex items-center justify-between">
                 <h2 className="font-sans font-medium text-foreground text-xl">Task Management</h2>
-                <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors">
+                <button
+                  onClick={handleAddTask}
+                  className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
+                >
                   <Plus className="w-4 h-4" />
                   Add Task
                 </button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-background">
-                    <tr>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">ID</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Title</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Category</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Difficulty</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tasks.map((task, idx) => (
-                      <tr key={task.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
-                        <td className="p-4 font-mono text-primary">{task.id}</td>
-                        <td className="p-4 font-sans text-foreground">{task.title}</td>
-                        <td className="p-4 font-sans text-muted-foreground">{task.category}</td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`w-3 h-3 rounded-full bg-error`}
-                            />
-                            <span className="font-sans text-foreground">{task.difficulty}</span>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex gap-2">
-                            <button className="p-2 hover:bg-muted rounded transition-colors">
-                              <Edit className="w-4 h-4 text-info" />
-                            </button>
-                            <button className="p-2 hover:bg-muted rounded transition-colors">
-                              <Trash2 className="w-4 h-4 text-error" />
-                            </button>
-                          </div>
-                        </td>
+              {loading ? (
+                <div className="p-8 text-center">
+                  <p className="font-sans text-muted-foreground">Loading tasks...</p>
+                </div>
+              ) : tasks.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="font-sans text-muted-foreground">No tasks found. Create your first task!</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-background">
+                      <tr>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Title</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Type</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Difficulty</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Status</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Created</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {tasks.map((task, idx) => (
+                        <tr key={task.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
+                          <td className="p-4 font-sans text-foreground">{task.title}</td>
+                          <td className="p-4 font-sans text-muted-foreground">
+                            {task.taskType === 0 ? 'Programming' : 'Interactive'}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${DifficultyColor[task.difficulty]}`} />
+                              <span className="font-sans text-foreground">{DifficultyLabel[task.difficulty]}</span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${task.isPublished ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
+                              }`}>
+                              {task.isPublished ? 'Published' : 'Draft'}
+                            </span>
+                          </td>
+                          <td className="p-4 font-sans text-muted-foreground">
+                            {new Date(task.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditTask(task)}
+                                className="p-2 hover:bg-muted rounded transition-colors"
+                                title="Edit Task"
+                              >
+                                <Edit className="w-4 h-4 text-info" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="p-2 hover:bg-muted rounded transition-colors"
+                                title="Delete Task"
+                              >
+                                <Trash2 className="w-4 h-4 text-error" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Lectures Tab */}
+          {activeTab === 'lectures' && (
+            <div>
+              <div className="p-6 border-b border-muted flex items-center justify-between">
+                <h2 className="font-sans font-medium text-foreground text-xl">Lecture Management</h2>
+                <button
+                  onClick={handleAddLecture}
+                  className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Lecture
+                </button>
               </div>
+              {loading ? (
+                <div className="p-8 text-center">
+                  <p className="font-sans text-muted-foreground">Loading lectures...</p>
+                </div>
+              ) : lectures.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="font-sans text-muted-foreground">No lectures found. Create your first lecture!</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-background">
+                      <tr>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Title</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Course ID</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Contents</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Status</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Created</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {lectures.map((lecture, idx) => (
+                        <tr key={lecture.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
+                          <td className="p-4 font-sans text-foreground">{lecture.title}</td>
+                          <td className="p-4 font-mono text-sm text-muted-foreground">
+                            {lecture.courseId.substring(0, 8)}...
+                          </td>
+                          <td className="p-4 font-sans text-muted-foreground">
+                            {lecture.contents?.length || 0} items
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${lecture.isPublished ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
+                              }`}>
+                              {lecture.isPublished ? 'Published' : 'Draft'}
+                            </span>
+                          </td>
+                          <td className="p-4 font-sans text-muted-foreground">
+                            {new Date(lecture.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleManageContent(lecture)}
+                                className="p-2 hover:bg-muted rounded transition-colors"
+                                title="Manage Content"
+                              >
+                                <FileText className="w-4 h-4 text-primary" />
+                              </button>
+                              <button
+                                onClick={() => handleEditLecture(lecture)}
+                                className="p-2 hover:bg-muted rounded transition-colors"
+                                title="Edit Lecture"
+                              >
+                                <Edit className="w-4 h-4 text-info" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteLecture(lecture.id)}
+                                className="p-2 hover:bg-muted rounded transition-colors"
+                                title="Delete Lecture"
+                              >
+                                <Trash2 className="w-4 h-4 text-error" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
@@ -214,7 +467,7 @@ export function Admin() {
                     <div className="w-2 h-2 rounded-full bg-primary mt-2" />
                     <div className="flex-1">
                       <p className="font-sans font-medium text-foreground mb-1">
-                        User {mockUsers[i % mockUsers.length].name} completed task "{tasks[i % tasks.length].title}"
+                        User {mockUsers[i % mockUsers.length].name} completed a task
                       </p>
                       <p className="font-sans text-muted-foreground text-sm">
                         {new Date(Date.now() - i * 3600000).toLocaleString()}
@@ -227,6 +480,32 @@ export function Admin() {
           )}
         </div>
       </div>
+
+      {/* Task Form Modal */}
+      <TaskFormModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSuccess={handleTaskSuccess}
+        task={selectedTask}
+      />
+
+      {/* Lecture Form Modal */}
+      <LectureFormModal
+        isOpen={isLectureModalOpen}
+        onClose={() => setIsLectureModalOpen(false)}
+        onSuccess={handleLectureSuccess}
+        lecture={selectedLecture}
+        courses={courses}
+      />
+
+      {/* Lecture Content Modal */}
+      {selectedLecture && (
+        <LectureContentModal
+          isOpen={isContentModalOpen}
+          onClose={() => setIsContentModalOpen(false)}
+          lecture={selectedLecture}
+        />
+      )}
     </div>
   );
 }

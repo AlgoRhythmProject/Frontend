@@ -1,14 +1,28 @@
 import { Calendar, Award, TrendingUp, Code, CheckCircle2, XCircle, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { userStats, tasks } from '../data/mockData';
+import { tasks } from '../data/mockData';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { ProgressBar } from '../components/ProgressBar';
 import { authApi } from '../api/authApi';
+import { achievementApi, type UserAchievementDto } from '../api/achievementApi';
+import { useState, useEffect } from 'react';
 
 export function Profile() {
   const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.user.user);
+
+  const [achievements, setAchievements] = useState<UserAchievementDto[]>([]);
+  const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
+  const [achievementError, setAchievementError] = useState<string | null>(null);
+
+  // Mock data dla streaks i statystyk (na razie)
+  const userStats = {
+    tasksCompleted: 47,
+    currentStreak: 12,
+    longestStreak: 23,
+  };
 
   const recentActivity = tasks.slice(0, 5).map((task, idx) => ({
     task: task.title,
@@ -16,13 +30,35 @@ export function Profile() {
     date: new Date(Date.now() - idx * 86400000).toLocaleDateString(),
   }));
 
+  // Załaduj achievementy z API
+  useEffect(() => {
+    const loadAchievements = async () => {
+      try {
+        setIsLoadingAchievements(true);
+        setAchievementError(null);
+        const data = await achievementApi.getMyAchievements();
+        setAchievements(data);
+      } catch (error) {
+        console.error('Error loading achievements:', error);
+        setAchievementError('Failed to load achievements');
+      } finally {
+        setIsLoadingAchievements(false);
+      }
+    };
+
+    if (user) {
+      loadAchievements();
+    }
+  }, [user]);
+
   const handleLogout = async () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userEmail');
     await authApi.logout();
     navigate('/login');
   };
-  const user = useSelector((state: RootState) => state.user.user);
+
+  const earnedAchievementsCount = achievements.filter(a => a.isCompleted).length;
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -34,7 +70,8 @@ export function Profile() {
               <span className="text-on-primary text-4xl font-sans font-bold">
                 {user
                   ? `${user.firstName[0] || ''}${user.lastName[0] || ''}`.toUpperCase()
-                  : 'G'}              </span>
+                  : 'G'}
+              </span>
             </div>
             <div className="flex-1">
               <h1 className="font-sans font-medium text-on-primary text-4xl mb-2">
@@ -91,10 +128,11 @@ export function Profile() {
                   <p className="font-sans text-muted-foreground text-sm">Badges</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
-                  {userStats.badges.filter(b => b.earned).length}
+                  {isLoadingAchievements ? '...' : earnedAchievementsCount}
                 </p>
               </div>
             </div>
+
             <div className="bg-card border border-muted rounded-xl p-6">
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
                 Overall Progress
@@ -126,7 +164,6 @@ export function Profile() {
                 </div>
               </div>
             </div>
-
 
             {/* Recent Activity */}
             <div className="bg-card border border-muted rounded-xl p-6">
@@ -161,39 +198,72 @@ export function Profile() {
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
                 Achievements
               </h2>
-              <div className="space-y-3">
-                {userStats.badges.map((badge) => (
-                  <div
-                    key={badge.id}
-                    className={`p-4 rounded-lg border ${badge.earned
-                      ? 'bg-primary/10 border-primary'
-                      : 'bg-background border-muted opacity-50'
-                      }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${badge.earned ? 'bg-primary' : 'bg-muted'
-                          }`}
-                      >
-                        <Award className={`w-5 h-5 ${badge.earned ? 'text-on-primary' : 'text-secondary-foreground'}`} />
+
+              {isLoadingAchievements ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : achievementError ? (
+                <div className="text-center py-8">
+                  <p className="font-sans text-error text-sm">{achievementError}</p>
+                </div>
+              ) : achievements.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="font-sans text-muted-foreground text-sm">No achievements yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {achievements.map((achievement) => (
+                    <div
+                      key={achievement.id}
+                      className={`p-4 rounded-lg border ${achievement.isCompleted
+                        ? 'bg-primary/10 border-primary'
+                        : 'bg-background border-muted opacity-50'
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${achievement.isCompleted ? 'bg-primary' : 'bg-muted'
+                            }`}
+                        >
+                          <Award
+                            className={`w-5 h-5 ${achievement.isCompleted
+                              ? 'text-on-primary'
+                              : 'text-secondary-foreground'
+                              }`}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`font-sans font-medium mb-1 ${achievement.isCompleted
+                              ? 'text-foreground'
+                              : 'text-secondary-foreground'
+                              }`}
+                          >
+                            {achievement.achievementName}
+                          </p>
+                          <p
+                            className={`font-sans text-sm ${achievement.isCompleted
+                              ? 'text-muted-foreground'
+                              : 'text-secondary-foreground'
+                              }`}
+                          >
+                            {achievement.achievementDescription || 'No description'}
+                          </p>
+                          {achievement.isCompleted && achievement.earnedAt && (
+                            <p className="font-sans text-xs text-muted-foreground mt-1">
+                              Earned: {new Date(achievement.earnedAt).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                        {achievement.isCompleted && (
+                          <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
+                        )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-sans font-medium mb-1 ${badge.earned ? 'text-foreground' : 'text-secondary-foreground'
-                          }`}>
-                          {badge.name}
-                        </p>
-                        <p className={`font-sans text-sm ${badge.earned ? 'text-muted-foreground' : 'text-secondary-foreground'
-                          }`}>
-                          {badge.description}
-                        </p>
-                      </div>
-                      {badge.earned && (
-                        <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                      )}
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Settings */}

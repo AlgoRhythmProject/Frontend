@@ -3,18 +3,22 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { submissionApi, type SubmissionResponse } from "../api/submissionApi";
 import { taskApi } from "../api/taskApi";
+import { achievementApi } from "../api/achievementApi";
+import type { UserAchievementDto } from "../api/achievementApi";
 import { DifficultyColor, DifficultyLabel } from "../utils/difficulty";
 import type { Task } from "@/types/Task";
 import type { TestResult } from "@/types/TestResult";
 import { TaskDescription } from "@/components/Tasks/TaskDetails/TaskDescription";
 import { CodeEditorPanel } from "@/components/Tasks/TaskDetails/CodeEditorPanel";
+import { useAchievementNotification } from "@/components/AchievementNotification";
+import { checkAndShowNewAchievements } from "@/utils/achievementUtils";
 
 export function TaskDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { showAchievement } = useAchievementNotification();
 
-  // Pobierz informację o source z location state
   const fromCourse = location.state?.fromCourse;
   const courseId = location.state?.courseId;
 
@@ -29,6 +33,9 @@ export function TaskDetail() {
   const [runStatus, setRunStatus] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+
+  // Achievements state
+  const [achievements, setAchievements] = useState<UserAchievementDto[]>([]);
 
   // Fetch task from API
   useEffect(() => {
@@ -66,19 +73,30 @@ export function TaskDetail() {
     fetchTask();
   }, [id]);
 
+  // Load achievements on mount
+  useEffect(() => {
+    const loadAchievements = async () => {
+      try {
+        const data = await achievementApi.getMyAchievements();
+        setAchievements(data);
+      } catch (error) {
+        console.error('Error loading achievements:', error);
+      }
+    };
+    loadAchievements();
+  }, []);
+
   const handleBack = () => {
     if (fromCourse && courseId) {
-      // Wróć do strony kursu
       navigate(`/courses/${courseId}`);
     } else {
-      // Wróć do listy zadań
       navigate('/tasks');
     }
   };
 
   const handleReset = () => {
     if (task) {
-      setCode(task.templateCode);
+      setCode(task.templateCode ?? "");
       setTestResults(null);
       setRunStatus(null);
       setErrorMsg(null);
@@ -135,6 +153,19 @@ export function TaskDetail() {
       if (finalResult.testResults && finalResult.testResults.length > 0) {
         setTestResults(finalResult.testResults);
       }
+
+      // 5) Jeśli zadanie zostało rozwiązane, sprawdź achievementy
+      if (finalResult.status === "Accepted" && finalResult.isSolved) {
+        console.log("🎉 Task solved! Checking for new achievements...");
+
+        const updatedAchievements = await checkAndShowNewAchievements(
+          achievements,
+          achievementApi.getMyAchievements,
+          showAchievement
+        );
+        setAchievements(updatedAchievements);
+      }
+
     } catch (err: any) {
       // Handle network and validation errors
       if (err.response) {

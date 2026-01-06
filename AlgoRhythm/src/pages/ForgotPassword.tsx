@@ -29,7 +29,6 @@ export function ForgotPassword() {
         try {
             await authApi.forgotPassword(email);
             setSuccess(true);
-            // Po 3 sekundach przekieruj do reset-password
             setTimeout(() => {
                 navigate(`/reset-password?email=${encodeURIComponent(email)}`);
             }, 3000);

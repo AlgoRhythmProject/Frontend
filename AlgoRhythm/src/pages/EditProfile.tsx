@@ -91,15 +91,13 @@ export function EditProfile() {
 
       const updatedUser = await authApi.updateProfile(sanitizedData);
 
-      // Aktualizuj Redux store z nowymi danymi
       dispatch(login({
         ...updatedUser,
-        token: userState.user?.token // zachowaj obecny token
+        token: userState.user?.token
       }));
 
       setSuccessMessage("Profile updated successfully!");
 
-      // Jeśli email się zmienił, poinformuj użytkownika o weryfikacji
       if (sanitizedData.email !== userState.user?.email) {
         setTimeout(() => {
           setSuccessMessage("Profile updated! Please verify your new email address.");
@@ -162,7 +160,6 @@ export function EditProfile() {
 
       setSuccessMessage("Password changed successfully!");
 
-      // Wyczyść pola hasła
       setPasswordData({
         currentPassword: '',
         newPassword: '',
@@ -298,7 +295,7 @@ export function EditProfile() {
           {/* Password Section */}
           <form onSubmit={handlePasswordSubmit} className="space-y-6 pt-6 border-t border-muted">
             <div className="space-y-4">
-              <h2 className="font-sans font-medium text-xl text-on-primary mb-4">
+              <h2 className="font-sans font-medium text-xl text-foreground mb-4">
                 Change Password
               </h2>
 
@@ -343,7 +340,7 @@ export function EditProfile() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isLoadingPassword || !passwordData.currentPassword}
-              className="w-full bg-linear-to-r cursor-pointer from-primary to-primary-light text-foreground py-3 px-6 rounded-lg font-sans font-medium hover:from-primary-hover hover:to-primary-light-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-linear-to-r cursor-pointer from-primary to-primary-light text-on-primary py-3 px-6 rounded-lg font-sans font-medium hover:from-primary-hover hover:to-primary-light-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Lock className="w-5 h-5" />
               {isLoadingPassword ? 'Changing...' : 'Change Password'}

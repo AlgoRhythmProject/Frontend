@@ -1,7 +1,11 @@
 import { motion } from "framer-motion";
 import type { Lecture } from "../../types/Lecture";
 import { courseProgressApi } from "@/api/courseProgressApi";
+import { achievementApi } from "@/api/achievementApi";
+import type { UserAchievementDto } from "@/api/achievementApi";
 import { useState, useEffect } from "react";
+import { useAchievementNotification } from "@/components/AchievementNotification";
+import { checkAndShowNewAchievements } from "@/utils/achievementUtils";
 
 interface LectureViewProps {
     lecture: Lecture;
@@ -13,32 +17,50 @@ interface LectureViewProps {
 
 export function LectureView({
     lecture,
-    courseId,
     isCompleted = false,
-    onBack,
-    onProgressUpdate
-}: Readonly<LectureViewProps>) {
+    onBack }: Readonly<LectureViewProps>) {
     const [isLoading, setIsLoading] = useState(false);
     const [completed, setCompleted] = useState(isCompleted);
+    const [achievements, setAchievements] = useState<UserAchievementDto[]>([]);
+    const { showAchievement } = useAchievementNotification();
 
-    // Synchronizuj stan z propsem TYLKO gdy prop się zmieni
     useEffect(() => {
         setCompleted(isCompleted);
     }, [isCompleted]);
 
+    // Załaduj aktualne achievementy przy montowaniu
+    useEffect(() => {
+        const loadAchievements = async () => {
+            try {
+                const data = await achievementApi.getMyAchievements();
+                setAchievements(data);
+            } catch (error) {
+                console.error('Error loading achievements:', error);
+            }
+        };
+        loadAchievements();
+    }, []);
+
     const handleToggleCompletion = async () => {
         setIsLoading(true);
 
-        // Optymistyczne UI - zmień stan natychmiast
         const newCompletedState = !completed;
         setCompleted(newCompletedState);
 
         try {
-            const response = await courseProgressApi.toggleLectureCompletion(lecture.id);
+            await courseProgressApi.toggleLectureCompletion(lecture.id);
+
+            if (newCompletedState) {
+                const updatedAchievements = await checkAndShowNewAchievements(
+                    achievements,
+                    achievementApi.getMyAchievements,
+                    showAchievement
+                );
+                setAchievements(updatedAchievements);
+            }
 
         } catch (err) {
             console.error("Error toggling lecture completion:", err);
-            // W przypadku błędu, przywróć poprzedni stan
             setCompleted(!newCompletedState);
         } finally {
             setIsLoading(false);
@@ -69,7 +91,7 @@ export function LectureView({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            key={lecture.id} // Wymusza re-mount gdy zmienia się wykład
+            key={lecture.id}
         >
             <button
                 onClick={onBack}

@@ -12,7 +12,6 @@ export const COURSE_ICON_MAP: Record<string, LucideIcon> = {
     "course-8": Rocket,
 };
 
-// Używamy zmiennych CSS zamiast hardcoded wartości
 export const COURSE_COLOR_MAP: Record<string, string> = {
     "course-1": "from-[var(--course-1-from)] to-[var(--course-1-to)]",
     "course-2": "from-[var(--course-2-from)] to-[var(--course-2-to)]",

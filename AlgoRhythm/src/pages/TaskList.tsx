@@ -6,6 +6,7 @@ import { StatBox } from '../components/StatBox';
 
 import { taskApi } from '../api/taskApi';
 import { courseApi } from '../api/courseApi';
+import { tagApi, type Tag } from '../api/tagApi';
 import type { Course } from '@/types/Course';
 import type { Task } from '@/types/Task';
 import { DifficultyLabel, type Difficulty } from '@/utils/difficulty';
@@ -22,6 +23,7 @@ type TaskWithCourses = Task & {
 export function TaskList() {
   const [tasks, setTasks] = useState<TaskWithCourses[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,23 +31,26 @@ export function TaskList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // FETCH TASKS + COURSES
+  // FETCH TASKS + COURSES + TAGS
   useEffect(() => {
     const fetchAll = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        const [taskResp, courseResp] = await Promise.all([
+        const [taskResp, courseResp, tagResp] = await Promise.all([
           taskApi.getAll(),
           courseApi.getAll(),
+          tagApi.getAll(),
         ]);
 
         const tasks = taskResp;
         const courses = courseResp;
+        const tags = tagResp;
 
         const taskToCourses: Record<string, string[]> = {};
 
@@ -65,6 +70,7 @@ export function TaskList() {
 
         setTasks(tasksWithCourseIds);
         setCourses(courses);
+        setTags(tags);
       } catch (err: any) {
         console.error('Failed to load tasks or courses:', err);
         setError(err.response?.data?.message || 'Failed to load data. Please try again.');
@@ -86,7 +92,10 @@ export function TaskList() {
     const matchesDifficulty =
       selectedDifficulty === null || task.difficulty === selectedDifficulty;
 
-    return matchesSearch && matchesCourse && matchesDifficulty;
+    const matchesTag =
+      !selectedTag || (task.tagIds && task.tagIds.includes(selectedTag));
+
+    return matchesSearch && matchesCourse && matchesDifficulty && matchesTag;
   });
 
   const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
@@ -191,7 +200,7 @@ export function TaskList() {
                 </div>
 
                 {/* DIFFICULTY FILTER */}
-                <div>
+                <div className="mb-6">
                   <h3 className="font-sans font-medium text-foreground text-sm mb-3">DIFFICULTY</h3>
 
                   <div className="space-y-2">
@@ -221,6 +230,43 @@ export function TaskList() {
                     })}
                   </div>
                 </div>
+
+                {/* TAG FILTER */}
+                <div>
+                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">TAGS</h3>
+
+                  <div className="space-y-2">
+                    <FilterButton
+                      active={selectedTag === null}
+                      onClick={() => { setSelectedTag(null); setCurrentPage(1); }}
+                    >
+                      All Tags
+                    </FilterButton>
+
+                    {tags.map((tag) => {
+                      const count = tasks.filter(t =>
+                        t.tagIds && t.tagIds.includes(tag.id)
+                      ).length;
+
+                      if (count === 0) return null;
+
+                      return (
+                        <FilterButton
+                          key={tag.id}
+                          active={selectedTag === tag.id}
+                          onClick={() => {
+                            setSelectedTag(tag.id);
+                            setCurrentPage(1);
+                          }}
+                        >
+                          <span className="truncate">{tag.name}</span>
+                          <span className="text-xs ml-2">({count})</span>
+                        </FilterButton>
+                      );
+                    })}
+                  </div>
+                </div>
+
               </div>
             </motion.div>
 
@@ -251,9 +297,3 @@ export function TaskList() {
     </div>
   );
 }
-
-
-
-
-
-

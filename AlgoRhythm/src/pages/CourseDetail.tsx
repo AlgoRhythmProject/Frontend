@@ -58,7 +58,7 @@ export function CourseDetail() {
         setCourse(courseData);
 
         const tasksForThisCourse = allTasks.filter(task =>
-          task.courses.some(c => c.id === id)
+          task.courses!.some(c => c.id === id)
         );
         setCourseTasks(tasksForThisCourse);
 
@@ -75,11 +75,6 @@ export function CourseDetail() {
     fetchCourseData();
   }, [id]);
 
-  const handleRefreshProgress = async () => {
-    if (id) {
-      await fetchCourseProgress(id);
-    }
-  };
 
   // LOADING STATE
   if (isLoading) {

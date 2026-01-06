@@ -125,10 +125,6 @@ export function HintsPanelContent({ taskId }: Readonly<{ taskId: string }>) {
                     </div>
                 );
             })}
-
-            <p className="text-muted-foreground text-xs mt-3 font-sans">
-                💡 Using hints may reduce your final score.
-            </p>
         </div>
     );
 }

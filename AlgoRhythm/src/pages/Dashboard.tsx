@@ -31,13 +31,11 @@ export function Dashboard() {
       try {
         setIsLoading(true);
 
-        // Pobierz wszystkie taski i kursy równolegle
         const [taskResp, courseResp] = await Promise.all([
           taskApi.getAll(),
           courseApi.getAll(),
         ]);
 
-        // Mapowanie tasków do kursów (tak jak w TaskList)
         const taskToCourses: Record<string, string[]> = {};
         courseResp.forEach(course => {
           course.tasks.forEach(taskInCourse => {
@@ -55,7 +53,6 @@ export function Dashboard() {
 
         setTasks(tasksWithCourseIds);
 
-        // Pobierz progressy dla wszystkich kursów
         const settled = await Promise.allSettled(
           courseResp.map((c) => courseProgressApi.getMyCourseProgress(c.id))
         );
@@ -69,14 +66,12 @@ export function Dashboard() {
           }
         });
 
-        // Znajdź kurs z progresem (niezerowym)
         const coursesInProgress = coursesWithProgress.filter(
           c => c.progress !== null && c.progress !== undefined && (c.progress.percentage ?? 0) > 0
         );
 
         setCoursesWithProgressCount(coursesInProgress.length);
 
-        // Wybierz pierwszy kurs w toku lub pierwszy dostępny
         if (coursesInProgress.length > 0) {
           setActiveCourse(coursesInProgress[0]);
         } else if (coursesWithProgress.length > 0) {
@@ -93,7 +88,7 @@ export function Dashboard() {
     fetchData();
   }, []);
 
-  // Mock user stats - nie mamy jeszcze API
+  // Mock user stats
   const userStats = {
     tasksCompleted: tasks.filter(t => t.completed).length,
     totalTasks: tasks.length,
@@ -106,7 +101,6 @@ export function Dashboard() {
     ]
   };
 
-  // Losowe 5 tasków (możesz zmienić na inne kryterium)
   const recentTasks = tasks
     .sort(() => Math.random() - 0.5)
     .slice(0, 5);

@@ -15,9 +15,7 @@ export function Lectures() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0); // Klucz do force refresh
-
-  // Pobierz informację o source z location state
+  const [refreshKey, setRefreshKey] = useState(0);
   const fromCourse = location.state?.fromCourse;
   const courseId = location.state?.courseId;
 
@@ -36,7 +34,7 @@ export function Lectures() {
       }
     };
     fetchLectures();
-  }, [refreshKey]); // Dodaj refreshKey jako dependency
+  }, [refreshKey]);
 
   useEffect(() => {
     const lectureId = searchParams.get("id");
@@ -45,17 +43,14 @@ export function Lectures() {
 
   const handleBack = () => {
     if (fromCourse && courseId) {
-      // Wróć do strony kursu
       navigate(`/courses/${courseId}`);
     } else {
-      // Wróć do listy wykładów
       setSelectedLecture(null);
       setSearchParams({});
     }
   };
 
   const handleProgressUpdate = () => {
-    // Zamiast przeładowywać całą stronę, po prostu odśwież listę wykładów
     setRefreshKey(prev => prev + 1);
   };
 

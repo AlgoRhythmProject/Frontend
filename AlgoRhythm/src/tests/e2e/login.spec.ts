@@ -4,9 +4,6 @@ const EMAIL_PLACEHOLDER = "your@email.com";
 const PASSWORD_PLACEHOLDER = "••••••••";
 const ERROR_SELECTOR = ".text-error";
 const LOGIN_BUTTON_NAME = "Login";
-//const HEADER_TEXT = "AlgoRhythm";
-//const FOOTER_PROMPT = "Don’t have an account?";
-//const SIGNUP_TEXT = "Sign up";
 
 test.beforeEach(async ({ page }) => {
     await page.goto("/login");
@@ -35,7 +32,6 @@ test.describe("Login E2E", () => {
 
     test("should disable the button during loading (mocked slow API)", async ({ page }) => {
         await page.route("**/api/Authentication/login", async (route) => {
-            // opóźnienie aby sprawdzić stan ładowania
             await new Promise((r) => setTimeout(r, 2000));
             await route.fulfill({
                 status: 200,
@@ -50,7 +46,6 @@ test.describe("Login E2E", () => {
         const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
         await loginBtn.click();
 
-        // sprawdź standardowy disabled
         await expect(loginBtn).toBeDisabled();
     });
 
@@ -69,7 +64,6 @@ test.describe("Login E2E", () => {
         const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
         await loginBtn.click();
 
-        // czyli: request zakończony, catch odpalony, error ustawiony
         await expect(loginBtn).not.toBeDisabled({ timeout: 5000 });
 
         await expect(page.locator(ERROR_SELECTOR))

@@ -21,7 +21,6 @@ export function ResetPassword() {
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        // Jeśli nie ma emaila w URL, przekieruj do forgot-password
         if (!searchParams.get("email")) {
             navigate("/forgot-password");
         }
@@ -31,7 +30,6 @@ export function ResetPassword() {
         e.preventDefault();
         setError(null);
 
-        // Walidacja
         if (!email.includes("@")) {
             setError("Please enter a valid email address");
             return;
@@ -57,7 +55,6 @@ export function ResetPassword() {
                 newPassword
             });
             setSuccess(true);
-            // Po 3 sekundach przekieruj do logowania
             setTimeout(() => {
                 navigate("/login");
             }, 3000);
