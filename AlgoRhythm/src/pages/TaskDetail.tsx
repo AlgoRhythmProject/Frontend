@@ -401,10 +401,10 @@ export function TaskDetail() {
                           Output: {r.stdOut}
                         </p>
                       )}
-                      {r.errors && r.errors.length > 0 && (
+                      {r.errors && r.errors.filter(e => e.startColumn == 0 && e.startLine == 0).length > 0 && (
                           <details className="mt-2">
                             <summary className="font-sans text-error text-xs cursor-pointer hover:underline">
-                              Exceptions ({r.errors.length})
+                              Exception ({r.errors.length})
                             </summary>
                             <ul className="mt-2 ml-2 space-y-2">
                               {r.errors.filter(e => e.startColumn == 0 && e.startLine == 0).map((error, errorIdx) => (
