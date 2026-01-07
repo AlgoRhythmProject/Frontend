@@ -1,4 +1,5 @@
 import apiClient from "./apiClient";
+import type {ExecutionError} from "@/types/CodeAnalysis.ts";
 
 export interface SubmissionRequest {
     taskId: string;
@@ -12,6 +13,7 @@ export interface TestResult {
     executionTimeMs: number;
     stdOut: string | null;
     stdErr: string | null;
+    errors: ExecutionError[] | null
 }
 
 export interface SubmissionResponse {
