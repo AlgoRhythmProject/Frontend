@@ -1,29 +1,51 @@
 name: Trigger auto deployment for frontend
 
-# When this action will be executed
 on:
-  # Automatically trigger it when detected changes in repo
   push:
     branches: 
       [ main ]
     paths:
     - '**'
     - '.github/workflows/frontend-AutoDeployTrigger-1933c1af-304c-4746-970a-8a36d195e6c9.yml'
-
-  # Allow manual trigger 
   workflow_dispatch:      
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions: 
-      id-token: write #This is required for requesting the OIDC JWT Token
-      contents: read #Required when GH token is used to authenticate with private repo
+      id-token: write
+      contents: read
+      packages: write # WAŻNE: Musi tu być, żeby móc robić push do GHCR!
 
     steps:
       - name: Checkout to the branch
         uses: actions/checkout@v2
 
+      # --- 1.Konfiguracja Buildx (zalecane dla build-push-action) ---
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # --- 2. Logowanie do GitHub Container Registry ---
+      # Bez tego kroku Docker nie ma prawa zapisu (push) i wyrzuca błąd "unauthorized"
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- 3. Budowanie i wysyłanie ---
+      - name: Build and push container image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./AlgoRhythm
+          file: ./AlgoRhythm/Dockerfile
+          push: true
+          tags: ghcr.io/algorhythmproject/frontend:${{ github.sha }}
+          build-args: |
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+      
+      # --- 4. Logowanie do Azure ---
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -31,16 +53,7 @@ jobs:
           tenant-id: ${{ secrets.FRONTEND_AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.FRONTEND_AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build and push container image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./AlgoRhythm # Ścieżka do folderu z frontendem
-          file: ./AlgoRhythm/Dockerfile
-          push: true
-          tags: ghcr.io/algorhythmproject/frontend:${{ github.sha }}
-          build-args: |
-            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
-          
+      # --- 5. Wdrożenie ---
       - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v2
         with:
@@ -50,7 +63,3 @@ jobs:
           containerAppName: frontend
           resourceGroup: algorhythm-app
           imageToDeploy: ghcr.io/algorhythmproject/frontend:${{ github.sha }}
-
-
-
-
