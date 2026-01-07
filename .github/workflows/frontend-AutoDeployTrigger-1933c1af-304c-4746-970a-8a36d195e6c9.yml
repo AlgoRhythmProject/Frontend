@@ -42,8 +42,9 @@ jobs:
           registryPassword: ${{ secrets.FRONTEND_REGISTRY_PASSWORD }}
           containerAppName: frontend
           resourceGroup: algorhythm-app
-          imageToBuild: ghcr.io/frontend:${{ github.sha }}
+          imageToBuild: ghcr.io/algorhythmproject/frontend:${{ github.sha }}
           _buildArgumentsKey_: |
             _buildArgumentsValues_
+
 
 
