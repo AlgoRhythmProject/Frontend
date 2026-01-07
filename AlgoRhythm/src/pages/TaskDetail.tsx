@@ -349,7 +349,7 @@ export function TaskDetail() {
               value={code}
               onChange={(value) => setCode(value || "")}
               language="csharp"
-              errors={executionErrors}
+              errors={executionErrors.filter(e => e.startLine != 0 && e.startColumn != 0)}
             />
           </div>
 
@@ -400,6 +400,23 @@ export function TaskDetail() {
                         <p className="font-mono text-success text-xs mt-1">
                           Output: {r.stdOut}
                         </p>
+                      )}
+                      {r.errors && r.errors.length > 0 && (
+                          <details className="mt-2">
+                            <summary className="font-sans text-error text-xs cursor-pointer hover:underline">
+                              Exceptions ({r.errors.length})
+                            </summary>
+                            <ul className="mt-2 ml-2 space-y-2">
+                              {r.errors.filter(e => e.startColumn == 0 && e.startLine == 0).map((error, errorIdx) => (
+                                  <li
+                                      key={errorIdx}
+                                      className="font-mono text-error text-xs bg-error/5 border border-error/20 rounded p-2"
+                                  >
+                                    <span className="font-semibold">Exception thrown:</span> {error.errorMessage}
+                                  </li>
+                              ))}
+                            </ul>
+                          </details>
                       )}
                     </div>
                   </div>
