@@ -31,20 +31,26 @@ jobs:
           tenant-id: ${{ secrets.FRONTEND_AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.FRONTEND_AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build and push container image to registry
+      - name: Build and push container image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./AlgoRhythm # Ścieżka do folderu z frontendem
+          file: ./AlgoRhythm/Dockerfile
+          push: true
+          tags: ghcr.io/algorhythmproject/frontend:${{ github.sha }}
+          build-args: |
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+          
+      - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v2
         with:
-          appSourcePath: ${{ github.workspace }}/AlgoRhythm
-          _dockerfilePathKey_: _dockerfilePath_
-          _targetLabelKey_: _targetLabel_
           registryUrl: ghcr.io
           registryUsername: ${{ secrets.FRONTEND_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.FRONTEND_REGISTRY_PASSWORD }}
           containerAppName: frontend
           resourceGroup: algorhythm-app
-          imageToBuild: ghcr.io/algorhythmproject/frontend:${{ github.sha }}
-          buildArguments: |
-            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+          imageToDeploy: ghcr.io/algorhythmproject/frontend:${{ github.sha }}
+
 
 
 
