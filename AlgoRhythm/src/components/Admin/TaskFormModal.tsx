@@ -6,6 +6,8 @@ import { hintApi, type HintInputDto } from '@/api/hintApi';
 import type { Task, TaskInputDto } from '@/types/Task';
 import type { Hint } from '@/types/Hint';
 import { TagManager } from '@/components/Admin/TagManager';
+import { TestCaseManager } from './TestCaseManager';
+import { testCaseApi, type CreateTestCaseDto, type TestCase } from '@/api/testcaseApi';
 
 interface TaskFormModalProps {
     isOpen: boolean;
@@ -31,6 +33,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
     const [allTags, setAllTags] = useState<Tag[]>([]);
     const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
     const [hints, setHints] = useState<Hint[]>([]);
+    const [testCases, setTestCases] = useState<(TestCase | (Omit<TestCase, 'programmingTaskItemId'> & { id: string }))[]>([]);
     const [newHintContent, setNewHintContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -57,18 +60,20 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                 hintIds: task.hintIds || []
             });
 
-            // Load selected tags
             if (task.tagIds && task.tagIds.length > 0) {
                 loadSelectedTags(task.tagIds);
             } else {
                 setSelectedTags([]);
             }
 
-            // Load hints from task
             if (task.id) {
                 loadTaskHints(task.id);
+                if (task.taskType === 0) {
+                    loadTestCases(task.id);
+                }
             } else {
                 setHints([]);
+                setTestCases([]);
             }
         } else {
             setFormData({
@@ -85,6 +90,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
             });
             setSelectedTags([]);
             setHints([]);
+            setTestCases([]);
         }
     }, [task]);
 
@@ -117,54 +123,47 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
         }
     };
 
+    const loadTestCases = async (taskId: string) => {
+        try {
+            const cases = await testCaseApi.getByTaskId(taskId);
+            setTestCases(cases);
+        } catch (error) {
+            console.error('Failed to load test cases:', error);
+        }
+    };
+
     const handleAddTag = async (tag: Tag) => {
         if (task?.id) {
-            // For existing task, add via API
             try {
                 await taskApi.addTag(task.id, tag.id);
                 const currentTagIds = formData.tagIds || [];
-                setFormData({
-                    ...formData,
-                    tagIds: [...currentTagIds, tag.id]
-                });
+                setFormData({ ...formData, tagIds: [...currentTagIds, tag.id] });
                 setSelectedTags([...selectedTags, tag]);
             } catch (error) {
                 console.error('Failed to add tag:', error);
                 alert('Failed to add tag');
             }
         } else {
-            // For new task, add to local state
             const currentTagIds = formData.tagIds || [];
-            setFormData({
-                ...formData,
-                tagIds: [...currentTagIds, tag.id]
-            });
+            setFormData({ ...formData, tagIds: [...currentTagIds, tag.id] });
             setSelectedTags([...selectedTags, tag]);
         }
     };
 
     const handleRemoveTag = async (tagId: string) => {
         if (task?.id) {
-            // For existing task, remove via API
             try {
                 await taskApi.removeTag(task.id, tagId);
                 const currentTagIds = formData.tagIds || [];
-                setFormData({
-                    ...formData,
-                    tagIds: currentTagIds.filter(id => id !== tagId)
-                });
+                setFormData({ ...formData, tagIds: currentTagIds.filter(id => id !== tagId) });
                 setSelectedTags(selectedTags.filter(t => t.id !== tagId));
             } catch (error) {
                 console.error('Failed to remove tag:', error);
                 alert('Failed to remove tag');
             }
         } else {
-            // For new task, remove from local state
             const currentTagIds = formData.tagIds || [];
-            setFormData({
-                ...formData,
-                tagIds: currentTagIds.filter(id => id !== tagId)
-            });
+            setFormData({ ...formData, tagIds: currentTagIds.filter(id => id !== tagId) });
             setSelectedTags(selectedTags.filter(t => t.id !== tagId));
         }
     };
@@ -173,37 +172,25 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
         if (!newHintContent.trim()) return;
 
         if (task?.id) {
-            // For existing task: 1) Create hint, 2) Add to task
             try {
                 const hintDto: HintInputDto = {
                     taskItemId: task.id,
                     content: newHintContent,
                     order: hints.length
                 };
-
-                console.log('Creating hint with dto:', hintDto);
                 const createdHint = await hintApi.create(hintDto);
-                console.log('Created hint:', createdHint);
-
-                console.log('Adding hint to task:', task.id, createdHint.id);
                 await taskApi.addHint(task.id, createdHint.id);
-                console.log('Hint added successfully');
-
                 await loadTaskHints(task.id);
-
                 setNewHintContent('');
                 setShowHintForm(false);
             } catch (error: any) {
-                console.error('Failed to add hint - Full error:', error);
-                console.error('Error response:', error.response?.data);
-                console.error('Error status:', error.response?.status);
-                alert(`Failed to add hint: ${error.response?.data?.message || error.message || 'Unknown error'}`);
+                console.error('Failed to add hint:', error);
+                alert(`Failed to add hint: ${error.response?.data?.message || error.message}`);
             }
         } else {
-            // For new task, add to local state (will be saved with task creation)
             const newHint: Hint = {
                 id: `temp-${Date.now()}`,
-                taskId: '', // Will be set when task is created
+                taskId: '',
                 content: newHintContent,
                 order: hints.length,
                 title: '',
@@ -225,36 +212,78 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                 alert('Failed to remove hint');
             }
         } else {
-            // For new task or temp hints, remove from local state
             setHints(hints.filter(h => h.id !== hintId));
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
+        if (!formData.title.trim()) {
+            setError('Title is required');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
         try {
             if (task) {
                 await taskApi.update(task.id, formData);
+
+                if (formData.taskType === 0) {
+                    const existingTestCases = await testCaseApi.getByTaskId(task.id);
+                    const existingIds = new Set(existingTestCases.map(tc => tc.id));
+
+                    for (const existing of existingTestCases) {
+                        if (!testCases.find(tc => tc.id === existing.id)) {
+                            await testCaseApi.delete(existing.id);
+                        }
+                    }
+
+                    for (const testCase of testCases) {
+                        if (testCase.id.startsWith('temp-')) {
+                            const dto: CreateTestCaseDto = {
+                                programmingTaskItemId: task.id,
+                                inputJson: testCase.inputJson || null,
+                                expectedJson: testCase.expectedJson || null,
+                                isVisible: testCase.isVisible,
+                                maxPoints: testCase.maxPoints,
+                            };
+                            await testCaseApi.create(dto);
+                        } else if (existingIds.has(testCase.id)) {
+                            await testCaseApi.update(testCase.id, {
+                                inputJson: testCase.inputJson || null,
+                                expectedJson: testCase.expectedJson || null,
+                                isVisible: testCase.isVisible,
+                                maxPoints: testCase.maxPoints,
+                            });
+                        }
+                    }
+                }
             } else {
-                // Create task first
                 const createdTask = await taskApi.create(formData);
 
-                // Then add hints to the newly created task
                 if (hints.length > 0) {
                     for (const hint of hints) {
-                        // 1. Create hint
                         const hintDto: HintInputDto = {
                             taskItemId: createdTask.id,
                             content: hint.content,
                             order: hint.order
                         };
                         const createdHint = await hintApi.create(hintDto);
-
-                        // 2. Add hint to task
                         await taskApi.addHint(createdTask.id, createdHint.id);
+                    }
+                }
+
+                if (formData.taskType === 0 && testCases.length > 0) {
+                    for (const testCase of testCases) {
+                        const dto: CreateTestCaseDto = {
+                            programmingTaskItemId: createdTask.id,
+                            inputJson: testCase.inputJson || null,
+                            expectedJson: testCase.expectedJson || null,
+                            isVisible: testCase.isVisible,
+                            maxPoints: testCase.maxPoints,
+                        };
+                        await testCaseApi.create(dto);
                     }
                 }
             }
@@ -275,7 +304,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-card rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-card rounded-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="p-6 border-b border-muted flex items-center justify-between sticky top-0 bg-card z-10">
                     <h2 className="font-sans font-medium text-foreground text-xl">
                         {task ? 'Edit Task' : 'Add New Task'}
@@ -288,14 +317,13 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <div className="p-6 space-y-6">
                     {error && (
                         <div className="bg-error/10 border border-error rounded-lg p-4">
                             <p className="text-error font-sans">{error}</p>
                         </div>
                     )}
 
-                    {/* Title */}
                     <div>
                         <label className="block font-sans font-medium text-foreground mb-2">
                             Title *
@@ -310,7 +338,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         />
                     </div>
 
-                    {/* Description */}
                     <div>
                         <label className="block font-sans font-medium text-foreground mb-2">
                             Description
@@ -324,7 +351,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         />
                     </div>
 
-                    {/* Task Type & Difficulty */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block font-sans font-medium text-foreground mb-2">
@@ -356,7 +382,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         </div>
                     </div>
 
-                    {/* Tags Section */}
                     <TagManager
                         selectedTags={selectedTags}
                         availableTags={availableTags}
@@ -365,14 +390,12 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         disabled={loading}
                     />
 
-                    {/* Hints Section */}
                     <div>
                         <div className="flex items-center justify-between mb-2">
                             <label className="block font-sans font-medium text-foreground">
                                 Hints
                             </label>
                             <button
-                                type="button"
                                 onClick={() => setShowHintForm(!showHintForm)}
                                 className="flex items-center gap-2 px-3 py-1 bg-warning/20 hover:bg-warning/30 text-warning rounded-lg transition-colors text-sm"
                             >
@@ -381,7 +404,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                             </button>
                         </div>
 
-                        {/* Hint Creation Form */}
                         {showHintForm && (
                             <div className="mb-3 p-4 bg-background border border-muted rounded-lg">
                                 <label className="block font-sans text-sm font-medium text-foreground mb-2">
@@ -396,7 +418,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                                 />
                                 <div className="flex gap-2">
                                     <button
-                                        type="button"
                                         onClick={() => {
                                             setShowHintForm(false);
                                             setNewHintContent('');
@@ -406,7 +427,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                                         Cancel
                                     </button>
                                     <button
-                                        type="button"
                                         onClick={handleAddHint}
                                         disabled={!newHintContent.trim()}
                                         className="flex-1 px-3 py-1.5 bg-warning/20 hover:bg-warning/30 text-warning rounded-lg font-sans text-sm transition-colors disabled:opacity-50"
@@ -417,7 +437,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                             </div>
                         )}
 
-                        {/* Hints List */}
                         <div className="space-y-2">
                             {hints.length === 0 ? (
                                 <p className="text-sm text-muted-foreground font-sans">No hints added yet</p>
@@ -433,7 +452,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                                             <p className="font-sans text-sm text-foreground">{hint.content}</p>
                                         </div>
                                         <button
-                                            type="button"
                                             onClick={() => handleRemoveHint(hint.id)}
                                             className="p-1 hover:bg-warning/20 rounded transition-colors shrink-0"
                                         >
@@ -445,23 +463,29 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         </div>
                     </div>
 
-                    {/* Programming Task Fields */}
                     {formData.taskType === 0 && (
-                        <div>
-                            <label className="block font-sans font-medium text-foreground mb-2">
-                                Template Code
-                            </label>
-                            <textarea
-                                value={formData.templateCode}
-                                onChange={(e) => setFormData({ ...formData, templateCode: e.target.value })}
-                                rows={8}
-                                className="w-full px-4 py-2 bg-background border border-muted rounded-lg font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                                placeholder="def solution():\n    # Your code here\n    pass"
+                        <>
+                            <div>
+                                <label className="block font-sans font-medium text-foreground mb-2">
+                                    Template Code
+                                </label>
+                                <textarea
+                                    value={formData.templateCode}
+                                    onChange={(e) => setFormData({ ...formData, templateCode: e.target.value })}
+                                    rows={8}
+                                    className="w-full px-4 py-2 bg-background border border-muted rounded-lg font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                    placeholder="public class Solution { }"
+                                />
+                            </div>
+
+                            <TestCaseManager
+                                testCases={testCases}
+                                onChange={setTestCases}
+                                disabled={loading}
                             />
-                        </div>
+                        </>
                     )}
 
-                    {/* Interactive Task Fields */}
                     {formData.taskType === 1 && (
                         <>
                             <div>
@@ -492,7 +516,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         </>
                     )}
 
-                    {/* Published Status */}
                     <div className="flex items-center gap-3">
                         <input
                             type="checkbox"
@@ -506,24 +529,22 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         </label>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex gap-3 pt-4">
                         <button
-                            type="button"
                             onClick={onClose}
                             className="flex-1 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans font-medium transition-colors"
                         >
                             Cancel
                         </button>
                         <button
-                            type="submit"
+                            onClick={handleSubmit}
                             disabled={loading}
                             className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : task ? 'Update Task' : 'Create Task'}
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     );

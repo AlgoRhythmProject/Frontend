@@ -43,7 +43,7 @@ export function TaskList() {
         setError(null);
 
         const [taskResp, courseResp, tagResp] = await Promise.all([
-          taskApi.getAll(),
+          taskApi.getPublished(),
           courseApi.getAll(),
           tagApi.getAll(),
         ]);

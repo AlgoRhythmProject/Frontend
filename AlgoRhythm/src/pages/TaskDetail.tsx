@@ -154,7 +154,6 @@ export function TaskDetail() {
         setTestResults(finalResult.testResults);
       }
 
-      // 5) Jeśli zadanie zostało rozwiązane, sprawdź achievementy
       if (finalResult.status === "Accepted" && finalResult.isSolved) {
         console.log("🎉 Task solved! Checking for new achievements...");
 

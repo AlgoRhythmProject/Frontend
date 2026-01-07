@@ -17,18 +17,36 @@ interface LectureViewProps {
 
 export function LectureView({
     lecture,
-    isCompleted = false,
-    onBack }: Readonly<LectureViewProps>) {
+    isCompleted,
+    onBack
+}: Readonly<LectureViewProps>) {
     const [isLoading, setIsLoading] = useState(false);
-    const [completed, setCompleted] = useState(isCompleted);
+    const [completed, setCompleted] = useState(isCompleted ?? false);
+    const [isCheckingCompletion, setIsCheckingCompletion] = useState(false);
     const [achievements, setAchievements] = useState<UserAchievementDto[]>([]);
     const { showAchievement } = useAchievementNotification();
 
     useEffect(() => {
-        setCompleted(isCompleted);
-    }, [isCompleted]);
+        const checkCompletion = async () => {
+            if (isCompleted !== undefined) {
+                setCompleted(isCompleted);
+                return;
+            }
 
-    // Załaduj aktualne achievementy przy montowaniu
+            setIsCheckingCompletion(true);
+            try {
+                const result = await courseProgressApi.isLectureCompleted(lecture.id);
+                setCompleted(result.isCompleted);
+            } catch (error) {
+                console.error('Error checking lecture completion:', error);
+            } finally {
+                setIsCheckingCompletion(false);
+            }
+        };
+
+        checkCompletion();
+    }, [lecture.id, isCompleted]);
+
     useEffect(() => {
         const loadAchievements = async () => {
             try {
@@ -85,6 +103,14 @@ export function LectureView({
     const sortedLectureContents = [...lecture.contents].sort(
         (a, b) => a.order - b.order
     );
+
+    if (isCheckingCompletion) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <span className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <motion.div

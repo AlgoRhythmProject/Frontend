@@ -39,15 +39,12 @@ export function TaskListBox({ tasks }: TaskListBoxProps) {
                                 <p className="text-foreground text-lg truncate">{task.title}</p>
                                 <p className="text-muted-foreground text-sm">{task.category}</p>
                             </div>
-
                             {/* Difficulty */}
                             <div className="px-4 py-4 flex items-center gap-3">
                                 <div className="flex items-center gap-2">
                                     <div
-                                        className="w-3 h-3 rounded-full"
-                                        style={{
-                                            backgroundColor: DifficultyColor[task.difficulty]
-                                        }}
+                                        className={`w-3 h-3 rounded-full ${DifficultyColor[task.difficulty] ?? 'bg-error'
+                                            }`}
                                     />
                                     <p className="text-primary-foreground text-sm hidden md:block">
                                         {DifficultyLabel[task.difficulty]}

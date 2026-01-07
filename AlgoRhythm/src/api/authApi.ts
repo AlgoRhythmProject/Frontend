@@ -16,7 +16,16 @@ export interface RegisterRequest {
 export interface LoginResponse {
     token: string;
     expiresUtc: string;
+    refreshToken: string;
+    refreshTokenExpiresUtc: string;
     user: User;
+}
+
+export interface RefreshTokenResponse {
+    accessToken: string;
+    accessTokenExpiresUtc: string;
+    refreshToken: string;
+    refreshTokenExpiresUtc: string;
 }
 
 export interface RegisterResponse {
@@ -186,11 +195,29 @@ export const authApi = {
     logout: async (): Promise<void> => {
         try {
             await apiClient.post("/Authentication/logout");
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
         } catch (error: any) {
             const errorData = error.response?.data as ErrorResponse;
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
             throw new ApiError(
                 errorData?.code || 'UNKNOWN_ERROR',
                 errorData?.message || 'Logout failed. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    refreshToken: async (): Promise<string> => {
+        try {
+            const response = await apiClient.post<RefreshTokenResponse>("/Authentication/refresh-token");
+            return response.data.accessToken;
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'INVALID_REFRESH_TOKEN',
+                errorData?.message || 'Session expired. Please login again.',
                 error.response?.status
             );
         }

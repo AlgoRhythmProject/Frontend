@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store";
 import { login } from "../store/userSlice";
 import { authApi, ApiError } from "../api/authApi";
+import { adminApi } from "../api/adminApi";
 import { Particles } from "@/components/ui/shadcn-io/particles";
 
 export function Login() {
@@ -37,9 +38,44 @@ export function Login() {
     setIsLoading(true);
     try {
       const user = await authApi.login({ email, password });
-      dispatch(login(user));
+
+      localStorage.setItem("token", user.token);
+      localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("isAuthenticated", "true");
-      navigate("/");
+
+      if (user.token) {
+        try {
+          const tokenParts = user.token.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            if (payload.exp) {
+              const expiresUtc = new Date(payload.exp * 1000).toISOString();
+              localStorage.setItem("tokenExpiresAt", expiresUtc);
+            }
+          }
+        } catch (decodeError) {
+          console.error('Failed to decode token:', decodeError);
+        }
+      }
+
+      dispatch(login(user));
+
+      // Sprawdź status admina
+      try {
+        const adminStatus = await adminApi.isCurrentUserAdmin();
+        localStorage.setItem("isAdmin", JSON.stringify(adminStatus.isAdmin));
+
+        // Przekieruj do odpowiedniej strony
+        if (adminStatus.isAdmin) {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      } catch (adminCheckError) {
+        console.error('Failed to check admin status:', adminCheckError);
+        // W przypadku błędu sprawdzania statusu, przekieruj do dashboardu
+        navigate("/");
+      }
     } catch (err: any) {
       if (err instanceof ApiError) {
         switch (err.code) {

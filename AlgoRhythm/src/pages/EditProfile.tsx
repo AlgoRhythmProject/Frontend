@@ -93,7 +93,7 @@ export function EditProfile() {
 
       dispatch(login({
         ...updatedUser,
-        token: userState.user?.token
+        token: userState.user!.token
       }));
 
       setSuccessMessage("Profile updated successfully!");

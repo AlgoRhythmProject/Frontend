@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Users, FileCode, Activity, BookOpen, Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { Users, FileCode, Activity, BookOpen, Edit, Trash2, FileText, Shield, ShieldOff } from 'lucide-react';
 import { taskApi } from '@/api/taskApi';
 import { lectureApi } from '@/api/lectureApi';
 import { courseApi, type CourseListItem } from '@/api/courseApi';
+import { adminApi, type UserWithRoles } from '@/api/adminApi';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
 import { DifficultyLabel, DifficultyColor } from '@/utils/difficulty';
@@ -10,24 +11,9 @@ import { LectureFormModal } from '@/components/Admin/LectureFormModal';
 import { TaskFormModal } from '@/components/Admin/TaskFormModal';
 import { LectureContentModal } from '@/components/Admin/LectureContentModal';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  tasksCompleted: number;
-  joinDate: string;
-}
-
-const mockUsers: User[] = [
-  { id: '1', name: 'Alex Chen', email: 'alex.chen@example.com', role: 'Student', tasksCompleted: 47, joinDate: '2024-01-15' },
-  { id: '2', name: 'Sarah Johnson', email: 'sarah.j@example.com', role: 'Student', tasksCompleted: 32, joinDate: '2024-02-20' },
-  { id: '3', name: 'Mike Williams', email: 'mike.w@example.com', role: 'Admin', tasksCompleted: 89, joinDate: '2023-11-05' },
-  { id: '4', name: 'Emma Davis', email: 'emma.d@example.com', role: 'Student', tasksCompleted: 15, joinDate: '2024-03-10' },
-];
-
 export function Admin() {
   const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'lectures' | 'activity'>('users');
+  const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [courses, setCourses] = useState<CourseListItem[]>([]);
@@ -38,15 +24,21 @@ export function Admin() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedLecture, setSelectedLecture] = useState<Lecture | null>(null);
 
+  // Załaduj wszystkie dane przy montowaniu
   useEffect(() => {
     loadCourses();
+    loadUsers();
+    loadTasks();
+    loadLectures();
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'tasks') {
+    if (activeTab === 'tasks' && tasks.length === 0) {
       loadTasks();
-    } else if (activeTab === 'lectures') {
+    } else if (activeTab === 'lectures' && lectures.length === 0) {
       loadLectures();
+    } else if (activeTab === 'users' && users.length === 0) {
+      loadUsers();
     }
   }, [activeTab]);
 
@@ -59,27 +51,55 @@ export function Admin() {
     }
   };
 
-  const loadTasks = async () => {
+  const loadUsers = async () => {
     setLoading(true);
     try {
-      const data = await taskApi.getAll();
-      setTasks(data);
+      const data = await adminApi.getAllUsers();
+      setUsers(data);
     } catch (error) {
-      console.error('Failed to load tasks:', error);
+      console.error('Failed to load users:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const loadTasks = async () => {
+    try {
+      const data = await taskApi.getAll();
+      setTasks(data);
+    } catch (error) {
+      console.error('Failed to load tasks:', error);
+    }
+  };
+
   const loadLectures = async () => {
-    setLoading(true);
     try {
       const data = await lectureApi.getAll();
       setLectures(data);
     } catch (error) {
       console.error('Failed to load lectures:', error);
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const handleToggleAdminRole = async (user: UserWithRoles) => {
+    const isAdmin = user.roles.includes('Admin');
+    const action = isAdmin ? 'revoke' : 'assign';
+    const actionText = isAdmin ? 'remove Admin role from' : 'grant Admin role to';
+
+    if (!confirm(`Are you sure you want to ${actionText} ${user.firstName} ${user.lastName}?`)) {
+      return;
+    }
+
+    try {
+      if (isAdmin) {
+        await adminApi.revokeAdminRole(user.id);
+      } else {
+        await adminApi.assignAdminRole(user.id);
+      }
+      await loadUsers();
+    } catch (error: any) {
+      console.error(`Failed to ${action} admin role:`, error);
+      alert(error.response?.data?.error || `Failed to ${action} admin role`);
     }
   };
 
@@ -162,7 +182,7 @@ export function Admin() {
               </div>
               <p className="font-sans text-muted-foreground">Total Users</p>
             </div>
-            <p className="font-sans font-medium text-foreground text-3xl">{mockUsers.length}</p>
+            <p className="font-sans font-medium text-foreground text-3xl">{users.length}</p>
           </div>
 
           <div className="bg-card border border-muted rounded-xl p-6">
@@ -190,9 +210,11 @@ export function Admin() {
               <div className="p-2 bg-success/20 rounded-lg">
                 <Activity className="w-5 h-5 text-success" />
               </div>
-              <p className="font-sans text-muted-foreground">Active Today</p>
+              <p className="font-sans text-muted-foreground">Admins</p>
             </div>
-            <p className="font-sans font-medium text-foreground text-3xl">12</p>
+            <p className="font-sans font-medium text-foreground text-3xl">
+              {users.filter(u => u.roles.includes('Admin')).length}
+            </p>
           </div>
         </div>
 
@@ -200,7 +222,7 @@ export function Admin() {
         <div className="bg-card rounded-xl p-2 mb-6 inline-flex gap-2">
           <button
             onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'users' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
+            className={`flex items-center cursor-pointer gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'users' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             <Users className="w-4 h-4" />
@@ -208,7 +230,7 @@ export function Admin() {
           </button>
           <button
             onClick={() => setActiveTab('tasks')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'tasks' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
+            className={`flex items-center cursor-pointer gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'tasks' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             <FileCode className="w-4 h-4" />
@@ -216,7 +238,7 @@ export function Admin() {
           </button>
           <button
             onClick={() => setActiveTab('lectures')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'lectures' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
+            className={`flex items-center cursor-pointer gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'lectures' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             <BookOpen className="w-4 h-4" />
@@ -224,7 +246,7 @@ export function Admin() {
           </button>
           <button
             onClick={() => setActiveTab('activity')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'activity' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
+            className={`flex cursor-pointer items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'activity' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             <Activity className="w-4 h-4" />
@@ -237,53 +259,99 @@ export function Admin() {
           {/* Users Tab */}
           {activeTab === 'users' && (
             <div>
-              <div className="p-6 border-b border-muted flex items-center justify-between">
+              <div className="p-6 border-b border-muted">
                 <h2 className="font-sans font-medium text-foreground text-xl">User Management</h2>
-                <button className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors">
-                  <Plus className="w-4 h-4" />
-                  Add User
-                </button>
+                <p className="font-sans text-sm text-muted-foreground mt-1">
+                  Manage user roles and permissions
+                </p>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-background">
-                    <tr>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Name</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Email</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Role</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Tasks</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Joined</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockUsers.map((user, idx) => (
-                      <tr key={user.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
-                        <td className="p-4 font-sans text-foreground">{user.name}</td>
-                        <td className="p-4 font-sans text-muted-foreground">{user.email}</td>
-                        <td className="p-4">
-                          <span className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${user.role === 'Admin' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-                            }`}>
-                            {user.role}
-                          </span>
-                        </td>
-                        <td className="p-4 font-sans text-foreground">{user.tasksCompleted}</td>
-                        <td className="p-4 font-sans text-muted-foreground">{user.joinDate}</td>
-                        <td className="p-4">
-                          <div className="flex gap-2">
-                            <button className="p-2 hover:bg-muted rounded transition-colors">
-                              <Edit className="w-4 h-4 text-info" />
-                            </button>
-                            <button className="p-2 hover:bg-muted rounded transition-colors">
-                              <Trash2 className="w-4 h-4 text-error" />
-                            </button>
-                          </div>
-                        </td>
+              {loading ? (
+                <div className="p-8 text-center">
+                  <p className="font-sans text-muted-foreground">Loading users...</p>
+                </div>
+              ) : users.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="font-sans text-muted-foreground">No users found.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-background">
+                      <tr>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Name</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Email</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Roles</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Status</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Joined</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {users.map((user, idx) => {
+                        const isAdmin = user.roles.includes('Admin');
+                        return (
+                          <tr key={user.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
+                            <td className="p-4 font-sans text-foreground">
+                              {user.firstName} {user.lastName}
+                            </td>
+                            <td className="p-4 font-sans text-muted-foreground">{user.email}</td>
+                            <td className="p-4">
+                              <div className="flex gap-2 flex-wrap">
+                                {user.roles.map((role) => (
+                                  <span
+                                    key={role}
+                                    className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${role === 'Admin'
+                                      ? 'bg-primary/20 text-primary'
+                                      : 'bg-muted text-muted-foreground'
+                                      }`}
+                                  >
+                                    {role}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span
+                                className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${user.emailConfirmed
+                                  ? 'bg-success/20 text-success'
+                                  : 'bg-warning/20 text-warning'
+                                  }`}
+                              >
+                                {user.emailConfirmed ? 'Verified' : 'Pending'}
+                              </span>
+                            </td>
+                            <td className="p-4 font-sans text-muted-foreground">
+                              {new Date(user.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="p-4">
+                              <button
+                                onClick={() => handleToggleAdminRole(user)}
+                                className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg transition-colors ${isAdmin
+                                  ? 'bg-error/10 hover:bg-error/20 text-error'
+                                  : 'bg-primary/10 hover:bg-primary/20 text-primary'
+                                  }`}
+                                title={isAdmin ? 'Revoke Admin' : 'Grant Admin'}
+                              >
+                                {isAdmin ? (
+                                  <>
+                                    <ShieldOff className="w-4 h-4" />
+                                    <span className="text-sm font-sans font-medium">Revoke Admin</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Shield className="w-4 h-4" />
+                                    <span className="text-sm font-sans font-medium">Grant Admin</span>
+                                  </>
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
@@ -294,17 +362,13 @@ export function Admin() {
                 <h2 className="font-sans font-medium text-foreground text-xl">Task Management</h2>
                 <button
                   onClick={handleAddTask}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center cursor-pointer gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
                 >
-                  <Plus className="w-4 h-4" />
+                  <FileCode className="w-4 h-4 " />
                   Add Task
                 </button>
               </div>
-              {loading ? (
-                <div className="p-8 text-center">
-                  <p className="font-sans text-muted-foreground">Loading tasks...</p>
-                </div>
-              ) : tasks.length === 0 ? (
+              {tasks.length === 0 ? (
                 <div className="p-8 text-center">
                   <p className="font-sans text-muted-foreground">No tasks found. Create your first task!</p>
                 </div>
@@ -335,8 +399,10 @@ export function Admin() {
                             </div>
                           </td>
                           <td className="p-4">
-                            <span className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${task.isPublished ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
-                              }`}>
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${task.isPublished ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
+                                }`}
+                            >
                               {task.isPublished ? 'Published' : 'Draft'}
                             </span>
                           </td>
@@ -347,14 +413,14 @@ export function Admin() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleEditTask(task)}
-                                className="p-2 hover:bg-muted rounded transition-colors"
+                                className="p-2 hover:bg-muted rounded cursor-pointer transition-colors"
                                 title="Edit Task"
                               >
                                 <Edit className="w-4 h-4 text-info" />
                               </button>
                               <button
                                 onClick={() => handleDeleteTask(task.id)}
-                                className="p-2 hover:bg-muted rounded transition-colors"
+                                className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
                                 title="Delete Task"
                               >
                                 <Trash2 className="w-4 h-4 text-error" />
@@ -377,17 +443,13 @@ export function Admin() {
                 <h2 className="font-sans font-medium text-foreground text-xl">Lecture Management</h2>
                 <button
                   onClick={handleAddLecture}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center cursor-pointer gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
                 >
-                  <Plus className="w-4 h-4" />
+                  <BookOpen className="w-4 h-4" />
                   Add Lecture
                 </button>
               </div>
-              {loading ? (
-                <div className="p-8 text-center">
-                  <p className="font-sans text-muted-foreground">Loading lectures...</p>
-                </div>
-              ) : lectures.length === 0 ? (
+              {lectures.length === 0 ? (
                 <div className="p-8 text-center">
                   <p className="font-sans text-muted-foreground">No lectures found. Create your first lecture!</p>
                 </div>
@@ -415,8 +477,10 @@ export function Admin() {
                             {lecture.contents?.length || 0} items
                           </td>
                           <td className="p-4">
-                            <span className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${lecture.isPublished ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
-                              }`}>
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${lecture.isPublished ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
+                                }`}
+                            >
                               {lecture.isPublished ? 'Published' : 'Draft'}
                             </span>
                           </td>
@@ -427,21 +491,21 @@ export function Admin() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleManageContent(lecture)}
-                                className="p-2 hover:bg-muted rounded transition-colors"
+                                className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
                                 title="Manage Content"
                               >
                                 <FileText className="w-4 h-4 text-primary" />
                               </button>
                               <button
                                 onClick={() => handleEditLecture(lecture)}
-                                className="p-2 hover:bg-muted rounded transition-colors"
+                                className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
                                 title="Edit Lecture"
                               >
                                 <Edit className="w-4 h-4 text-info" />
                               </button>
                               <button
                                 onClick={() => handleDeleteLecture(lecture.id)}
-                                className="p-2 hover:bg-muted rounded transition-colors"
+                                className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
                                 title="Delete Lecture"
                               >
                                 <Trash2 className="w-4 h-4 text-error" />
@@ -461,20 +525,8 @@ export function Admin() {
           {activeTab === 'activity' && (
             <div className="p-6">
               <h2 className="font-sans font-medium text-foreground text-xl mb-6">Recent Activity</h2>
-              <div className="space-y-3">
-                {Array.from({ length: 10 }, (_, i) => (
-                  <div key={i} className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                    <div className="flex-1">
-                      <p className="font-sans font-medium text-foreground mb-1">
-                        User {mockUsers[i % mockUsers.length].name} completed a task
-                      </p>
-                      <p className="font-sans text-muted-foreground text-sm">
-                        {new Date(Date.now() - i * 3600000).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              <div className="p-8 text-center">
+                <p className="font-sans text-muted-foreground">Activity tracking coming soon...</p>
               </div>
             </div>
           )}

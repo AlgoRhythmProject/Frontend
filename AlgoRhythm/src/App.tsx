@@ -16,21 +16,38 @@ import { VerifyEmail } from './pages/VerifyEmail';
 import { ResetPassword } from './pages/ResetPassword';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { AchievementNotificationProvider } from './components/AchievementNotification';
+import { useTokenRefresh } from './hooks/useTokenRefresh';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}
 function AppContent() {
   const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
-  const isEditProfilePage = location.pathname === '/profile/edit'
+  const isAuthenticationPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/verify-email' || location.pathname === '/forgot-password' || location.pathname === '/reset-password' || location.pathname === '/admin';
+  const isEditProfilePage = location.pathname === '/profile/edit';
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+  useTokenRefresh();
 
   return (
     <>
-      {!isLoginPage && !isEditProfilePage && isAuthenticated && <Navigation />}
+      {!isAuthenticationPage && !isEditProfilePage && isAuthenticated && <Navigation />}
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}
@@ -49,7 +66,7 @@ function AppContent() {
             <Route path="/lectures" element={<ProtectedRoute><Lectures /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
