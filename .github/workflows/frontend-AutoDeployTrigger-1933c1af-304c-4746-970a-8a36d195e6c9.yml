@@ -43,8 +43,8 @@ jobs:
           containerAppName: frontend
           resourceGroup: algorhythm-app
           imageToBuild: ghcr.io/algorhythmproject/frontend:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
+          buildArguments: |
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
 
 
 
