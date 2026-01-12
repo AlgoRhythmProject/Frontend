@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 import { PageHeader } from '../components/PageHeader';
 import { StatBox } from '../components/StatBox';
@@ -7,6 +8,7 @@ import { StatBox } from '../components/StatBox';
 import { taskApi } from '../api/taskApi';
 import { courseApi } from '../api/courseApi';
 import { tagApi, type Tag } from '../api/tagApi';
+import { courseProgressApi } from '../api/courseProgressApi';
 import type { Course } from '@/types/Course';
 import type { Task } from '@/types/Task';
 import { DifficultyLabel, type Difficulty } from '@/utils/difficulty';
@@ -14,16 +16,17 @@ import { FilterButton } from '@/components/Tasks/FilterButton';
 import { Pagination } from '@/components/Tasks/Pagination';
 import { SearchBox } from '@/components/Tasks/SearchBox';
 import { TaskListBox } from '@/components/Tasks/TaskListBox';
-import { Loader2 } from 'lucide-react';
 
 type TaskWithCourses = Task & {
   courseIds: string[];
+  completed: boolean;
 };
 
 export function TaskList() {
   const [tasks, setTasks] = useState<TaskWithCourses[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [, setCompletedTaskIds] = useState<Set<string>>(new Set());
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,22 +38,24 @@ export function TaskList() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // FETCH TASKS + COURSES + TAGS
+  // FETCH TASKS + COURSES + TAGS + COMPLETED TASKS
   useEffect(() => {
     const fetchAll = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        const [taskResp, courseResp, tagResp] = await Promise.all([
+        const [taskResp, courseResp, tagResp, completedResp] = await Promise.all([
           taskApi.getPublished(),
           courseApi.getAll(),
           tagApi.getAll(),
+          courseProgressApi.getMyCompletedTasks(),
         ]);
 
         const tasks = taskResp;
         const courses = courseResp;
         const tags = tagResp;
+        const completedIds = new Set(completedResp.completedTaskIds);
 
         const taskToCourses: Record<string, string[]> = {};
 
@@ -65,12 +70,14 @@ export function TaskList() {
 
         const tasksWithCourseIds: TaskWithCourses[] = tasks.map(t => ({
           ...t,
-          courseIds: taskToCourses[t.id] ?? []
+          courseIds: taskToCourses[t.id] ?? [],
+          completed: completedIds.has(t.id)
         }));
 
         setTasks(tasksWithCourseIds);
         setCourses(courses);
         setTags(tags);
+        setCompletedTaskIds(completedIds);
       } catch (err: any) {
         console.error('Failed to load tasks or courses:', err);
         setError(err.response?.data?.message || 'Failed to load data. Please try again.');

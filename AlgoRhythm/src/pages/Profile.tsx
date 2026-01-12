@@ -1,13 +1,15 @@
-import { Calendar, Award, TrendingUp, Code, CheckCircle2, XCircle, Settings, LogOut } from 'lucide-react';
+import { Award, TrendingUp, Code, CheckCircle2, XCircle, Settings, LogOut, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { tasks } from '../data/mockData';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { ProgressBar } from '../components/ProgressBar';
 import { authApi } from '../api/authApi';
 import { achievementApi, type UserAchievementDto } from '../api/achievementApi';
+import { courseProgressApi } from '../api/courseProgressApi';
+import { taskApi } from '../api/taskApi';
 import { useState, useEffect } from 'react';
+import type { Task } from '@/types/Task';
 
 export function Profile() {
   const navigate = useNavigate();
@@ -17,37 +19,49 @@ export function Profile() {
   const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
   const [achievementError, setAchievementError] = useState<string | null>(null);
 
-  // Mock data dla streaks i statystyk (na razie)
+  const [completedTasksCount, setCompletedTasksCount] = useState<number>(0);
+  const [completedLecturesCount, setCompletedLecturesCount] = useState<number>(0);
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  // Mock data dla streaks (na razie)
   const userStats = {
-    tasksCompleted: 47,
     currentStreak: 12,
-    longestStreak: 23,
   };
 
-  const recentActivity = tasks.slice(0, 5).map((task, idx) => ({
-    task: task.title,
-    completed: task.completed || false,
-    date: new Date(Date.now() - idx * 86400000).toLocaleDateString(),
-  }));
+  const recentActivity: Array<{ task: string; completed: boolean; date: string }> = [];
 
-  // Załaduj achievementy z API
+  // Załaduj wszystkie dane
   useEffect(() => {
-    const loadAchievements = async () => {
+    const loadData = async () => {
       try {
+        setIsLoadingStats(true);
         setIsLoadingAchievements(true);
+
+        const [completedTasksResp, completedLecturesResp, tasksResp, achievementsResp] = await Promise.all([
+          courseProgressApi.getMyCompletedTasks(),
+          courseProgressApi.getMyCompletedLectures(),
+          taskApi.getAll(),
+          achievementApi.getMyAchievements(),
+        ]);
+
+        setCompletedTasksCount(completedTasksResp.completedTaskIds.length);
+        setCompletedLecturesCount(completedLecturesResp.completedLectureIds.length);
+        setAllTasks(tasksResp);
+        setAchievements(achievementsResp);
+
         setAchievementError(null);
-        const data = await achievementApi.getMyAchievements();
-        setAchievements(data);
       } catch (error) {
-        console.error('Error loading achievements:', error);
-        setAchievementError('Failed to load achievements');
+        console.error('Error loading profile data:', error);
+        setAchievementError('Failed to load some data');
       } finally {
+        setIsLoadingStats(false);
         setIsLoadingAchievements(false);
       }
     };
 
     if (user) {
-      loadAchievements();
+      loadData();
     }
   }, [user]);
 
@@ -60,11 +74,29 @@ export function Profile() {
 
   const earnedAchievementsCount = achievements.filter(a => a.isCompleted).length;
 
+  // Calculate difficulty breakdown
+  const completedTasksSet = new Set(
+    allTasks.filter((_, idx) => idx < completedTasksCount).map(t => t.id)
+  );
+
+  const easyTasks = allTasks.filter(t => t.difficulty === 0);
+  const mediumTasks = allTasks.filter(t => t.difficulty === 1);
+  const hardTasks = allTasks.filter(t => t.difficulty === 2);
+
+  const easyCompleted = easyTasks.filter(t => completedTasksSet.has(t.id)).length;
+  const mediumCompleted = mediumTasks.filter(t => completedTasksSet.has(t.id)).length;
+  const hardCompleted = hardTasks.filter(t => completedTasksSet.has(t.id)).length;
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Profile Header */}
-        <div className="bg-linear-to-br from-primary to-primary-light rounded-2xl p-8 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-linear-to-br from-primary to-primary-light rounded-2xl p-8 mb-8"
+        >
           <div className="flex items-start gap-6">
             <div className="w-24 h-24 rounded-full bg-primary-foreground/20 flex items-center justify-center">
               <span className="text-on-primary text-4xl font-sans font-bold">
@@ -85,20 +117,25 @@ export function Profile() {
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Stats */}
           <div className="lg:col-span-2 space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            >
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Code className="w-4 h-4 text-primary" />
-                  <p className="font-sans text-muted-foreground text-sm">Solved</p>
+                  <p className="font-sans text-muted-foreground text-sm">Tasks Solved</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
-                  {userStats.tasksCompleted}
+                  {isLoadingStats ? '...' : completedTasksCount}
                 </p>
               </div>
 
@@ -114,11 +151,11 @@ export function Profile() {
 
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-4 h-4 text-success" />
-                  <p className="font-sans text-muted-foreground text-sm">Best</p>
+                  <BookOpen className="w-4 h-4 text-success" />
+                  <p className="font-sans text-muted-foreground text-sm">Lectures</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
-                  {userStats.longestStreak}
+                  {isLoadingStats ? '...' : completedLecturesCount}
                 </p>
               </div>
 
@@ -131,70 +168,105 @@ export function Profile() {
                   {isLoadingAchievements ? '...' : earnedAchievementsCount}
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-card border border-muted rounded-xl p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-card border border-muted rounded-xl p-6"
+            >
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
                 Overall Progress
               </h2>
 
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="font-sans text-muted-foreground">Easy</span>
-                    <span className="font-sans font-medium text-success">24/50</span>
-                  </div>
-                  <ProgressBar value={24} total={50} color="bg-success" />
+              {isLoadingStats ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-sans text-muted-foreground">Easy</span>
+                      <span className="font-sans font-medium text-success">
+                        {easyCompleted}/{easyTasks.length}
+                      </span>
+                    </div>
+                    <ProgressBar value={easyCompleted} total={easyTasks.length} color="bg-success" />
+                  </div>
 
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="font-sans text-muted-foreground">Medium</span>
-                    <span className="font-sans font-medium text-warning">18/60</span>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-sans text-muted-foreground">Medium</span>
+                      <span className="font-sans font-medium text-warning">
+                        {mediumCompleted}/{mediumTasks.length}
+                      </span>
+                    </div>
+                    <ProgressBar value={mediumCompleted} total={mediumTasks.length} color="bg-warning" />
                   </div>
-                  <ProgressBar value={18} total={60} color="bg-warning" />
-                </div>
 
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="font-sans text-muted-foreground">Hard</span>
-                    <span className="font-sans font-medium text-error">5/40</span>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-sans text-muted-foreground">Hard</span>
+                      <span className="font-sans font-medium text-error">
+                        {hardCompleted}/{hardTasks.length}
+                      </span>
+                    </div>
+                    <ProgressBar value={hardCompleted} total={hardTasks.length} color="bg-error" />
                   </div>
-                  <ProgressBar value={5} total={40} color="bg-error" />
                 </div>
-              </div>
-            </div>
+              )}
+            </motion.div>
 
             {/* Recent Activity */}
-            <div className="bg-card border border-muted rounded-xl p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-card border border-muted rounded-xl p-6"
+            >
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
                 Recent Activity
               </h2>
-              <div className="space-y-3">
-                {recentActivity.map((activity, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-background rounded-lg">
-                    {activity.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-error shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-sans font-medium text-foreground truncate">
-                        {activity.task}
-                      </p>
-                      <p className="font-sans text-muted-foreground text-sm">
-                        {activity.date}
-                      </p>
+              {recentActivity.length > 0 ? (
+                <div className="space-y-3">
+                  {recentActivity.map((activity, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-background rounded-lg">
+                      {activity.completed ? (
+                        <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-error shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-sans font-medium text-foreground truncate">
+                          {activity.task}
+                        </p>
+                        <p className="font-sans text-muted-foreground text-sm">
+                          {activity.date}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="font-sans text-muted-foreground text-sm">
+                    No recent activity yet. Start solving tasks!
+                  </p>
+                </div>
+              )}
+            </motion.div>
           </div>
 
           {/* Right Column - Badges */}
           <div className="space-y-6">
-            <div className="bg-card border border-muted rounded-xl p-6">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-card border border-muted rounded-xl p-6"
+            >
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
                 Achievements
               </h2>
@@ -264,10 +336,15 @@ export function Profile() {
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Settings */}
-            <div className="bg-card border border-muted rounded-xl p-6">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-card border border-muted rounded-xl p-6"
+            >
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
                 Settings
               </h2>
@@ -291,7 +368,7 @@ export function Profile() {
                   <p className="font-sans font-medium text-error">Logout</p>
                 </motion.button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

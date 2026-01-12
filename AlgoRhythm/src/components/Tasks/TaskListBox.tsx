@@ -46,7 +46,7 @@ export function TaskListBox({ tasks }: TaskListBoxProps) {
                                         className={`w-3 h-3 rounded-full ${DifficultyColor[task.difficulty] ?? 'bg-error'
                                             }`}
                                     />
-                                    <p className="text-primary-foreground text-sm hidden md:block">
+                                    <p className="text-foreground text-sm hidden md:block">
                                         {DifficultyLabel[task.difficulty]}
                                     </p>
                                 </div>

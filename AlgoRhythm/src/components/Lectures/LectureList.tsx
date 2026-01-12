@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import type { Lecture } from "../../types/Lecture";
 import { motion } from "framer-motion";
 import { PageHeader } from "../PageHeader";
 import { tagApi } from "../../api/tagApi";
+import { courseProgressApi } from "../../api/courseProgressApi";
 
 interface Tag {
     id: string;
@@ -20,25 +21,33 @@ export default function LectureList({ lectures, onSelectLecture }: Readonly<Lect
     // Tags + selection
     const [tags, setTags] = useState<Tag[]>([]);
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
+    const [completedLectureIds, setCompletedLectureIds] = useState<Set<string>>(new Set());
 
     // Scroll controls for tag bar
     const tagScrollRef = useRef<HTMLDivElement | null>(null);
     const [canScrollTagsLeft, setCanScrollTagsLeft] = useState(false);
     const [canScrollTagsRight, setCanScrollTagsRight] = useState(false);
 
-    // Fetch tags once
+    // Fetch tags and completed lectures once
     useEffect(() => {
         let mounted = true;
-        const fetchTags = async () => {
+        const fetchData = async () => {
             try {
-                const data = await tagApi.getAll();
-                if (mounted) setTags(data);
+                const [tagsData, completedData] = await Promise.all([
+                    tagApi.getAll(),
+                    courseProgressApi.getMyCompletedLectures()
+                ]);
+
+                if (mounted) {
+                    setTags(tagsData);
+                    setCompletedLectureIds(new Set(completedData.completedLectureIds));
+                }
             } catch (error) {
-                console.error("Error fetching tags:", error);
+                console.error("Error fetching data:", error);
             }
         };
 
-        fetchTags();
+        fetchData();
         return () => {
             mounted = false;
         };
@@ -129,7 +138,7 @@ export default function LectureList({ lectures, onSelectLecture }: Readonly<Lect
                             <button
                                 key={tag.id}
                                 onClick={() => setSelectedTag(tag.id)}
-                                className={`px-6 py-2 rounded-lg cursor-pointer text-sm transition-colors whitespace-nowrap shrink-0 ${selectedTag === tag.id ? "bg-primary text-foreground" : "bg-card text-muted-foreground hover:bg-muted"
+                                className={`px-6 py-2 rounded-lg cursor-pointer text-sm transition-colors whitespace-nowrap shrink-0 ${selectedTag === tag.id ? "bg-primary text-on-primary" : "bg-card text-muted-foreground hover:bg-muted"
                                     }`}
                             >
                                 {tag.name}
@@ -155,41 +164,48 @@ export default function LectureList({ lectures, onSelectLecture }: Readonly<Lect
             {/* List of lectures */}
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
                 <div className="space-y-3 mt-8 px-4">
-                    {filteredLectures.map((lecture) => (
-                        <button
-                            key={lecture.id}
-                            onClick={() => onSelectLecture(lecture.id)}
-                            className="w-full bg-card border border-muted rounded-xl p-6 hover:border-primary transition-colors cursor-pointer group text-left"
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className="shrink-0">
-                                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center group-hover:bg-primary-hover transition-colors">
-                                        <BookOpen className="w-6 h-6 text-on-primary" />
+                    {filteredLectures.map((lecture) => {
+                        const isCompleted = completedLectureIds.has(lecture.id);
+
+                        return (
+                            <button
+                                key={lecture.id}
+                                onClick={() => onSelectLecture(lecture.id)}
+                                className="w-full bg-card border border-muted rounded-xl p-6 hover:border-primary transition-colors cursor-pointer group text-left"
+                            >
+                                <div className="flex items-start gap-4">
+                                    <div className="shrink-0">
+                                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center group-hover:bg-primary-hover transition-colors relative">
+                                            <BookOpen className="w-6 h-6 text-on-primary" />
+                                            {isCompleted && (
+                                                <div className="absolute -top-1 -right-1">
+                                                    <CheckCircle2 className="w-5 h-5 text-success bg-card rounded-full" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1">
+                                        <p className="font-sans font-medium text-foreground text-xl mb-2">{lecture.title}</p>
+
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {lecture.tagIds?.map((tagId) => (
+                                                <span key={tagId} className="px-3 py-1 bg-muted rounded-full text-xs text-muted-foreground border border-muted">
+                                                    {tagMap[tagId] ?? "Unknown"}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div className="flex-1">
-                                    <p className="font-sans font-medium text-foreground text-xl mb-2">{lecture.title}</p>
-
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {lecture.tagIds?.map((tagId) => (
-                                            <span key={tagId} className="px-3 py-1 bg-muted rounded-full text-xs text-muted-foreground border border-muted">
-                                                {tagMap[tagId] ?? "Unknown"}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </button>
-                    ))}
+                            </button>
+                        );
+                    })}
 
                     {filteredLectures.length === 0 && (
                         <p className="text-muted-foreground text-sm text-center mt-8">No lectures found for this tag.</p>
                     )}
                 </div>
             </motion.div>
-
-
         </>
     );
 }

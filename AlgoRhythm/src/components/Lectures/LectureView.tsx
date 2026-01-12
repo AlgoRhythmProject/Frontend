@@ -97,7 +97,7 @@ export function LectureView({
     } else if (completed) {
         buttonContent = '✓ Completed';
     } else {
-        buttonContent = 'Mark as Complete';
+        buttonContent = 'Complete';
     }
 
     const sortedLectureContents = [...lecture.contents].sort(
@@ -119,20 +119,22 @@ export function LectureView({
             transition={{ duration: 0.4 }}
             key={lecture.id}
         >
+
             <button
                 onClick={onBack}
                 className="mb-6 text-primary hover:text-primary-hover cursor-pointer font-sans transition-colors"
             >
                 ← Back
             </button>
+            <div className="max-w-7xl mx-auto bg-card border border-muted rounded-2xl p-8 md:p-12">
 
-            <div className="max-w-4xl mx-auto bg-card border border-muted rounded-2xl p-8 md:p-12">
                 <div className="mb-6 flex items-center gap-2">
+
                     <span className="inline-block bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-sans">
                         Lecture
                     </span>
                     {completed && (
-                        <span className="inline-block bg-green-500/20 text-green-600 px-3 py-1 rounded-full text-sm font-sans">
+                        <span className="inline-block bg-success/20 text-success px-3 py-1 rounded-full text-sm font-sans">
                             ✓ Completed
                         </span>
                     )}
@@ -173,7 +175,7 @@ export function LectureView({
                         onClick={handleToggleCompletion}
                         disabled={isLoading}
                         className={`w-full px-6 py-3 rounded-lg font-sans font-medium transition-all ${completed
-                            ? 'bg-green-500/20 text-green-600 hover:bg-green-500/30 border border-green-500/30'
+                            ? 'bg-success/20 text-success hover:bg-success/30 border border-success/30'
                             : 'bg-primary text-white hover:bg-primary-hover'
                             } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                             }`}

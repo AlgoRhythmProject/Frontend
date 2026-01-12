@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, FileCode, Activity, BookOpen, Edit, Trash2, FileText, Shield, ShieldOff } from 'lucide-react';
+import { Users, FileCode, Activity, BookOpen, Edit, Trash2, FileText, Shield, ShieldOff, Eye } from 'lucide-react';
 import { taskApi } from '@/api/taskApi';
 import { lectureApi } from '@/api/lectureApi';
 import { courseApi, type CourseListItem } from '@/api/courseApi';
@@ -10,6 +10,7 @@ import { DifficultyLabel, DifficultyColor } from '@/utils/difficulty';
 import { LectureFormModal } from '@/components/Admin/LectureFormModal';
 import { TaskFormModal } from '@/components/Admin/TaskFormModal';
 import { LectureContentModal } from '@/components/Admin/LectureContentModal';
+import { LecturePreviewModal } from '@/components/Admin/LecturePreviewModal';
 
 export function Admin() {
   const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'lectures' | 'activity'>('users');
@@ -20,6 +21,7 @@ export function Admin() {
   const [loading, setLoading] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isLectureModalOpen, setIsLectureModalOpen] = useState(false);
+  const [isLecturePreviewModalOpen, setIsLecturePreviewModalOpen] = useState(false);
   const [isContentModalOpen, setIsContentModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedLecture, setSelectedLecture] = useState<Lecture | null>(null);
@@ -137,6 +139,11 @@ export function Admin() {
   const handleEditLecture = (lecture: Lecture) => {
     setSelectedLecture(lecture);
     setIsLectureModalOpen(true);
+  };
+
+  const handlePreviewLecture = (lecture: Lecture) => {
+    setSelectedLecture(lecture);
+    setIsLecturePreviewModalOpen(true);
   };
 
   const handleDeleteLecture = async (lectureId: string) => {
@@ -488,7 +495,15 @@ export function Admin() {
                             {new Date(lecture.createdAt).toLocaleDateString()}
                           </td>
                           <td className="p-4">
+
                             <div className="flex gap-2">
+                              <button
+                                onClick={() => handlePreviewLecture(lecture)}
+                                className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
+                                title="Preview Lecture"
+                              >
+                                <Eye className="w-4 h-4 text-warning" />
+                              </button>
                               <button
                                 onClick={() => handleManageContent(lecture)}
                                 className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
@@ -548,6 +563,12 @@ export function Admin() {
         onSuccess={handleLectureSuccess}
         lecture={selectedLecture}
         courses={courses}
+      />
+
+      <LecturePreviewModal
+        isOpen={isLecturePreviewModalOpen}
+        onClose={() => setIsLecturePreviewModalOpen(false)}
+        lecture={selectedLecture}
       />
 
       {/* Lecture Content Modal */}

@@ -9,7 +9,6 @@ import { CourseDetail } from './pages/CourseDetail';
 import { Lectures } from './pages/Lectures';
 import { Profile } from './pages/Profile';
 import { EditProfile } from './pages/EditProfile';
-import { Admin } from './pages/Admin';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { VerifyEmail } from './pages/VerifyEmail';
@@ -17,10 +16,14 @@ import { ResetPassword } from './pages/ResetPassword';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { AchievementNotificationProvider } from './components/AchievementNotification';
 import { useTokenRefresh } from './hooks/useTokenRefresh';
+import { Admin } from './pages/Admin';
+import { NavigationAdmin } from './components/Navigation copy';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+  return isAuthenticated && !isAdmin ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
@@ -39,15 +42,18 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 function AppContent() {
   const location = useLocation();
-  const isAuthenticationPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/verify-email' || location.pathname === '/forgot-password' || location.pathname === '/reset-password' || location.pathname === '/admin';
+  const isAuthenticationPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/verify-email' || location.pathname === '/forgot-password' || location.pathname === '/reset-password';
   const isEditProfilePage = location.pathname === '/profile/edit';
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
   useTokenRefresh();
 
   return (
     <>
-      {!isAuthenticationPage && !isEditProfilePage && isAuthenticated && <Navigation />}
+      {!isAuthenticationPage && !isEditProfilePage && isAuthenticated && !isAdmin && <Navigation />}
+      {isAdmin && !isAuthenticationPage && !isEditProfilePage && isAuthenticated && < NavigationAdmin />}
+
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}

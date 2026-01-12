@@ -14,6 +14,7 @@ import type { CourseProgress } from '@/types/CourseProgress';
 
 type TaskWithCourses = Task & {
   courseIds: string[];
+  completed: boolean;
 };
 
 type UICourse = Course & {
@@ -25,16 +26,21 @@ export function Dashboard() {
   const [activeCourse, setActiveCourse] = useState<UICourse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [coursesWithProgressCount, setCoursesWithProgressCount] = useState<number>(0);
+  const [completedTasksCount, setCompletedTasksCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
 
-        const [taskResp, courseResp] = await Promise.all([
+        const [taskResp, courseResp, completedTasksResp] = await Promise.all([
           taskApi.getAll(),
           courseApi.getAll(),
+          courseProgressApi.getMyCompletedTasks(),
         ]);
+
+        const completedTaskIds = new Set(completedTasksResp.completedTaskIds);
+        setCompletedTasksCount(completedTaskIds.size);
 
         const taskToCourses: Record<string, string[]> = {};
         courseResp.forEach(course => {
@@ -48,7 +54,8 @@ export function Dashboard() {
 
         const tasksWithCourseIds: TaskWithCourses[] = taskResp.map(t => ({
           ...t,
-          courseIds: taskToCourses[t.id] ?? []
+          courseIds: taskToCourses[t.id] ?? [],
+          completed: completedTaskIds.has(t.id)
         }));
 
         setTasks(tasksWithCourseIds);
@@ -88,9 +95,9 @@ export function Dashboard() {
     fetchData();
   }, []);
 
-  // Mock user stats
+  // User stats
   const userStats = {
-    tasksCompleted: tasks.filter(t => t.completed).length,
+    tasksCompleted: completedTasksCount,
     totalTasks: tasks.length,
     currentStreak: 5,
     badges: [

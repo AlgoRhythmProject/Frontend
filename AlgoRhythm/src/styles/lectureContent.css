@@ -53,12 +53,12 @@
 }
 
 .lecture-content strong {
-    color: var(--primary);
+    color: var(--primary-light-hover);
     font-weight: 600;
 }
 
 .lecture-content code {
-    color: var(--primary);
+    color: var(--primary-light-hover);
     background-color: var(--card);
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
@@ -66,7 +66,7 @@
 }
 
 .lecture-content pre {
-    background-color: var(--card);
+    background-color: var(--background);
     border: 1px solid var(--border);
     padding: 1rem;
     border-radius: 0.5rem;

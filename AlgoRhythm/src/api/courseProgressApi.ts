@@ -12,6 +12,14 @@ export interface LectureCompletionDto {
     isCompleted: boolean;
 }
 
+export interface UserCompletedLecturesDto {
+    completedLectureIds: string[];
+}
+
+export interface UserCompletedTasksDto {
+    completedTaskIds: string[];
+}
+
 export const courseProgressApi = {
     getAllMyProgress: async (): Promise<CourseProgress[]> => {
         const res = await apiClient.get<CourseProgress[]>('/CourseProgress/my-progress');
@@ -70,6 +78,20 @@ export const courseProgressApi = {
     getCompletedTaskIds: async (courseId: string): Promise<string[]> => {
         const res = await apiClient.get<string[]>(
             `/CourseProgress/course/${courseId}/completed-tasks`
+        );
+        return res.data;
+    },
+
+    getMyCompletedLectures: async (): Promise<UserCompletedLecturesDto> => {
+        const res = await apiClient.get<UserCompletedLecturesDto>(
+            '/CourseProgress/my-completed-lectures'
+        );
+        return res.data;
+    },
+
+    getMyCompletedTasks: async (): Promise<UserCompletedTasksDto> => {
+        const res = await apiClient.get<UserCompletedTasksDto>(
+            '/CourseProgress/my-completed-tasks'
         );
         return res.data;
     },
