@@ -100,7 +100,7 @@ export function TestCaseManager({ testCases, onChange, disabled = false }: TestC
                     <button
                         type="button"
                         onClick={() => setShowAddForm(!showAddForm)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-info/20 hover:bg-info/30 text-info rounded-lg transition-colors text-sm"
+                        className="cursor-pointer flex items-center gap-2 px-3 py-1.5 bg-info/20 hover:bg-info/30 text-info rounded-lg transition-colors text-sm"
                     >
                         <Plus className="w-4 h-4" />
                         Add Test Case
@@ -168,14 +168,14 @@ export function TestCaseManager({ testCases, onChange, disabled = false }: TestC
                         <button
                             type="button"
                             onClick={resetForm}
-                            className="flex-1 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans text-sm transition-colors"
+                            className="cursor-pointer flex-1 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans text-sm transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="button"
                             onClick={handleAdd}
-                            className="flex-1 px-3 py-1.5 bg-info/20 hover:bg-info/30 text-info rounded-lg font-sans text-sm transition-colors"
+                            className="cursor-pointer flex-1 px-3 py-1.5 bg-info/20 hover:bg-info/30 text-info rounded-lg font-sans text-sm transition-colors"
                         >
                             Add Test Case
                         </button>
@@ -209,7 +209,7 @@ export function TestCaseManager({ testCases, onChange, disabled = false }: TestC
                                             onClick={cancelEdit}
                                             className="p-1 hover:bg-muted rounded transition-colors"
                                         >
-                                            <X className="w-4 h-4 text-muted-foreground" />
+                                            <X className="cursor-pointer w-4 h-4 text-muted-foreground" />
                                         </button>
                                     </div>
 
@@ -268,14 +268,14 @@ export function TestCaseManager({ testCases, onChange, disabled = false }: TestC
                                         <button
                                             type="button"
                                             onClick={cancelEdit}
-                                            className="flex-1 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans text-sm transition-colors"
+                                            className="cursor-pointer flex-1 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans text-sm transition-colors"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleUpdate(testCase.id)}
-                                            className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-info/20 hover:bg-info/30 text-info rounded-lg font-sans text-sm transition-colors"
+                                            className="cursor-pointer flex-1 flex items-center justify-center gap-2 px-3 py-1.5 bg-info/20 hover:bg-info/30 text-info rounded-lg font-sans text-sm transition-colors"
                                         >
                                             <Save className="w-4 h-4" />
                                             Save Changes
@@ -315,7 +315,7 @@ export function TestCaseManager({ testCases, onChange, disabled = false }: TestC
                                                 <button
                                                     type="button"
                                                     onClick={() => startEdit(testCase)}
-                                                    className="p-1.5 hover:bg-muted rounded transition-colors"
+                                                    className="cursor-pointer p-1.5 hover:bg-muted rounded transition-colors"
                                                     title="Edit"
                                                 >
                                                     <Edit2 className="w-4 h-4 text-info" />
@@ -323,7 +323,7 @@ export function TestCaseManager({ testCases, onChange, disabled = false }: TestC
                                                 <button
                                                     type="button"
                                                     onClick={() => handleDelete(testCase.id)}
-                                                    className="p-1.5 hover:bg-muted rounded transition-colors"
+                                                    className="cursor-pointer p-1.5 hover:bg-muted rounded transition-colors"
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="w-4 h-4 text-error" />

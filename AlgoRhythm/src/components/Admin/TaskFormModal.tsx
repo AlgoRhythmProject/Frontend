@@ -215,6 +215,9 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
             setHints(hints.filter(h => h.id !== hintId));
         }
     };
+    const handleTagCreated = (newTag: Tag) => {
+        setAllTags(prev => [...prev, newTag]);
+    };
 
     const handleSubmit = async () => {
         if (!formData.title.trim()) {
@@ -311,7 +314,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-muted rounded-lg transition-colors"
+                        className="cursor-pointer p-2 hover:bg-muted rounded-lg transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -382,11 +385,13 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         </div>
                     </div>
 
+                    {/* Tags Section */}
                     <TagManager
                         selectedTags={selectedTags}
                         availableTags={availableTags}
                         onAddTag={handleAddTag}
                         onRemoveTag={handleRemoveTag}
+                        onTagCreated={handleTagCreated}
                         disabled={loading}
                     />
 
@@ -397,7 +402,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                             </label>
                             <button
                                 onClick={() => setShowHintForm(!showHintForm)}
-                                className="flex items-center gap-2 px-3 py-1 bg-warning/20 hover:bg-warning/30 text-warning rounded-lg transition-colors text-sm"
+                                className="cursor-pointer flex items-center gap-2 px-3 py-1 bg-warning/20 hover:bg-warning/30 text-warning rounded-lg transition-colors text-sm"
                             >
                                 <Plus className="w-4 h-4" />
                                 Add Hint
@@ -422,14 +427,14 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                                             setShowHintForm(false);
                                             setNewHintContent('');
                                         }}
-                                        className="flex-1 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans text-sm transition-colors"
+                                        className="cursor-pointer flex-1 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans text-sm transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleAddHint}
                                         disabled={!newHintContent.trim()}
-                                        className="flex-1 px-3 py-1.5 bg-warning/20 hover:bg-warning/30 text-warning rounded-lg font-sans text-sm transition-colors disabled:opacity-50"
+                                        className="cursor-pointer  flex-1 px-3 py-1.5 bg-warning/20 hover:bg-warning/30 text-warning rounded-lg font-sans text-sm transition-colors disabled:opacity-50"
                                     >
                                         Add Hint
                                     </button>
@@ -532,14 +537,14 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                     <div className="flex gap-3 pt-4">
                         <button
                             onClick={onClose}
-                            className="flex-1 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans font-medium transition-colors"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans font-medium transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : task ? 'Update Task' : 'Create Task'}
                         </button>

@@ -129,7 +129,7 @@ export function LectureContentModal({ isOpen, onClose, lecture }: LectureContent
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-muted rounded-lg transition-colors"
+                        className="cursor-pointer p-2 hover:bg-muted rounded-lg transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -369,13 +369,13 @@ export function LectureContentModal({ isOpen, onClose, lecture }: LectureContent
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => handleEditContent(content)}
-                                                className="p-2 hover:bg-muted rounded transition-colors"
+                                                className="cursor-pointer p-2 hover:bg-muted rounded transition-colors"
                                             >
                                                 <Edit className="w-4 h-4 text-info" />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteContent(content.id)}
-                                                className="p-2 hover:bg-muted rounded transition-colors"
+                                                className="cursor-pointer p-2 hover:bg-muted rounded transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4 text-error" />
                                             </button>

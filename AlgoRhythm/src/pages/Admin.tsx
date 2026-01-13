@@ -427,7 +427,7 @@ export function Admin() {
                               </button>
                               <button
                                 onClick={() => handleDeleteTask(task.id)}
-                                className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
+                                className="cursor-pointer p-2 hover:bg-muted rounded transition-colors"
                                 title="Delete Task"
                               >
                                 <Trash2 className="w-4 h-4 text-error" />

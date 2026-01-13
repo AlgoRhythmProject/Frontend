@@ -108,6 +108,10 @@ export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses 
         }
     };
 
+    const handleTagCreated = (newTag: Tag) => {
+        setAllTags(prev => [...prev, newTag]);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -151,7 +155,7 @@ export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses 
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-muted rounded-lg transition-colors"
+                        className="cursor-pointer p-2 hover:bg-muted rounded-lg transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -211,6 +215,7 @@ export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses 
                         availableTags={availableTags}
                         onAddTag={handleAddTag}
                         onRemoveTag={handleRemoveTag}
+                        onTagCreated={handleTagCreated}
                         disabled={loading}
                     />
 
@@ -233,14 +238,14 @@ export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses 
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans font-medium transition-colors"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg font-sans font-medium transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : lecture ? 'Update Lecture' : 'Create Lecture'}
                         </button>

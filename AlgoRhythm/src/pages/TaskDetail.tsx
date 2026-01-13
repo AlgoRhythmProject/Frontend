@@ -12,6 +12,8 @@ import { TaskDescription } from "@/components/Tasks/TaskDetails/TaskDescription"
 import { CodeEditorPanel } from "@/components/Tasks/TaskDetails/CodeEditorPanel";
 import { useAchievementNotification } from "@/components/AchievementNotification";
 import { checkAndShowNewAchievements } from "@/utils/achievementUtils";
+import type { ExecutionError } from "@/types/CodeAnalysis";
+
 
 export function TaskDetail() {
   const { id } = useParams();
@@ -34,31 +36,32 @@ export function TaskDetail() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
 
+  const [, setExecutionErrors] = useState<ExecutionError[]>([]);
+
   // Achievements state
   const [achievements, setAchievements] = useState<UserAchievementDto[]>([]);
 
   // Fetch task from API
   useEffect(() => {
     const fetchTask = async () => {
-      console.log("🔍 TaskDetail useEffect - ID from URL:", id);
+      console.log("TaskDetail useEffect - ID from URL:", id);
 
       if (!id) {
-        console.error("❌ No ID provided");
         setIsLoadingTask(false);
         setTaskError("No task ID provided");
         return;
       }
 
       try {
-        console.log("📡 Fetching task with ID:", id);
+        console.log("Fetching task with ID:", id);
         setIsLoadingTask(true);
         setTaskError(null);
         const data = await taskApi.getById(id);
-        console.log("✅ Task fetched successfully:", data);
+        console.log("Task fetched successfully:", data);
         setTask(data);
         setCode(data.templateCode || "// Write your solution here\n");
       } catch (err: any) {
-        console.error("❌ Failed to fetch task:", err);
+        console.error("Failed to fetch task:", err);
         console.error("Error details:", {
           status: err.response?.status,
           data: err.response?.data,
@@ -110,6 +113,7 @@ export function TaskDetail() {
     setRunStatus(null);
     setErrorMsg(null);
     setTestResults(null);
+    setExecutionErrors([]);
 
     try {
       // 1) Submit code to backend
@@ -127,8 +131,8 @@ export function TaskDetail() {
       const submissionId = submission.submissionId;
       let finalResult: SubmissionResponse | null = null;
 
-      for (let i = 0; i < 15; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      for (let i = 0; i < 30; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
 
         finalResult = await submissionApi.getResult(submissionId);
 
@@ -146,14 +150,28 @@ export function TaskDetail() {
       // 4) Display results
       setRunStatus(finalResult.status);
 
+      // Set general error message if exists
       if (finalResult.errorMessage) {
         setErrorMsg(finalResult.errorMessage);
       }
 
+      // Set test results (including errors within each test)
       if (finalResult.testResults && finalResult.testResults.length > 0) {
         setTestResults(finalResult.testResults);
       }
 
+      // Collect execution errors for editor markers
+      const allErrors: ExecutionError[] = [];
+      if (finalResult.testResults) {
+        finalResult.testResults.forEach(test => {
+          if (test.errors) {
+            allErrors.push(...test.errors);
+          }
+        });
+      }
+      setExecutionErrors(allErrors);
+
+      // Check for achievements if solved
       if (finalResult.status === "Accepted" && finalResult.isSolved) {
         console.log("🎉 Task solved! Checking for new achievements...");
 

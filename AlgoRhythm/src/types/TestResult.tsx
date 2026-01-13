@@ -1,3 +1,5 @@
+import type { ExecutionError } from "./CodeAnalysis";
+
 export interface TestResult {
     testCaseId: string;
     passed: boolean;
@@ -5,4 +7,5 @@ export interface TestResult {
     executionTimeMs: number;
     stdOut: string | null;
     stdErr: string | null;
+    errors: ExecutionError[] | null
 }

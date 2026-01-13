@@ -159,7 +159,7 @@ export function CommentsSection({ taskId }: Readonly<CommentsSectionProps>) {
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Share your thoughts, ask questions, or discuss solutions..."
-                    className="w-full bg-background text-foreground border border-muted rounded-lg p-3 min-h-[100px] resize-y focus:outline-none focus:ring-2 focus:ring-primary font-sans text-sm"
+                    className="w-full bg-background text-foreground border border-muted rounded-lg p-3 min-h-25 resize-y focus:outline-none focus:ring-2 focus:ring-primary font-sans text-sm"
                     disabled={isSubmitting}
                 />
                 <div className="flex justify-end mt-3">
@@ -221,7 +221,7 @@ export function CommentsSection({ taskId }: Readonly<CommentsSectionProps>) {
                                                 </button>
                                                 <button
                                                     onClick={handleCancelEdit}
-                                                    className="p-1.5 hover:bg-error/20 text-error rounded transition-colors"
+                                                    className="cursor-pointer p-1.5 hover:bg-error/20 text-error rounded transition-colors"
                                                     title="Cancel"
                                                 >
                                                     <X className="w-4 h-4" />
@@ -231,14 +231,14 @@ export function CommentsSection({ taskId }: Readonly<CommentsSectionProps>) {
                                             <>
                                                 <button
                                                     onClick={() => handleEdit(comment)}
-                                                    className="p-1.5 hover:bg-card-hover text-muted-foreground hover:text-foreground rounded transition-colors"
+                                                    className="cursor-pointer p-1.5 hover:bg-card-hover text-muted-foreground hover:text-foreground rounded transition-colors"
                                                     title="Edit"
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(comment.id)}
-                                                    className="p-1.5 hover:bg-error/20 text-error rounded transition-colors"
+                                                    className="cursor-pointer p-1.5 hover:bg-error/20 text-error rounded transition-colors"
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
