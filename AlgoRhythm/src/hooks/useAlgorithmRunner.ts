@@ -99,8 +99,8 @@ export const useAlgorithmRunner = () => {
                 code,
                 nodes.map(n => ({ id: n.id, label: n.label })),
                 edges.map(e => ({ from: e.from, to: e.to, weight: e.weight })),
-                startId,
-                endId,
+                nodes.find(n => n.id === startId),
+                nodes.find(n => n.id === endId),
             );
         } catch (err) {
             console.error("Failed to start algorithm:", err);

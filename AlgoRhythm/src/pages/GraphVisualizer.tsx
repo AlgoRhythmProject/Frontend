@@ -10,11 +10,13 @@ import {useGraphTour} from "@/hooks/useGraphVisualizerTour.ts";
 
 const DEFAULT_CODE = `using Graph;
 /*
+using Graph;
+/*
     API:
     public interface IGraph
     {
-        string StartNodeId { get; }
-        string? EndNodeId { get; }
+        Node? StartNode { get; }
+        Node? EndNode { get; }
         Task SetNodeColor(string nodeId, string color);
         Task HighlightEdge(string fromId, string toId, string color);
         Task SetEdgeLabel(string fromId, string toId, string label);
@@ -35,6 +37,9 @@ const DEFAULT_CODE = `using Graph;
         public string Id { get; set; } 
         public string Label { get; set; } 
     }
+    
+    Keep entry class and method names! (public class Solution { public async Task Solve(IGraph graph); } } 
+    
 */
 public class Solution
 {
@@ -42,42 +47,42 @@ public class Solution
     {
         await graph.Log("Starting BFS traversal");
         
-        var startId = graph.StartNodeId;
+        var startId = graph.StartNode.Id;
         if (string.IsNullOrEmpty(startId))
         {
             await graph.Log("No start node selected!");
             return;
         }
         
-        var queue = new Queue<string>();
+        var queue = new Queue<Node>();
         var visited = new HashSet<string>();
         
-        queue.Enqueue(startId);
+        queue.Enqueue(graph.StartNode);
         visited.Add(startId);
-        await graph.SetNodeColor(startId, "#10b981"); // Green
+        await graph.SetNodeColor(startId, "#10b981"); 
         
         while (queue.Count > 0)
         {
             var current = queue.Dequeue();
-            await graph.Log($"Visiting node: {current}");
-            await graph.SetNodeColor(current, "#fbbf24"); // Yellow
+            await graph.Log($"Visiting node: {current.Label}");
+            await graph.SetNodeColor(current.Id, "#fbbf24"); 
             await graph.Sleep(1000);
             
-            var neighbors = await graph.GetNeighbors(current);
+            var neighbors = await graph.GetNeighbors(current.Id);
             foreach (var neighbor in neighbors)
             {
                 if (!visited.Contains(neighbor.Id))
                 {
                     visited.Add(neighbor.Id);
-                    queue.Enqueue(neighbor.Id);
-                    await graph.HighlightEdge(current, neighbor.Id, "#22c55e");
+                    queue.Enqueue(neighbor);
+                    await graph.HighlightEdge(current.Id, neighbor.Id, "#22c55e");
                     await graph.Sleep(500);
-                    await graph.SetNodeColor(neighbor.Id, "#3b82f6"); // Blue
+                    await graph.SetNodeColor(neighbor.Id, "#3b82f6"); 
                 }
             }
 
             await graph.Sleep(500);
-            await graph.SetNodeColor(current, "#6366f1"); // Purple (visited)
+            await graph.SetNodeColor(current.Label, "#6366f1"); 
         }
         
         await graph.Log("BFS completed!");
@@ -169,7 +174,9 @@ const GraphVisualizer = () => {
     };
 
     const handleRunCode = () => {
-        runner.run(userCode, graph.nodes, graph.edges, startNodeId, endNodeId);
+        if (!runner.isRunning) {
+            runner.run(userCode, graph.nodes, graph.edges, startNodeId, endNodeId);
+        }
     };
 
     const handleResetCode = () => {
@@ -272,9 +279,16 @@ const GraphVisualizer = () => {
                                     <button
                                         onClick={handleRunCode}
                                         disabled={runner.isRunning}
-                                        className="flex items-center gap-2 px-6 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs uppercase tracking-wider rounded-lg transition-all shadow-lg shadow-emerald-900/20"
+                                        className={`
+                                            flex items-center gap-2 px-6 py-1.5 font-semibold text-xs uppercase tracking-wider rounded-lg transition-all shadow-lg 
+                                            ${runner.isRunning
+                                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-70 shadow-none' 
+                                                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/20'
+                                            }
+                                        `}
                                     >
-                                        <Play size={14} fill="currentColor" /> Run Code
+                                        <Play size={14} fill="currentColor" />
+                                        {runner.isRunning ? 'Running...' : 'Run Code'}
                                     </button>
 
                             </div>
