@@ -1,100 +1,143 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import type {Node, Edge, GraphAlgorithm, AlgorithmStep} from "@/types/visualizations/Graph";
+import { useState, useEffect } from 'react';
+import type { Edge, Node } from "@/types/visualizations/Graph";
+import { useSignalR } from "@/hooks/useSignalR.ts";
+
+export interface VisualState {
+    nodeColors: Record<string, string>;
+    edgeColors: Record<string, string>;
+    edgeLabels: Record<string, string>;
+    logs: string[];
+}
 
 export const useAlgorithmRunner = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
-    const [log, setLog] = useState('Ready to start');
-    const [markedEdges, setMarkedEdges] = useState<{ from: string, to: string }[]>([]);
-    const [path, setPath] = useState<string[]>([]);
+    const [visualState, setVisualState] = useState<VisualState>({
+        nodeColors: {},
+        edgeColors: {},
+        edgeLabels: {},
+        logs: []
+    });
 
-    // Refs for instant access in async loop
-    const isPausedRef = useRef(false);
-    const abortControllerRef = useRef<AbortController | null>(null);
+    const { connection: visualizerConn } = useSignalR('http://localhost:5148/visualizerhub');
+    const sessionId = visualizerConn?.connectionId;
 
-    useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
 
-    // Pauza Loop
-    const waitIfPaused = useCallback(async () => {
-        while (isPausedRef.current) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-    }, []);
+    useEffect(() => {
+        if (!visualizerConn) return;
 
-    const sleep = useCallback(async (ms: number) => {
-        await waitIfPaused();
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }, [waitIfPaused]);
+        // Aktualizacja koloru węzła
+        visualizerConn.on("UpdateNodeColor", (nodeId: string, color: string) => {
+            setVisualState(prev => ({
+                ...prev,
+                nodeColors: { ...prev.nodeColors, [nodeId]: color }
+            }));
+        });
 
-    const run = async (
-        algorithm: GraphAlgorithm,
-        nodes: Node[],
-        edges: Edge[],
-        startNode: string,
-        endNode: string,
-        updateNodesFn: (step: AlgorithmStep) => void
-    ) => {
-        if (isRunning) return;
+        // Aktualizacja krawędzi (kolor)
+        visualizerConn.on("UpdateEdgeColor", (from: string, to: string, color: string) => {
+            setVisualState(prev => ({
+                ...prev,
+                edgeColors: { ...prev.edgeColors, [`${from}-${to}`]: color }
+            }));
+        });
 
+        // Aktualizacja etykiety krawędzi (np. flow/capacity)
+        visualizerConn.on("UpdateEdgeLabel", (from: string, to: string, label: string) => {
+            setVisualState(prev => ({
+                ...prev,
+                edgeLabels: { ...prev.edgeLabels, [`${from}-${to}`]: label }
+            }));
+        });
+
+        // Nowy log
+        visualizerConn.on("AddLog", (message: string) => {
+            setVisualState(prev => ({
+                ...prev,
+                logs: [message, ...prev.logs].slice(0, 8)
+            }));
+        });
+
+        // Koniec algorytmu
+        visualizerConn.on("ExecutionFinished", () => {
+            setIsRunning(false);
+            setIsPaused(false);
+        });
+
+        // Błąd wykonania
+        visualizerConn.on("ExecutionError", (error: string) => {
+            setVisualState(prev => ({
+                ...prev,
+                logs: [...prev.logs, `Error: ${error}`]
+            }));
+            setIsRunning(false);
+        });
+
+        return () => {
+            visualizerConn.off("UpdateNodeColor");
+            visualizerConn.off("UpdateEdgeColor");
+            visualizerConn.off("UpdateEdgeLabel");
+            visualizerConn.off("AddLog");
+            visualizerConn.off("ExecutionFinished");
+            visualizerConn.off("ExecutionError");
+        };
+    }, [visualizerConn]);
+
+
+    const run = async (code: string, nodes: Node[], edges: Edge[], startId: string | null, endId: string | null) => {
+        if (!visualizerConn || isRunning) return;
+
+        setVisualState({ nodeColors: {}, edgeColors: {}, edgeLabels: {}, logs: ['> Sending code to server...'] });
         setIsRunning(true);
         setIsPaused(false);
-        setPath([]);
-        setMarkedEdges([]);
-        setLog(`Running ${algorithm.name}...`);
 
-        const controller = new AbortController();
-        abortControllerRef.current = controller;
-
-        const onStep = async (step: AlgorithmStep) => {
-            if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
-            await waitIfPaused();
-
-            setLog(step.message);
-            if (step.highlightedEdges) setMarkedEdges(step.highlightedEdges);
-
-            // Delegate node updates back to the data layer via callback
-            updateNodesFn(step);
-
-            const delay = step.action === 'update' ? 500 : 800;
-            await sleep(delay);
-        };
+        console.log(code);
 
         try {
-            const result = await algorithm.run(nodes, edges, startNode, endNode, onStep, controller.signal);
-
-            if (result.path.length > 0) setPath(result.path);
-            else if (result.finalDistance === -Infinity) setLog('⚠️ Negative cycle detected!');
-            else setLog('Algorithm finished (check visualization).');
-
-        } catch (error: any) {
-            if (error.name !== 'AbortError') {
-                console.error(error);
-                setLog('❌ Error running algorithm');
-            } else {
-                setLog('⏹️ Algorithm stopped.');
-            }
-        } finally {
+            await visualizerConn.invoke("StartAlgorithm",
+                sessionId,
+                code,
+                nodes.map(n => ({ id: n.id, label: n.label })),
+                edges.map(e => ({ from: e.from, to: e.to, weight: e.weight })),
+                startId,
+                endId,
+            );
+        } catch (err) {
+            console.error("Failed to start algorithm:", err);
             setIsRunning(false);
-            abortControllerRef.current = null;
         }
     };
 
-    const togglePause = () => setIsPaused(!isPaused);
+    const togglePause = async () => {
+        if (!visualizerConn || !isRunning) return;
 
-    const stop = () => {
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
+        const newPauseState = !isPaused;
+        setIsPaused(newPauseState);
+
+        try {
+            await visualizerConn.invoke(newPauseState ? "PauseAlgorithm" : "ResumeAlgorithm", sessionId);
+            setIsPaused(newPauseState);
+        } catch (err) {
+            console.error("Failed to toggle pause:", err);
+        }
+    };
+
+    const stop = async () => {
+        if (!visualizerConn || !isRunning) return;
+
+        try {
+            await visualizerConn.invoke("StopAlgorithm", sessionId);
+            setIsRunning(false);
             setIsPaused(false);
+        } catch (err) {
+            console.error("Failed to stop algorithm:", err);
         }
     };
 
     return {
+        visualState,
         isRunning,
         isPaused,
-        log,
-        setLog,
-        markedEdges,
-        path,
         run,
         togglePause,
         stop

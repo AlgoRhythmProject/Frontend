@@ -93,6 +93,69 @@
   }
 }
 
+@layer components {
+  .driver-popover.driverjs-theme {
+    background-color: #020617;
+    color: #f1f5f9;
+    border: 1px solid #312e81; /* Ciemny Indigo border */
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-title {
+    color: #a5b4fc;
+    font-weight: 800;
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Opis - lekko przygaszony szary Slate-300 */
+  .driver-popover.driverjs-theme .driver-popover-description {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* Tekst postępu (np. 1/4) */
+  .driver-popover.driverjs-theme .driver-popover-progress-text {
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  /* Przyciski nawigacji */
+  .driver-popover.driverjs-theme .driver-popover-next-btn,
+  .driver-popover.driverjs-theme .driver-popover-prev-btn {
+    background-color: #4338ca; /* Indigo-700 */
+    color: #ffffff;
+    text-shadow: none;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-next-btn:hover {
+    background-color: #3730a3; /* Indigo-800 */
+    transform: translateY(-1px);
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-close-btn {
+    color: #94a3b8;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-close-btn:hover {
+    color: #f1f5f9;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-arrow-side-top { border-top-color: #020617; }
+  .driver-popover.driverjs-theme .driver-popover-arrow-side-bottom { border-bottom-color: #020617; }
+  .driver-popover.driverjs-theme .driver-popover-arrow-side-left { border-left-color: #020617; }
+  .driver-popover.driverjs-theme .driver-popover-arrow-side-right { border-right-color: #020617; }
+}
+
 /* Prose styles for lecture content */
 .lecture-content h1 {
   font-size: 2.25rem;

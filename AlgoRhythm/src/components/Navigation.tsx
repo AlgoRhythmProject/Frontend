@@ -9,8 +9,7 @@ export function Navigation() {
     { name: 'Lectures', path: '/lectures' },
     { name: 'Courses', path: '/courses' },
     { name: 'Tasks', path: '/tasks' },
-    { name: 'Visualizations', path: '/graph'},
-    { name: 'BST', path: '/visualize'}
+    { name: 'Visualizations', path: '/visualize'},
   ];
 
   const isActive = (path: string) => {

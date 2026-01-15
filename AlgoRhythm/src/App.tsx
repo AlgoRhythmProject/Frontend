@@ -13,14 +13,7 @@ import { Admin } from './pages/Admin';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { VerifyEmail } from './pages/VerifyEmail';
-import BSTVisualizer from "@/pages/BSTVisualizer.tsx";
 import GraphVisualizer from "@/pages/GraphVisualizer.tsx";
-import {dijkstraAlgorithm} from "@/types/visualizations/DijkstraAlgorithm.ts";
-import {bfsAlgorithm} from "@/types/visualizations/BFSAlgorithm.ts";
-import {dfsAlgorithm} from "@/types/visualizations/DFSAlgorithm.ts";
-import {bellmanFordAlgorithm} from "@/types/visualizations/BellmanFordAlgorithm.ts";
-import {primsAlgorithm} from "@/types/visualizations/PrimsAlgorithm.ts";
-import {coloringAlgorithm} from "@/types/visualizations/GreedyColoring.ts";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -34,14 +27,7 @@ function AppContent() {
   const isEditProfilePage = location.pathname === '/profile/edit'
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
-  const algorithms = [
-    dijkstraAlgorithm,
-    bfsAlgorithm,
-    dfsAlgorithm,
-    bellmanFordAlgorithm,
-    //primsAlgorithm,
-    //coloringAlgorithm
-  ];
+
 
   return (
     <>
@@ -67,11 +53,7 @@ function AppContent() {
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/visualize" element={<BSTVisualizer/>} />
-            <Route path="/graph" element={
-              <GraphVisualizer
-                availableAlgorithms={algorithms}
-                defaultAlgorithmId="dijkstra"/>}/>
+            <Route path="/visualize" element={<ProtectedRoute><GraphVisualizer /></ProtectedRoute>} />
           </Routes>
         </motion.div>
       </AnimatePresence>

@@ -1,16 +1,18 @@
-import {Move, Link as LinkIcon, Trash2, MousePointer2, Flag, Target, RotateCcw} from 'lucide-react';
+import {Move, Link as LinkIcon, Trash2, MousePointer2, Flag, Target, Scissors, Shuffle} from 'lucide-react';
 import { ToolbarButton } from "./ToolbarButton";
 
+type EditorMode = 'select' | 'addEdge' | 'move' | 'delete' | 'deleteEdge';
+
 interface ToolbarProps {
-    mode: 'select' | 'addEdge' | 'move' | 'delete';
-    setMode: (mode: 'select' | 'addEdge' | 'move' | 'delete') => void;
+    mode:EditorMode;
+    setMode: (mode: EditorMode) => void;
     selectedNodeId: string | null;
     onSetStart: () => void;
     onSetEnd: () => void;
     edgeWeight: string;
     setEdgeWeight: (weight: string) => void;
     isRunning: boolean;
-    onRandomGraph: any;
+    onRandomGraph: () => void;
 }
 
 export const Toolbar = ({
@@ -25,8 +27,7 @@ export const Toolbar = ({
                             onRandomGraph,
                         }: ToolbarProps) => {
     return (
-        <aside className="w-80 bg-slate-900 border-r border-slate-800 p-6 flex flex-col gap-8 overflow-y-auto">
-            {/* Sekcja 1: Tryby Manipulacji */}
+        <aside className="w-80 bg-slate-900 border-r border-slate-800 p-6 flex flex-col gap-8 overflow-y-auto h-full">
             <section>
                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Editor Tools</h3>
                 <div className="grid grid-cols-2 gap-2">
@@ -56,12 +57,25 @@ export const Toolbar = ({
                         onClick={() => setMode('delete')}
                         disabled={isRunning}
                         icon={<Trash2 size={18}/>}
-                        label="Delete"
+                        label="Delete vertex"
+                    />
+                    <ToolbarButton
+                        active={mode === 'deleteEdge'}
+                        onClick={() => setMode('deleteEdge')}
+                        icon={<Scissors/>}
+                        disabled={isRunning}
+                        label={"Delete edge"}
+                    />
+                    <ToolbarButton
+                        active={false}
+                        onClick={onRandomGraph}
+                        icon={<Shuffle/>}
+                        disabled={isRunning}
+                        label={"Random graph"}
                     />
                 </div>
             </section>
 
-            {/* Sekcja 2: Konfiguracja Krawędzi */}
             {mode === 'addEdge' && (
                 <section
                     className="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 animate-in fade-in slide-in-from-top-2">
@@ -76,7 +90,6 @@ export const Toolbar = ({
                 </section>
             )}
 
-            {/* Sekcja 3: Akcje na wybranym węźle */}
             <section>
                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Node Operations</h3>
                 <div className="flex flex-col gap-2">
@@ -104,7 +117,7 @@ export const Toolbar = ({
                 )}
             </section>
 
-            {/* Sekcja 4: Legenda / Status */}
+            {/* Legend / Status */}
             <section className="mt-auto">
                 <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4">
                     <h4 className="text-xs font-bold text-indigo-400 uppercase mb-3">Quick Guide</h4>
