@@ -275,6 +275,7 @@ export const GraphVisualizer = () => {
                             {/* Control buttons */}
                             <div className="flex items-center gap-3">
                                 <button
+                                    id="run-code"
                                     onClick={handleRunCode}
                                     disabled={runner.isRunning}
                                     className={`

@@ -97,14 +97,14 @@ export const Toolbar = ({
             )}
 
             {/* Node Operations */}
-            <section>
+            <section id="node-operations">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">
                     Node Operations
                 </h3>
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={onSetStart}
-                        disabled={!selectedNodeId || isRunning}
+                        disabled={!selectedNodeId || isRunning || mode !== 'move'}
                         className="flex items-center justify-center gap-2 w-full py-3 bg-info/10 hover:bg-info text-info hover:text-white border border-info/30 rounded-xl transition-all font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                     >
                         <Flag size={18} />
@@ -112,7 +112,7 @@ export const Toolbar = ({
                     </button>
                     <button
                         onClick={onSetEnd}
-                        disabled={!selectedNodeId || isRunning}
+                        disabled={!selectedNodeId || isRunning || mode !== 'move'}
                         className="flex items-center justify-center gap-2 w-full py-3 bg-error/10 hover:bg-error text-error hover:text-white border border-error/30 rounded-xl transition-all font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                     >
                         <Target size={18} />

@@ -103,7 +103,7 @@
 @layer components {
   .driver-popover.driverjs-theme {
     background-color: #020617;
-    color: #f1f5f9;
+    color: #b8adad;
     border: 1px solid #312e81; /* Ciemny Indigo border */
     border-radius: 16px;
     padding: 20px;
@@ -120,7 +120,7 @@
 
   /* Opis - lekko przygaszony szary Slate-300 */
   .driver-popover.driverjs-theme .driver-popover-description {
-    color: #cbd5e1;
+    color: #3e4757;
     font-size: 0.95rem;
     line-height: 1.6;
   }

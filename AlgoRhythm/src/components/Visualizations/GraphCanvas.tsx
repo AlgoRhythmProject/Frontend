@@ -293,7 +293,7 @@ export const GraphCanvas = ({
                     const { x, y } = getCoords(e);
                     const node = getNodeAt(x, y);
                     if (node) onNodeMouseUp(node);
-                    else onNodeMouseUp(node as any); // Hack dla TS jeśli handler wymaga, ale logika parenta ignoruje
+                    else onNodeMouseUp(node as any);
                 }}
 
                 onMouseMove={(e) => {
