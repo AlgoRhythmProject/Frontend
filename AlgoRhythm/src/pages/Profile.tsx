@@ -1,4 +1,4 @@
-import { Award, TrendingUp, Code, CheckCircle2, XCircle, Settings, LogOut, BookOpen } from 'lucide-react';
+import { Award, TrendingUp, Code, CheckCircle2, Settings, LogOut, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
@@ -11,6 +11,7 @@ import { taskApi } from '../api/taskApi';
 import { useState, useEffect } from 'react';
 import type { Task } from '@/types/Task';
 import { RecentSubmissions } from '@/components/RecentSubmissions';
+import { userStreakApi, type UserStreakDto } from '@/api/userStreakApi';
 
 export function Profile() {
   const navigate = useNavigate();
@@ -21,35 +22,31 @@ export function Profile() {
   const [achievementError, setAchievementError] = useState<string | null>(null);
 
   const [completedTasksCount, setCompletedTasksCount] = useState<number>(0);
-  const [completedLecturesCount, setCompletedLecturesCount] = useState<number>(0);
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  // Mock data dla streaks (na razie)
-  const userStats = {
-    currentStreak: 12,
-  };
+  const [streak, setStreak] = useState<UserStreakDto | null>(null);
+  const [isLoadingStreak, setIsLoadingStreak] = useState(true);
 
-  const recentActivity: Array<{ task: string; completed: boolean; date: string }> = [];
 
-  // Załaduj wszystkie dane
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoadingStats(true);
         setIsLoadingAchievements(true);
+        setIsLoadingStreak(true);
 
-        const [completedTasksResp, completedLecturesResp, tasksResp, achievementsResp] = await Promise.all([
+        const [completedTasksResp, tasksResp, achievementsResp, streakResp] = await Promise.all([
           courseProgressApi.getMyCompletedTasks(),
-          courseProgressApi.getMyCompletedLectures(),
           taskApi.getAll(),
           achievementApi.getMyAchievements(),
+          userStreakApi.getMyStreak(),
         ]);
 
         setCompletedTasksCount(completedTasksResp.completedTaskIds.length);
-        setCompletedLecturesCount(completedLecturesResp.completedLectureIds.length);
         setAllTasks(tasksResp);
         setAchievements(achievementsResp);
+        setStreak(streakResp);
 
         setAchievementError(null);
       } catch (error) {
@@ -58,6 +55,7 @@ export function Profile() {
       } finally {
         setIsLoadingStats(false);
         setIsLoadingAchievements(false);
+        setIsLoadingStreak(false);
       }
     };
 
@@ -143,26 +141,26 @@ export function Profile() {
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-4 h-4 text-info" />
-                  <p className="font-sans text-muted-foreground text-sm">Streak</p>
+                  <p className="font-sans text-muted-foreground text-sm">Current Streak</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
-                  {userStats.currentStreak}
+                  {isLoadingStreak ? '...' : streak?.currentStreak || 0}
                 </p>
               </div>
 
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <BookOpen className="w-4 h-4 text-success" />
-                  <p className="font-sans text-muted-foreground text-sm">Lectures</p>
+                  <Zap className="w-4 h-4 text-warning" />
+                  <p className="font-sans text-muted-foreground text-sm">Longest Streak</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
-                  {isLoadingStats ? '...' : completedLecturesCount}
+                  {isLoadingStreak ? '...' : streak?.longestStreak || 0}
                 </p>
               </div>
 
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Award className="w-4 h-4 text-warning" />
+                  <Award className="w-4 h-4 text-success" />
                   <p className="font-sans text-muted-foreground text-sm">Badges</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
@@ -228,15 +226,10 @@ export function Profile() {
             >
               <RecentSubmissions limit={5} />
             </motion.div>
-
-
           </div>
 
-
-
-          {/* Right Column - Badges */}
+          {/* Right Column - Settings & Achievements */}
           <div className="space-y-6">
-
             {/* Settings */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -268,6 +261,8 @@ export function Profile() {
                 </motion.button>
               </div>
             </motion.div>
+
+            {/* Achievements */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -344,7 +339,6 @@ export function Profile() {
                 </div>
               )}
             </motion.div>
-
           </div>
         </div>
       </div>

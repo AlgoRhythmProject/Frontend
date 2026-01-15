@@ -1,13 +1,18 @@
+
+// ==========================================
+// 2. Aktualizacja TaskDescription.tsx
+// ==========================================
 import { useState } from "react";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Code } from "lucide-react";
 import type { Task } from "@/types/Task";
 import { CommentsSection } from "./CommentSection";
+import { TaskSubmissionsTab } from "./TaskSubmissionsTab";
 
 interface TaskDescriptionProps {
     task: Task;
 }
 
-type TabType = "description" | "discussion";
+type TabType = "description" | "discussion" | "submissions";
 
 export function TaskDescription({ task }: TaskDescriptionProps) {
     const [activeTab, setActiveTab] = useState<TabType>("description");
@@ -38,6 +43,19 @@ export function TaskDescription({ task }: TaskDescriptionProps) {
                     <MessageSquare className="w-4 h-4" />
                     Discussion
                     {activeTab === "discussion" && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                </button>
+                <button
+                    onClick={() => setActiveTab("submissions")}
+                    className={`flex-1 px-6 py-3 font-sans cursor-pointer font-medium transition-colors relative flex items-center justify-center gap-2 ${activeTab === "submissions"
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
+                >
+                    <Code className="w-4 h-4" />
+                    Submissions
+                    {activeTab === "submissions" && (
                         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                     )}
                 </button>
@@ -81,11 +99,14 @@ export function TaskDescription({ task }: TaskDescriptionProps) {
                                 </div>
                             </>
                         )}
-
+                    </div>
+                ) : activeTab === "discussion" ? (
+                    <div className="max-w-2xl">
+                        <CommentsSection taskId={task.id} />
                     </div>
                 ) : (
                     <div className="max-w-2xl">
-                        <CommentsSection taskId={task.id} />
+                        <TaskSubmissionsTab taskId={task.id} />
                     </div>
                 )}
             </div>

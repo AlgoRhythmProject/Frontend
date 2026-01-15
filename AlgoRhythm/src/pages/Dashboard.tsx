@@ -8,6 +8,7 @@ import { TaskCard } from '@/components/TaskCard';
 import { taskApi } from '../api/taskApi';
 import { courseApi } from '../api/courseApi';
 import { courseProgressApi } from '@/api/courseProgressApi';
+import { userStreakApi, type UserStreakDto } from '@/api/userStreakApi';
 import type { Task } from '@/types/Task';
 import type { Course } from '@/types/Course';
 import type { CourseProgress } from '@/types/CourseProgress';
@@ -27,20 +28,23 @@ export function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [coursesWithProgressCount, setCoursesWithProgressCount] = useState<number>(0);
   const [completedTasksCount, setCompletedTasksCount] = useState<number>(0);
+  const [streak, setStreak] = useState<UserStreakDto | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
 
-        const [taskResp, courseResp, completedTasksResp] = await Promise.all([
+        const [taskResp, courseResp, completedTasksResp, streakResp] = await Promise.all([
           taskApi.getAll(),
           courseApi.getAll(),
           courseProgressApi.getMyCompletedTasks(),
+          userStreakApi.getMyStreak(),
         ]);
 
         const completedTaskIds = new Set(completedTasksResp.completedTaskIds);
         setCompletedTasksCount(completedTaskIds.size);
+        setStreak(streakResp);
 
         const taskToCourses: Record<string, string[]> = {};
         courseResp.forEach(course => {
@@ -99,7 +103,7 @@ export function Dashboard() {
   const userStats = {
     tasksCompleted: completedTasksCount,
     totalTasks: tasks.length,
-    currentStreak: 5,
+    currentStreak: streak?.currentStreak ?? 0,
     badges: [
       { earned: true },
       { earned: true },
