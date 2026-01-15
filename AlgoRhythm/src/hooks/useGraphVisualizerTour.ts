@@ -52,7 +52,7 @@ export const useGraphTour = () => {
                     element: '#editor',
                     popover: {
                         title: 'Code editor',
-                        description: 'Here you can write your code to be visualized. You can also change the width of editor. Currently available methods are written in the comment.',
+                        description: 'Here you can write your code to be visualized. You can also change the width of editor.',
                         side: "left",
                         align: 'start'
                     }
@@ -70,7 +70,7 @@ export const useGraphTour = () => {
                     element: '#editor',
                     popover: {
                         title: "API",
-                        description: "For available methods see editor comment.",
+                        description: "Currently available methods are described in the editor comment.",
                         side: "left",
                     }
                 },
