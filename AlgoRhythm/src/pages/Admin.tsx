@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, FileCode, Activity, BookOpen, Edit, Trash2, FileText, Shield, ShieldOff, Eye } from 'lucide-react';
+import { Users, FileCode, Activity, BookOpen, Edit, Trash2, FileText, Shield, ShieldOff, Eye, Plus, Folders } from 'lucide-react';
 import { taskApi } from '@/api/taskApi';
 import { lectureApi } from '@/api/lectureApi';
-import { courseApi, type CourseListItem } from '@/api/courseApi';
+import { courseApi } from '@/api/courseApi';
 import { adminApi, type UserWithRoles } from '@/api/adminApi';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
@@ -11,20 +11,24 @@ import { LectureFormModal } from '@/components/Admin/LectureFormModal';
 import { TaskFormModal } from '@/components/Admin/TaskFormModal';
 import { LectureContentModal } from '@/components/Admin/LectureContentModal';
 import { LecturePreviewModal } from '@/components/Admin/LecturePreviewModal';
+import type { Course } from '@/types/Course';
+import { CourseFormModal } from '@/components/Admin/CourseFormModal';
 
 export function Admin() {
-  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'lectures' | 'activity'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'lectures' | 'courses' | 'activity'>('users');
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lectures, setLectures] = useState<Lecture[]>([]);
-  const [courses, setCourses] = useState<CourseListItem[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [isLectureModalOpen, setIsLectureModalOpen] = useState(false);
   const [isLecturePreviewModalOpen, setIsLecturePreviewModalOpen] = useState(false);
   const [isContentModalOpen, setIsContentModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedLecture, setSelectedLecture] = useState<Lecture | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   // Załaduj wszystkie dane przy montowaniu
   useEffect(() => {
@@ -46,7 +50,7 @@ export function Admin() {
 
   const loadCourses = async () => {
     try {
-      const data = await courseApi.getListItems();
+      const data = await courseApi.getAll();
       setCourses(data);
     } catch (error) {
       console.error('Failed to load courses:', error);
@@ -162,6 +166,32 @@ export function Admin() {
     loadLectures();
   };
 
+  const handleAddCourse = () => {
+    setSelectedCourse(null);
+    setIsCourseModalOpen(true);
+  };
+
+  const handleEditCourse = (course: Course) => {
+    setSelectedCourse(course);
+    setIsCourseModalOpen(true);
+  };
+
+  const handleDeleteCourse = async (taskId: string) => {
+    if (!confirm('Are you sure you want to delete this course?')) return;
+
+    try {
+      await taskApi.delete(taskId);
+      await loadTasks();
+    } catch (error) {
+      console.error('Failed to delete course:', error);
+      alert('Failed to delete course');
+    }
+  };
+
+  const handleCourseSuccess = () => {
+    loadCourses();
+  };
+
   const handleManageContent = (lecture: Lecture) => {
     setSelectedLecture(lecture);
     setIsContentModalOpen(true);
@@ -250,6 +280,14 @@ export function Admin() {
           >
             <BookOpen className="w-4 h-4" />
             Lectures
+          </button>
+          <button
+            onClick={() => setActiveTab('courses')}
+            className={`flex cursor-pointer items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'courses' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+          >
+            <Folders className="w-4 h-4" />
+            Courses
           </button>
           <button
             onClick={() => setActiveTab('activity')}
@@ -466,7 +504,6 @@ export function Admin() {
                     <thead className="bg-background">
                       <tr>
                         <th className="text-left p-4 font-sans font-medium text-muted-foreground">Title</th>
-                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Course ID</th>
                         <th className="text-left p-4 font-sans font-medium text-muted-foreground">Contents</th>
                         <th className="text-left p-4 font-sans font-medium text-muted-foreground">Status</th>
                         <th className="text-left p-4 font-sans font-medium text-muted-foreground">Created</th>
@@ -477,9 +514,6 @@ export function Admin() {
                       {lectures.map((lecture, idx) => (
                         <tr key={lecture.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
                           <td className="p-4 font-sans text-foreground">{lecture.title}</td>
-                          <td className="p-4 font-mono text-sm text-muted-foreground">
-                            {lecture.courseId.substring(0, 8)}...
-                          </td>
                           <td className="p-4 font-sans text-muted-foreground">
                             {lecture.contents?.length || 0} items
                           </td>
@@ -535,7 +569,89 @@ export function Admin() {
               )}
             </div>
           )}
-
+          {/* Courses Tab */}
+          {activeTab === 'courses' && (
+            <div>
+              <div className="p-6 border-b border-muted flex items-center justify-between">
+                <h2 className="font-sans font-medium text-foreground text-xl">Course Management</h2>
+                <button
+                  onClick={handleAddCourse}
+                  className="flex items-center cursor-pointer gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Course
+                </button>
+              </div>
+              {courses.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="font-sans text-muted-foreground">No courses found. Create your first course!</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-background">
+                      <tr>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Name</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Description</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Lectures</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Tasks</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Status</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Created</th>
+                        <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {courses.map((course, idx) => (
+                        <tr key={course.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
+                          <td className="p-4 font-sans text-foreground font-medium">{course.name}</td>
+                          <td className="p-4 font-sans text-muted-foreground max-w-xs truncate">
+                            {course.description || 'No description'}
+                          </td>
+                          <td className="p-4 font-sans text-muted-foreground">
+                            {course.lectures?.length || 0} lectures
+                          </td>
+                          <td className="p-4 font-sans text-muted-foreground">
+                            {course.tasks.length || 0} tasks
+                          </td>
+                          <td className="p-4">
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${course.isPublished
+                                ? 'bg-success/20 text-success'
+                                : 'bg-muted text-muted-foreground'
+                                }`}
+                            >
+                              {course.isPublished ? 'Published' : 'Draft'}
+                            </span>
+                          </td>
+                          <td className="p-4 font-sans text-muted-foreground">
+                            {new Date(course.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditCourse(course)}
+                                className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
+                                title="Edit Course"
+                              >
+                                <Edit className="w-4 h-4 text-info" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteCourse(course.id)}
+                                className="p-2 hover:bg-muted cursor-pointer rounded transition-colors"
+                                title="Delete Course"
+                              >
+                                <Trash2 className="w-4 h-4 text-error" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
           {/* Activity Tab */}
           {activeTab === 'activity' && (
             <div className="p-6">
@@ -548,6 +664,12 @@ export function Admin() {
         </div>
       </div>
 
+      <CourseFormModal
+        isOpen={isCourseModalOpen}
+        onClose={() => setIsCourseModalOpen(false)}
+        onSuccess={handleCourseSuccess}
+        course={selectedCourse}
+      />
       {/* Task Form Modal */}
       <TaskFormModal
         isOpen={isTaskModalOpen}

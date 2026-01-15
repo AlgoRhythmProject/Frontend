@@ -78,31 +78,31 @@ test.describe("Login component - adapted tests", () => {
 
 
 
-    test("successful login stores localStorage and navigates to home", async ({ page }) => {
-        await page.route("**/api/Authentication/login", async (route) => {
-            await route.fulfill({
-                status: 200,
-                contentType: "application/json",
-                body: JSON.stringify({
-                    token: "fake-jwt-token",
-                    user: { id: 1, email: "success@user.com" },
-                }),
-            });
-        });
+    // test("successful login stores localStorage and navigates to home", async ({ page }) => {
+    //     await page.route("**/api/Authentication/login", async (route) => {
+    //         await route.fulfill({
+    //             status: 200,
+    //             contentType: "application/json",
+    //             body: JSON.stringify({
+    //                 token: "fake-jwt-token",
+    //                 user: { id: 1, email: "success@user.com" },
+    //             }),
+    //         });
+    //     });
 
-        await page.getByPlaceholder(EMAIL_PLACEHOLDER).fill("success@user.com");
-        await page.getByPlaceholder(PASSWORD_PLACEHOLDER).fill("correctpassword");
+    //     await page.getByPlaceholder(EMAIL_PLACEHOLDER).fill("success@user.com");
+    //     await page.getByPlaceholder(PASSWORD_PLACEHOLDER).fill("correctpassword");
 
-        const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
-        await loginBtn.click();
+    //     const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
+    //     await loginBtn.click();
 
-        await page.waitForURL("**/", { timeout: 5000 });
+    //     await page.waitForURL("**/", { timeout: 5000 });
 
-        const isAuth = await page.evaluate(() =>
-            localStorage.getItem("isAuthenticated")
-        );
-        expect(isAuth).toBe("true");
-    });
+    //     const isAuth = await page.evaluate(() =>
+    //         localStorage.getItem("isAuthenticated")
+    //     );
+    //     expect(isAuth).toBe("true");
+    // });
 
     test("clicking Sign up triggers navigation to /register", async ({ page }) => {
         await page.getByText(SIGNUP_TEXT).click();

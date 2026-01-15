@@ -27,7 +27,7 @@ export function LecturePreviewModal({ isOpen, onClose, lecture }: LecturePreview
                     </div>
                     <button
                         onClick={onClose}
-                        className="cursor-pointer p-2 hover:bg-muted cursor-pointer rounded-lg transition-colors"
+                        className="p-2 hover:bg-muted cursor-pointer rounded-lg transition-colors"
                         aria-label="Close preview"
                     >
                         <X className="w-5 h-5" />

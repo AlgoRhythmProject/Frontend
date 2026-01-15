@@ -44,7 +44,6 @@ export function VerifyEmail() {
             return () => clearTimeout(timer);
         }
     }, [resendCooldown]);
-
     const handleVerify = async (enteredCode: string) => {
         setIsLoading(true);
         setError("");
@@ -52,8 +51,16 @@ export function VerifyEmail() {
 
         try {
             const user = await authApi.verifyEmail(email, enteredCode);
+
+            if (user.token) {
+                localStorage.setItem("token", user.token);
+            }
+
             dispatch(login(user));
             localStorage.setItem("isAuthenticated", "true");
+
+            localStorage.setItem("user", JSON.stringify(user));
+
             navigate("/");
         } catch (err) {
             if (err instanceof ApiError) {

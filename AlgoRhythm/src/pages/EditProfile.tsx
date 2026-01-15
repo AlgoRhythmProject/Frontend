@@ -20,6 +20,9 @@ export function EditProfile() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+  const backPath = isAdmin ? '/admin' : '/profile';
+
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -189,6 +192,10 @@ export function EditProfile() {
     }
   };
 
+  const handleBack = () => {
+    navigate(backPath);
+  };
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <AuthenticationBackground />
@@ -201,11 +208,11 @@ export function EditProfile() {
       >
         {/* Header */}
         <button
-          onClick={() => navigate('/profile')}
+          onClick={handleBack}
           className="mb-6 flex items-center gap-2 text-foreground hover:text-primary-hover cursor-pointer font-sans transition-colors group"
         >
           <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          Back to Profile
+          Back to {isAdmin ? 'Admin Panel' : 'Profile'}
         </button>
 
         <div className="bg-background/80 backdrop-blur-xl border border-muted rounded-2xl p-6 md:p-8">
@@ -358,7 +365,7 @@ export function EditProfile() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="button"
-              onClick={() => navigate('/profile')}
+              onClick={handleBack}
               className="w-full bg-background/70 cursor-pointer border border-muted text-foreground py-3 rounded-lg font-sans font-medium hover:border-primary transition-colors"
             >
               Cancel

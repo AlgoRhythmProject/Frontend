@@ -22,7 +22,7 @@ export interface LectureContent {
 
 export interface Lecture {
     id: string;
-    courseId: string;
+    courseIds: string[];
     title: string;
     isPublished: boolean;
     createdAt: string;
@@ -37,7 +37,6 @@ export interface Tag {
 }
 
 export interface LectureInputDto {
-    courseId: string;
     title: string;
     isPublished: boolean;
 }

@@ -16,7 +16,6 @@ interface LectureFormModalProps {
 
 export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses }: LectureFormModalProps) {
     const [formData, setFormData] = useState<LectureInputDto>({
-        courseId: '',
         title: '',
         isPublished: false
     });
@@ -35,7 +34,6 @@ export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses 
     useEffect(() => {
         if (lecture) {
             setFormData({
-                courseId: lecture.courseId,
                 title: lecture.title,
                 isPublished: lecture.isPublished
             });
@@ -48,7 +46,6 @@ export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses 
             }
         } else {
             setFormData({
-                courseId: courses.length > 0 ? courses[0].id : '',
                 title: '',
                 isPublished: false
             });
@@ -183,31 +180,6 @@ export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses 
                         />
                     </div>
 
-                    {/* Course */}
-                    <div>
-                        <label className="block font-sans font-medium text-foreground mb-2">
-                            Course *
-                        </label>
-                        <select
-                            required
-                            value={formData.courseId}
-                            onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
-                            className="w-full px-4 py-2 bg-background border border-muted rounded-lg font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                            disabled={!!lecture}
-                        >
-                            <option value="">Select a course</option>
-                            {courses.map(course => (
-                                <option key={course.id} value={course.id}>
-                                    {course.name}
-                                </option>
-                            ))}
-                        </select>
-                        {lecture && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Course cannot be changed after creation
-                            </p>
-                        )}
-                    </div>
 
                     {/* Tags Section */}
                     <TagManager

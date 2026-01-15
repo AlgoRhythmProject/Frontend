@@ -90,7 +90,7 @@ test.describe("Register Component Tests", () => {
 
         const errorMsg = page.locator(ERROR_SELECTOR);
         await expect(errorMsg).toBeVisible();
-        await expect(errorMsg).toHaveText("Registration failed. Please try again.");
+        await expect(errorMsg).toHaveText("An account with this email already exists.");
     });
 
     test("should register successfully and redirect to verify-email page", async ({ page }) => {
