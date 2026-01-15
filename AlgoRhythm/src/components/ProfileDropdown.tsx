@@ -1,13 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { LogOut, Settings, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 import type { RootState } from "../store";
+import { logout as logoutAction } from "../store/userSlice";
 import { authApi } from "../api/authApi";
 
 export function ProfileDropdown() {
     const [open, setOpen] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const dropdownRef = useRef<HTMLDivElement>(null);
     const user = useSelector((state: RootState) => state.user.user);
 
@@ -16,10 +20,20 @@ export function ProfileDropdown() {
         : "G";
 
     const handleLogout = async () => {
-        localStorage.removeItem("isAuthenticated");
-        localStorage.removeItem("userEmail");
-        await authApi.logout();
-        navigate("/login");
+        setIsLoggingOut(true);
+        try {
+            await authApi.logout();
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            localStorage.removeItem("isAuthenticated");
+            localStorage.removeItem("userEmail");
+
+            dispatch(logoutAction());
+            setOpen(false);
+            navigate("/login");
+            setIsLoggingOut(false);
+        }
     };
 
     const goToProfile = () => {
@@ -32,7 +46,6 @@ export function ProfileDropdown() {
         setOpen(false);
     };
 
-    // click outside to close
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -46,28 +59,38 @@ export function ProfileDropdown() {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* --- Avatar Button --- */}
-            <button
+            {/* --- Avatar Button z animacją --- */}
+            <motion.button
                 onClick={() => setOpen((prev) => !prev)}
-                className="w-10 h-10 rounded-full bg-primary flex items-center justify-center  cursor-pointer ">
-                <User className="w-5 h-5 text-foreground" />
-            </button >
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-10 h-10 rounded-full bg-primary flex items-center justify-center cursor-pointer hover:border-primary transition-transform"
+            >
+                <User className="w-5 h-5 text-on-primary" />
+            </motion.button>
 
-            {/* --- Dropdown Panel --- */}
-            {
-                open && (
-                    <div className="absolute right-0 mt-2 w-72 bg-card border border-muted rounded-xl shadow-lg p-3 z-50">
-
+            {/* --- Dropdown Panel z animacją rozwijania --- */}
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        className="absolute right-0 mt-2 w-72 bg-card border border-muted rounded-xl shadow-lg p-3 z-50"
+                    >
                         {/* Header */}
                         <div className="flex items-center gap-3 p-2 border-b border-muted mb-2">
-                            <div className="w-10 h-10 rounded-full bg-primary text-foreground font-bold flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-primary text-on-primary font-bold flex items-center justify-center">
                                 {initials}
                             </div>
-                            <div>
+                            <div className="flex-1 min-w-0">
                                 <p className="font-sans font-medium text-foreground">
                                     {user?.firstName} {user?.lastName}
                                 </p>
-                                <p className="font-sans text-muted-foreground text-sm truncate">{user?.email}</p>
+                                <p className="font-sans text-muted-foreground text-sm truncate">
+                                    {user?.email}
+                                </p>
                             </div>
                         </div>
 
@@ -75,14 +98,16 @@ export function ProfileDropdown() {
                         <div className="flex flex-col gap-1">
                             <button
                                 onClick={goToProfile}
-                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted cursor-pointer transition-colors font-sans"
+                                disabled={isLoggingOut}
+                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted cursor-pointer transition-colors font-sans disabled:opacity-50"
                             >
                                 Profile
                             </button>
 
                             <button
                                 onClick={goToSettings}
-                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted transition-colors cursor-pointer  font-sans flex items-center gap-2"
+                                disabled={isLoggingOut}
+                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted transition-colors cursor-pointer font-sans flex items-center gap-2 disabled:opacity-50"
                             >
                                 <Settings className="w-4 h-4 text-primary" />
                                 Settings
@@ -90,15 +115,16 @@ export function ProfileDropdown() {
 
                             <button
                                 onClick={handleLogout}
-                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-error/20 transition-colors cursor-pointer  font-sans flex items-center gap-2 text-error"
+                                disabled={isLoggingOut}
+                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-error/20 transition-colors cursor-pointer font-sans flex items-center gap-2 text-error disabled:opacity-50"
                             >
                                 <LogOut className="w-4 h-4" />
-                                Logout
+                                {isLoggingOut ? "Logging out..." : "Logout"}
                             </button>
                         </div>
-                    </div>
-                )
-            }
-        </div >
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 }

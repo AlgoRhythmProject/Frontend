@@ -17,7 +17,7 @@ export function AuthenticationFooter({
                     {promptText}{" "}
                     <button
                         onClick={onLinkClick}
-                        className="text-primary font-medium hover:underline cursor-pointer"
+                        className="text-primary-light font-medium hover:underline cursor-pointer"
                     >
                         {linkText}
                     </button>

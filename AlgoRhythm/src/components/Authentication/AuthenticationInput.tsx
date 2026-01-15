@@ -23,7 +23,7 @@ export function AuthenticationInput({ label, type, icon, value, onChange, placeh
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
                     required
-                    className="w-full bg-card border border-muted rounded-lg px-12 py-3 text-foreground placeholder-[#6b6b6b] font-sans outline-none focus:border-primary transition-colors"
+                    className="w-full bg-card/70 border border-muted rounded-lg px-12 py-3 text-foreground placeholder-secondary-foreground font-sans outline-none focus:border-primary transition-colors"
                 />
             </div>
         </motion.div>

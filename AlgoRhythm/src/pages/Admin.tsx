@@ -1,233 +1,326 @@
-import { useState } from 'react';
-import { Users, FileCode, Activity, Plus, Edit, Trash2 } from 'lucide-react';
-import { tasks } from '../data/mockData';
-import { difficultyColors } from '@/utils/difficultyColors';
+import { useState, useEffect } from 'react';
+import { taskApi } from '@/api/taskApi';
+import { lectureApi } from '@/api/lectureApi';
+import { courseApi } from '@/api/courseApi';
+import { adminApi, type UserWithRoles } from '@/api/adminApi';
+import type { Task } from '@/types/Task';
+import type { Lecture } from '@/types/Lecture';
+import type { Course } from '@/types/Course';
+import { LectureFormModal } from '@/components/Admin/LectureFormModal';
+import { TaskFormModal } from '@/components/Admin/TaskFormModal';
+import { LectureContentModal } from '@/components/Admin/LectureContentModal';
+import { LecturePreviewModal } from '@/components/Admin/LecturePreviewModal';
+import { CourseFormModal } from '@/components/Admin/CourseFormModal';
+import { AdminStats } from '@/components/Admin/AdminPanel/AdminStats';
+import { AdminTabs } from '@/components/Admin/AdminPanel/AdminTabs';
+import { UsersTab } from '@/components/Admin/AdminPanel/UsersTab';
+import { TasksTab } from '@/components/Admin/AdminPanel/TasksTab';
+import { LecturesTab } from '@/components/Admin/AdminPanel/LecturesTab';
+import { CoursesTab } from '@/components/Admin/AdminPanel/CoursesTab';
+import { ActivityTab } from '@/components/Admin/AdminPanel/ActivityTab';
+import { commentApi } from '@/api/commentApi';
+import type { Comment } from '@/types/Comment';
+import { CommentsTab } from '@/components/Admin/AdminPanel/CommentsTab';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  tasksCompleted: number;
-  joinDate: string;
-}
-
-const mockUsers: User[] = [
-  { id: '1', name: 'Alex Chen', email: 'alex.chen@example.com', role: 'Student', tasksCompleted: 47, joinDate: '2024-01-15' },
-  { id: '2', name: 'Sarah Johnson', email: 'sarah.j@example.com', role: 'Student', tasksCompleted: 32, joinDate: '2024-02-20' },
-  { id: '3', name: 'Mike Williams', email: 'mike.w@example.com', role: 'Admin', tasksCompleted: 89, joinDate: '2023-11-05' },
-  { id: '4', name: 'Emma Davis', email: 'emma.d@example.com', role: 'Student', tasksCompleted: 15, joinDate: '2024-03-10' },
-];
+type TabType = 'users' | 'tasks' | 'lectures' | 'courses' | 'activity' | 'comments';
 
 export function Admin() {
-  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'activity'>('users');
+  const [activeTab, setActiveTab] = useState<TabType>('users');
+  const [users, setUsers] = useState<UserWithRoles[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [lectures, setLectures] = useState<Lecture[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
+  const [isLectureModalOpen, setIsLectureModalOpen] = useState(false);
+  const [isLecturePreviewModalOpen, setIsLecturePreviewModalOpen] = useState(false);
+  const [isContentModalOpen, setIsContentModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedLecture, setSelectedLecture] = useState<Lecture | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+
+  useEffect(() => {
+    loadCourses();
+    loadUsers();
+    loadTasks();
+    loadLectures();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'tasks' && tasks.length === 0) {
+      loadTasks();
+    } else if (activeTab === 'lectures' && lectures.length === 0) {
+      loadLectures();
+    } else if (activeTab === 'users' && users.length === 0) {
+      loadUsers();
+    }
+  }, [activeTab]);
+
+  const loadCourses = async () => {
+    try {
+      const data = await courseApi.getAll();
+      setCourses(data);
+    } catch (error) {
+      console.error('Failed to load courses:', error);
+    }
+  };
+
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const data = await adminApi.getAllUsers();
+      setUsers(data);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTasks = async () => {
+    try {
+      const data = await taskApi.getAll();
+      setTasks(data);
+    } catch (error) {
+      console.error('Failed to load tasks:', error);
+    }
+  };
+
+  const loadLectures = async () => {
+    try {
+      const data = await lectureApi.getAll();
+      setLectures(data);
+    } catch (error) {
+      console.error('Failed to load lectures:', error);
+    }
+  };
+
+  const handleToggleAdminRole = async (user: UserWithRoles) => {
+    const isAdmin = user.roles.includes('Admin');
+    const action = isAdmin ? 'revoke' : 'assign';
+    const actionText = isAdmin ? 'remove Admin role from' : 'grant Admin role to';
+
+    if (!confirm(`Are you sure you want to ${actionText} ${user.firstName} ${user.lastName}?`)) {
+      return;
+    }
+
+    try {
+      if (isAdmin) {
+        await adminApi.revokeAdminRole(user.id);
+      } else {
+        await adminApi.assignAdminRole(user.id);
+      }
+      await loadUsers();
+    } catch (error: any) {
+      console.error(`Failed to ${action} admin role:`, error);
+      alert(error.response?.data?.error || `Failed to ${action} admin role`);
+    }
+  };
+
+  const handleAddTask = () => {
+    setSelectedTask(null);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    try {
+      await taskApi.delete(taskId);
+      await loadTasks();
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      alert('Failed to delete task');
+    }
+  };
+
+  const handleTaskSuccess = () => {
+    loadTasks();
+  };
+
+  const handleAddLecture = () => {
+    setSelectedLecture(null);
+    setIsLectureModalOpen(true);
+  };
+
+  const handleEditLecture = (lecture: Lecture) => {
+    setSelectedLecture(lecture);
+    setIsLectureModalOpen(true);
+  };
+
+  const handlePreviewLecture = (lecture: Lecture) => {
+    setSelectedLecture(lecture);
+    setIsLecturePreviewModalOpen(true);
+  };
+
+  const handleDeleteLecture = async (lectureId: string) => {
+    if (!confirm('Are you sure you want to delete this lecture?')) return;
+    try {
+      await lectureApi.delete(lectureId);
+      await loadLectures();
+    } catch (error) {
+      console.error('Failed to delete lecture:', error);
+      alert('Failed to delete lecture');
+    }
+  };
+
+  const handleLectureSuccess = () => {
+    loadLectures();
+  };
+
+  const handleAddCourse = () => {
+    setSelectedCourse(null);
+    setIsCourseModalOpen(true);
+  };
+
+  const handleEditCourse = (course: Course) => {
+    setSelectedCourse(course);
+    setIsCourseModalOpen(true);
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    if (!confirm('Are you sure you want to delete this course?')) return;
+    try {
+      await courseApi.delete(courseId);
+      await loadCourses();
+    } catch (error) {
+      console.error('Failed to delete course:', error);
+      alert('Failed to delete course');
+    }
+  };
+
+  const handleCourseSuccess = () => {
+    loadCourses();
+  };
+
+  const handleManageContent = (lecture: Lecture) => {
+    setSelectedLecture(lecture);
+    setIsContentModalOpen(true);
+  };
+
+  const loadComments = async () => {
+    try {
+      // Pobierz komentarze dla wszystkich zadań
+      const allComments: Comment[] = [];
+      for (const task of tasks) {
+        const taskComments = await commentApi.getByTaskId(task.id);
+        allComments.push(...taskComments);
+      }
+      setComments(allComments);
+    } catch (error) {
+      console.error('Failed to load comments:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (tasks.length > 0 && comments.length === 0) {
+      loadComments();
+    }
+  }, [tasks]);
+
+  useEffect(() => {
+    if (activeTab === 'comments' && comments.length === 0 && tasks.length > 0) {
+      loadComments();
+    }
+  }, [activeTab, tasks]);
+
 
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="font-sans font-medium text-foreground text-4xl mb-2" style={{ fontVariationSettings: "'wdth' 100" }}>
             Admin Panel
           </h1>
           <p className="font-sans text-muted-foreground">
-            Manage users, tasks, and monitor platform activity
+            Manage users, tasks, lectures, and monitor platform activity
           </p>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-card border border-muted rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/20 rounded-lg">
-                <Users className="w-5 h-5 text-primary" />
-              </div>
-              <p className="font-sans text-muted-foreground">Total Users</p>
-            </div>
-            <p className="font-sans font-medium text-foreground text-3xl">{mockUsers.length}</p>
-          </div>
+        <AdminStats users={users} tasks={tasks} lectures={lectures} />
+        <AdminTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-          <div className="bg-card border border-muted rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-info/20 rounded-lg">
-                <FileCode className="w-5 h-5 text-info" />
-              </div>
-              <p className="font-sans text-muted-foreground">Total Tasks</p>
-            </div>
-            <p className="font-sans font-medium text-foreground text-3xl">{tasks.length}</p>
-          </div>
-
-          <div className="bg-card border border-muted rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-success/20 rounded-lg">
-                <Activity className="w-5 h-5 text-success" />
-              </div>
-              <p className="font-sans text-muted-foreground">Active Today</p>
-            </div>
-            <p className="font-sans font-medium text-foreground text-3xl">12</p>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="bg-card rounded-xl p-2 mb-6 inline-flex gap-2">
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'users' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-          >
-            <Users className="w-4 h-4" />
-            Users
-          </button>
-          <button
-            onClick={() => setActiveTab('tasks')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'tasks' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-          >
-            <FileCode className="w-4 h-4" />
-            Tasks
-          </button>
-          <button
-            onClick={() => setActiveTab('activity')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${activeTab === 'activity' ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-          >
-            <Activity className="w-4 h-4" />
-            Activity
-          </button>
-        </div>
-
-        {/* Content Area */}
         <div className="bg-card border border-muted rounded-xl overflow-hidden">
-          {/* Users Tab */}
           {activeTab === 'users' && (
-            <div>
-              <div className="p-6 border-b border-muted flex items-center justify-between">
-                <h2 className="font-sans font-medium text-foreground text-xl">User Management</h2>
-                <button className="flex items-center gap-2 bg-primary hover:bg-[#7952e5] text-foreground px-4 py-2 rounded-lg transition-colors">
-                  <Plus className="w-4 h-4" />
-                  Add User
-                </button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-background">
-                    <tr>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Name</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Email</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Role</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Tasks</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Joined</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockUsers.map((user, idx) => (
-                      <tr key={user.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
-                        <td className="p-4 font-sans text-foreground">{user.name}</td>
-                        <td className="p-4 font-sans text-muted-foreground">{user.email}</td>
-                        <td className="p-4">
-                          <span className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${user.role === 'Admin' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-                            }`}>
-                            {user.role}
-                          </span>
-                        </td>
-                        <td className="p-4 font-sans text-foreground">{user.tasksCompleted}</td>
-                        <td className="p-4 font-sans text-muted-foreground">{user.joinDate}</td>
-                        <td className="p-4">
-                          <div className="flex gap-2">
-                            <button className="p-2 hover:bg-muted rounded transition-colors">
-                              <Edit className="w-4 h-4 text-info" />
-                            </button>
-                            <button className="p-2 hover:bg-muted rounded transition-colors">
-                              <Trash2 className="w-4 h-4 text-error" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <UsersTab users={users} loading={loading} onToggleAdminRole={handleToggleAdminRole} />
           )}
-
-          {/* Tasks Tab */}
 
           {activeTab === 'tasks' && (
-            <div>
-              <div className="p-6 border-b border-muted flex items-center justify-between">
-                <h2 className="font-sans font-medium text-foreground text-xl">Task Management</h2>
-                <button className="flex items-center gap-2 bg-primary hover:bg-[#7952e5] text-foreground px-4 py-2 rounded-lg transition-colors">
-                  <Plus className="w-4 h-4" />
-                  Add Task
-                </button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-background">
-                    <tr>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">ID</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Title</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Category</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Difficulty</th>
-                      <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tasks.map((task, idx) => (
-                      <tr key={task.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
-                        <td className="p-4 font-mono text-primary">{task.id}</td>
-                        <td className="p-4 font-sans text-foreground">{task.title}</td>
-                        <td className="p-4 font-sans text-muted-foreground">{task.category}</td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`w-3 h-3 rounded-full ${difficultyColors[task.difficulty] ?? "bg-error"}`}
-                            />
-                            <span className="font-sans text-foreground">{task.difficulty}</span>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex gap-2">
-                            <button className="p-2 hover:bg-muted rounded transition-colors">
-                              <Edit className="w-4 h-4 text-info" />
-                            </button>
-                            <button className="p-2 hover:bg-muted rounded transition-colors">
-                              <Trash2 className="w-4 h-4 text-error" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <TasksTab
+              tasks={tasks}
+              onAddTask={handleAddTask}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteTask}
+            />
           )}
 
-          {/* Activity Tab */}
-          {activeTab === 'activity' && (
-            <div className="p-6">
-              <h2 className="font-sans font-medium text-foreground text-xl mb-6">Recent Activity</h2>
-              <div className="space-y-3">
-                {Array.from({ length: 10 }, (_, i) => (
-                  <div key={i} className="flex items-start gap-4 p-4 bg-background rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                    <div className="flex-1">
-                      <p className="font-sans font-medium text-foreground mb-1">
-                        User {mockUsers[i % mockUsers.length].name} completed task "{tasks[i % tasks.length].title}"
-                      </p>
-                      <p className="font-sans text-muted-foreground text-sm">
-                        {new Date(Date.now() - i * 3600000).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {activeTab === 'lectures' && (
+            <LecturesTab
+              lectures={lectures}
+              onAddLecture={handleAddLecture}
+              onEditLecture={handleEditLecture}
+              onPreviewLecture={handlePreviewLecture}
+              onManageContent={handleManageContent}
+              onDeleteLecture={handleDeleteLecture}
+            />
           )}
+
+          {activeTab === 'courses' && (
+            <CoursesTab
+              courses={courses}
+              onAddCourse={handleAddCourse}
+              onEditCourse={handleEditCourse}
+              onDeleteCourse={handleDeleteCourse}
+            />
+          )}
+          {activeTab === 'comments' && (
+            <CommentsTab comments={comments} tasks={tasks} loading={loading} />
+          )}
+          {activeTab === 'activity' && <ActivityTab />}
         </div>
       </div>
+
+      <CourseFormModal
+        isOpen={isCourseModalOpen}
+        onClose={() => setIsCourseModalOpen(false)}
+        onSuccess={handleCourseSuccess}
+        course={selectedCourse}
+      />
+
+      <TaskFormModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSuccess={handleTaskSuccess}
+        task={selectedTask}
+      />
+
+      <LectureFormModal
+        isOpen={isLectureModalOpen}
+        onClose={() => setIsLectureModalOpen(false)}
+        onSuccess={handleLectureSuccess}
+        lecture={selectedLecture}
+        courses={courses}
+      />
+
+      <LecturePreviewModal
+        isOpen={isLecturePreviewModalOpen}
+        onClose={() => setIsLecturePreviewModalOpen(false)}
+        lecture={selectedLecture}
+      />
+
+      {selectedLecture && (
+        <LectureContentModal
+          isOpen={isContentModalOpen}
+          onClose={() => setIsContentModalOpen(false)}
+          lecture={selectedLecture}
+        />
+      )}
     </div>
   );
 }

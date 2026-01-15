@@ -1,23 +1,108 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, CheckCircle2, Circle } from 'lucide-react';
-import { tasks, courses } from '../data/mockData';
+import { Loader2 } from 'lucide-react';
+
 import { PageHeader } from '../components/PageHeader';
 import { StatBox } from '../components/StatBox';
 
+import { taskApi } from '../api/taskApi';
+import { courseApi } from '../api/courseApi';
+import { tagApi, type Tag } from '../api/tagApi';
+import { courseProgressApi } from '../api/courseProgressApi';
+import type { Course } from '@/types/Course';
+import type { Task } from '@/types/Task';
+import { DifficultyLabel, type Difficulty } from '@/utils/difficulty';
+import { FilterButton } from '@/components/Tasks/FilterButton';
+import { Pagination } from '@/components/Tasks/Pagination';
+import { SearchBox } from '@/components/Tasks/SearchBox';
+import { TaskListBox } from '@/components/Tasks/TaskListBox';
+
+type TaskWithCourses = Task & {
+  courseIds: string[];
+  completed: boolean;
+};
+
 export function TaskList() {
+  const [tasks, setTasks] = useState<TaskWithCourses[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [, setCompletedTaskIds] = useState<Set<string>>(new Set());
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  // FETCH TASKS + COURSES + TAGS + COMPLETED TASKS
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const [taskResp, courseResp, tagResp, completedResp] = await Promise.all([
+          taskApi.getPublished(),
+          courseApi.getAll(),
+          tagApi.getAll(),
+          courseProgressApi.getMyCompletedTasks(),
+        ]);
+
+        const tasks = taskResp;
+        const courses = courseResp;
+        const tags = tagResp;
+        const completedIds = new Set(completedResp.completedTaskIds);
+
+        const taskToCourses: Record<string, string[]> = {};
+
+        courses.forEach(course => {
+          course.tasks.forEach(taskInCourse => {
+            if (!taskToCourses[taskInCourse.id]) {
+              taskToCourses[taskInCourse.id] = [];
+            }
+            taskToCourses[taskInCourse.id].push(course.id);
+          });
+        });
+
+        const tasksWithCourseIds: TaskWithCourses[] = tasks.map(t => ({
+          ...t,
+          courseIds: taskToCourses[t.id] ?? [],
+          completed: completedIds.has(t.id)
+        }));
+
+        setTasks(tasksWithCourseIds);
+        setCourses(courses);
+        setTags(tags);
+        setCompletedTaskIds(completedIds);
+      } catch (err: any) {
+        console.error('Failed to load tasks or courses:', err);
+        setError(err.response?.data?.message || 'Failed to load data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAll();
+  }, []);
+
+  // FILTERING
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCourse = !selectedCourse || task.courseId === selectedCourse;
-    const matchesDifficulty = !selectedDifficulty || task.difficulty === selectedDifficulty;
-    return matchesSearch && matchesCourse && matchesDifficulty;
+
+    const matchesCourse =
+      !selectedCourse || task.courseIds.includes(selectedCourse);
+
+    const matchesDifficulty =
+      selectedDifficulty === null || task.difficulty === selectedDifficulty;
+
+    const matchesTag =
+      !selectedTag || (task.tagIds && task.tagIds.includes(selectedTag));
+
+    return matchesSearch && matchesCourse && matchesDifficulty && matchesTag;
   });
 
   const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
@@ -29,264 +114,191 @@ export function TaskList() {
   const completedCount = tasks.filter(t => t.completed).length;
   const totalCount = tasks.length;
 
+  // LOADING
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+          <p className="text-muted-foreground font-sans">Loading tasks & courses...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ERROR
+  if (error) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="max-w-md text-center">
+          <p className="text-error text-xl mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-primary-hover transition-colors cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // RENDER
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          {/* Header */}
-          <PageHeader title='CODING TASKS' subtitle='Practice and master algorithms through hands-on coding challenges>' />
-          <div className="mb-8">
-            <div className="mt-4 flex items-center gap-4">
-              <StatBox color="primary">
-                {completedCount} / {totalCount} completed
-              </StatBox>
-            </div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+
+          {/* HEADER */}
+          <PageHeader
+            title='CODING TASKS'
+            subtitle='Practice and master algorithms through hands-on coding challenges'
+          />
+
+          <div className="mb-8 flex">
+            <StatBox color="primary">
+              {completedCount} / {totalCount} completed
+            </StatBox>
           </div>
 
-          {/* Main Layout with Sidebar */}
           <div className="flex gap-6">
-            {/* Left Filter Sidebar */}
-            <motion.div
+
+            {/* LEFT FILTER SIDEBAR */}
+            <motion.div className="hidden lg:block w-64 shrink-0"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="hidden lg:block w-64 shrink-0"
             >
               <div className="bg-card border border-muted rounded-2xl p-6 sticky top-4">
-                <h2 className="font-sans font-medium text-foreground text-xl mb-6">
-                  Filters
-                </h2>
 
-                {/* Course Filter */}
+                <h2 className="font-sans font-medium text-foreground text-xl mb-6">Filters</h2>
+
+                {/* COURSE FILTER */}
                 <div className="mb-6">
-                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">
-                    COURSE
-                  </h3>
+                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">COURSE</h3>
+
                   <div className="space-y-2">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setSelectedCourse(null);
-                        setCurrentPage(1);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-lg font-sans transition-colors ${selectedCourse === null
-                        ? 'bg-primary text-foreground'
-                        : 'text-muted-foreground hover:bg-background'
-                        }`}
+                    {/* ALL */}
+                    <FilterButton
+                      active={selectedCourse === null}
+                      onClick={() => { setSelectedCourse(null); setCurrentPage(1); }}
                     >
                       All Courses
-                    </motion.button>
+                    </FilterButton>
+
+                    {/* REAL COURSES FROM BACKEND */}
                     {courses.map((course) => {
-                      const courseTaskCount = tasks.filter(t => t.courseId === course.id).length;
+                      const count = tasks.filter(t => t.courseIds.includes(course.id)).length;
+
+                      if (count === 0) return null;
+
                       return (
-                        <motion.button
+                        <FilterButton
                           key={course.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            setSelectedCourse(course.id);
-                            setCurrentPage(1);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-lg font-sans transition-colors flex items-center justify-between ${selectedCourse === course.id
-                            ? 'bg-primary text-foreground'
-                            : 'text-muted-foreground hover:bg-background'
-                            }`}
+                          active={selectedCourse === course.id}
+                          onClick={() => { setSelectedCourse(course.id); setCurrentPage(1); }}
                         >
-                          <span className="truncate">{course.title}</span>
-                          <span className="text-xs ml-2">({courseTaskCount})</span>
-                        </motion.button>
+                          <span className="truncate">{course.name}</span>
+                          <span className="text-xs ml-2">({count})</span>
+                        </FilterButton>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Difficulty Filter */}
-                <div>
-                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">
-                    DIFFICULTY
-                  </h3>
+                {/* DIFFICULTY FILTER */}
+                <div className="mb-6">
+                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">DIFFICULTY</h3>
+
                   <div className="space-y-2">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setSelectedDifficulty(null);
-                        setCurrentPage(1);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-lg font-sans transition-colors ${selectedDifficulty === null
-                        ? 'bg-primary text-foreground'
-                        : 'text-muted-foreground hover:bg-background'
-                        }`}
+                    <FilterButton
+                      active={selectedDifficulty === null}
+                      onClick={() => { setSelectedDifficulty(null); setCurrentPage(1); }}
                     >
                       All Levels
-                    </motion.button>
-                    {['Easy', 'Medium', 'Hard'].map((difficulty) => {
-                      const difficultyCount = tasks.filter(t => t.difficulty === difficulty).length;
-                      const color = difficulty === 'Easy' ? '#ACE798' : difficulty === 'Medium' ? '#FFEE9C' : '#FE6868';
+                    </FilterButton>
+
+                    {([0, 1, 2] as const).map(difficulty => {
+                      const diff = difficulty as Difficulty;
+                      const count = tasks.filter(t => t.difficulty === diff).length;
+
                       return (
-                        <motion.button
+                        <FilterButton
                           key={difficulty}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          active={selectedDifficulty === diff}
                           onClick={() => {
-                            setSelectedDifficulty(difficulty);
+                            setSelectedDifficulty(diff);
                             setCurrentPage(1);
                           }}
-                          className={`w-full text-left px-3 py-2 rounded-lg font-sans transition-colors flex items-center justify-between ${selectedDifficulty === difficulty
-                            ? 'bg-primary text-foreground'
-                            : 'text-muted-foreground hover:bg-background'
-                            }`}
                         >
-                          <span className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                            {difficulty}
-                          </span>
-                          <span className="text-xs">({difficultyCount})</span>
-                        </motion.button>
+                          {DifficultyLabel[diff]} ({count})
+                        </FilterButton>
                       );
                     })}
                   </div>
                 </div>
+
+                {/* TAG FILTER */}
+                <div>
+                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">TAGS</h3>
+
+                  <div className="space-y-2">
+                    <FilterButton
+                      active={selectedTag === null}
+                      onClick={() => { setSelectedTag(null); setCurrentPage(1); }}
+                    >
+                      All Tags
+                    </FilterButton>
+
+                    {tags.map((tag) => {
+                      const count = tasks.filter(t =>
+                        t.tagIds && t.tagIds.includes(tag.id)
+                      ).length;
+
+                      if (count === 0) return null;
+
+                      return (
+                        <FilterButton
+                          key={tag.id}
+                          active={selectedTag === tag.id}
+                          onClick={() => {
+                            setSelectedTag(tag.id);
+                            setCurrentPage(1);
+                          }}
+                        >
+                          <span className="truncate">{tag.name}</span>
+                          <span className="text-xs ml-2">({count})</span>
+                        </FilterButton>
+                      );
+                    })}
+                  </div>
+                </div>
+
               </div>
             </motion.div>
 
-            {/* Main Content */}
+            {/* MAIN CONTENT */}
             <div className="flex-1 min-w-0">
-              {/* Search Bar */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="mb-6"
-              >
-                <div className="box-border content-stretch flex items-center justify-between px-4 py-3 relative rounded-xl shrink-0 w-full bg-transparent">
-                  <div aria-hidden="true" className="absolute border border-muted border-solid inset-0 pointer-events-none rounded-xl" />
-                  <input
-                    type="text"
-                    placeholder="Search tasks by name..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-transparent border-none outline-none text-foreground placeholder-[#6b6b6b] flex-1 font-sans"
-                  />
-                  <Search className="w-5 h-5 text-muted-foreground" />
-                </div>
-              </motion.div>
 
-              {/* Tasks List */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="bg-card content-stretch flex flex-col items-start relative rounded-2xl shrink-0 w-full border border-muted overflow-hidden mb-6"
-              >
-                {displayedTasks.length > 0 ? (
-                  displayedTasks.map((task, index) => (
-                    <div key={task.id} className="w-full">
-                      <Link
-                        to={`/tasks/${task.id}`}
-                        className="content-stretch flex items-center relative shrink-0 w-full hover:bg-card-hover transition-colors group"
-                      >
-                        {/* Completion Indicator */}
-                        <div className="px-4 py-4">
-                          {task.completed ? (
-                            <CheckCircle2 className="w-5 h-5 text-success" />
-                          ) : (
-                            <Circle className="w-5 h-5 text-muted group-hover:text-primary transition-colors" />
-                          )}
-                        </div>
+              {/* SEARCH */}
+              <SearchBox
+                value={searchQuery}
+                onChange={setSearchQuery}
+              />
 
-                        {/* Task Info */}
-                        <div className="box-border content-stretch flex gap-2 h-full items-center py-4 pr-4 relative flex-1 min-w-0">
-                          <div className="content-stretch flex flex-col gap-1 items-start relative shrink-0 min-w-0 flex-1">
-                            <p className="font-['Plus_Jakarta_Sans',sans-serif] font-normal leading-[1.4] relative shrink-0 text-primary text-xs">
-                              {task.id}
-                            </p>
-                            <p className="font-mono font-medium leading-normal relative text-[#f6f6f6] text-base md:text-lg truncate w-full">
-                              {task.title}
-                            </p>
-                            <p className="font-sans text-[#6b6b6b] text-sm">
-                              {task.category}
-                            </p>
-                          </div>
-                        </div>
+              {/* TASKS LIST */}
+              <TaskListBox tasks={displayedTasks} />
 
-                        {/* Difficulty Badge */}
-                        <div className="px-4 py-4 flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{
-                                backgroundColor:
-                                  task.difficulty === 'Easy'
-                                    ? '#ACE798'
-                                    : task.difficulty === 'Medium'
-                                      ? '#FFEE9C'
-                                      : '#FE6868'
-                              }}
-                            />
-                            <p className="font-sans font-normal text-[#f6f6f6] text-sm hidden md:block">
-                              {task.difficulty}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
+              {/* PAGINATION */}
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onChange={setCurrentPage}
+              />
 
-                      {/* Separator */}
-                      {index < displayedTasks.length - 1 && (
-                        <div className="h-px bg-muted w-full" />
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="w-full py-16 text-center">
-                    <p className="font-sans text-[#6b6b6b] text-lg">
-                      No tasks found matching your filters
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
-                  className="flex items-center justify-between"
-                >
-                  <div className="font-sans text-muted-foreground">
-                    Page <span className="text-primary">{currentPage}</span> of {totalPages}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 bg-card border border-muted rounded-lg font-sans text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary transition-colors"
-                    >
-                      Previous
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 bg-card border border-muted rounded-lg font-sans text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary transition-colors"
-                    >
-                      Next
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
             </div>
           </div>
+
         </motion.div>
       </div>
     </div>

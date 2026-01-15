@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ProfileDropdown } from './ProfileDropdown';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Navigation() {
   const location = useLocation();
@@ -19,7 +20,7 @@ export function Navigation() {
   };
 
   return (
-    <div className="bg-black box-border flex items-center h-[60px] px-4 md:pl-[82px] md:pr-[76px] w-full">
+    <div className="bg-primary-background box-border flex items-center h-[60px] px-4 md:pl-[82px] md:pr-[76px] w-full">
       <div className="flex gap-4 md:gap-8">
         {navItems.map((item) => (
           <Link
@@ -27,7 +28,7 @@ export function Navigation() {
             to={item.path}
             className={`font-sans font-medium text-[16px] md:text-[20px] text-center transition-colors ${isActive(item.path)
               ? 'text-foreground'
-              : 'text-[#9e9e9e] hover:text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
               }`}
             style={{ fontVariationSettings: "'wdth' 100" }}
           >
@@ -36,8 +37,9 @@ export function Navigation() {
         ))}
       </div>
 
-      <div className="ml-auto">
+      <div className="ml-auto gap-4 flex">
         <ProfileDropdown />
+        <ThemeToggle />
       </div>
 
     </div>
