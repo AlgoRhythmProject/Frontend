@@ -1,9 +1,8 @@
 import {useEffect, useState} from 'react';
 import { Panel, Group } from "react-resizable-panels";
 import { CodeEditor } from "@/components/CodeEditor.tsx";
-import { Play, Pause, Square, Code2, Eraser } from 'lucide-react';
+import { Play, Code2, Eraser } from 'lucide-react';
 import { useGraph } from '@/hooks/useGraph';
-
 import { useAlgorithmRunner } from '@/hooks/useAlgorithmRunner.ts';
 import { GraphCanvas } from '@/components/Visualizations/GraphCanvas';
 import { Toolbar } from '@/components/Visualizations/Toolbar';
