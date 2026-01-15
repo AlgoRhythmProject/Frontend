@@ -6,11 +6,9 @@ import { useGraph } from '@/hooks/useGraph';
 import { useAlgorithmRunner } from '@/hooks/useAlgorithmRunner.ts';
 import { GraphCanvas } from '@/components/Visualizations/GraphCanvas';
 import { Toolbar } from '@/components/Visualizations/Toolbar';
-import {useGraphTour} from "@/hooks/useGraphVisualizerTour.ts";
+import { useGraphTour } from "@/hooks/useGraphVisualizerTour.ts";
 
 const DEFAULT_CODE = `using Graph;
-/*
-using Graph;
 /*
     API:
     public interface IGraph
@@ -22,7 +20,7 @@ using Graph;
         Task SetEdgeLabel(string fromId, string toId, string label);
         Task Log(string message);
         Task Sleep(int ms);
-        List<NodeDto> GetNeighbors(string nodeId);
+        List<Node> GetNeighbors(string nodeId);
     }
     
    public class Edge
@@ -90,7 +88,7 @@ public class Solution
 }
 `;
 
-const GraphVisualizer = () => {
+export const GraphVisualizer = () => {
     const { startTour } = useGraphTour();
 
     useEffect(() => {
@@ -139,7 +137,7 @@ const GraphVisualizer = () => {
         // Add edge mode
         if (mode === 'addEdge') {
             if (edgeFromId) {
-                graph.addEdge(edgeFromId, node.id, parseInt(edgeWeight) || 1);
+                graph.addEdge(edgeFromId, node.id, Number.parseInt(edgeWeight) || 1);
                 setEdgeFromId(null);
             } else {
                 setEdgeFromId(node.id);
@@ -184,9 +182,9 @@ const GraphVisualizer = () => {
     };
 
     return (
-        <div className="flex h-screen bg-slate-800 text-slate-100 overflow-hidden font-sans">
+        <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans transition-colors duration-300">
             {/* Left sidebar - Tools */}
-            <div className="border-r border-slate-800 z-10"  id="toolbar">
+            <div className="border-r border-border z-10 bg-card" id="toolbar">
                 <Toolbar
                     mode={mode}
                     setMode={setMode}
@@ -203,20 +201,20 @@ const GraphVisualizer = () => {
             {/* Center + Right - Resizable panels */}
             <Group orientation="horizontal" className="flex-1">
                 {/* Visualization panel */}
-                <Panel defaultSize={66} minSize={30} className="bg-slate-800" id="canvas">
+                <Panel defaultSize={66} minSize={30} className="bg-background relative" id="canvas">
                     <main className="h-full relative flex flex-col">
                         {/* Info bar */}
                         <div className="absolute top-4 left-4 z-10 flex gap-2 pointer-events-none">
-                            <div className="bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-mono text-slate-400 shadow-lg">
-                                Nodes: <span className="text-white">{graph.nodes.length}</span>
+                            <div className="bg-card/90 backdrop-blur px-3 py-1.5 rounded-lg border border-border text-xs font-mono text-muted-foreground shadow-soft">
+                                Nodes: <span className="text-foreground font-bold">{graph.nodes.length}</span>
                             </div>
                             {startNodeId && (
-                                <div className="bg-indigo-900/80 backdrop-blur px-3 py-1.5 rounded-lg border border-indigo-700/50 text-xs font-mono text-indigo-200 shadow-lg animate-in fade-in">
+                                <div className="bg-primary/10 backdrop-blur px-3 py-1.5 rounded-lg border border-primary/20 text-xs font-mono text-primary shadow-soft animate-in fade-in">
                                     Start: {graph.nodes.find(n => n.id === startNodeId)?.label}
                                 </div>
                             )}
                             {endNodeId && (
-                                <div className="bg-indigo-900/80 backdrop-blur px-3 py-1.5 rounded-lg border border-indigo-700/50 text-xs font-mono text-indigo-200 shadow-lg animate-in fade-in">
+                                <div className="bg-primary/10 backdrop-blur px-3 py-1.5 rounded-lg border border-primary/20 text-xs font-mono text-primary shadow-soft animate-in fade-in">
                                     End: {graph.nodes.find(n => n.id === endNodeId)?.label}
                                 </div>
                             )}
@@ -244,16 +242,16 @@ const GraphVisualizer = () => {
 
                         {/* Logs panel */}
                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl pointer-events-none" id="logs">
-                            <div className="bg-slate-900/85 backdrop-blur border border-slate-700/50 p-4 rounded-2xl shadow-2xl pointer-events-auto flex flex-col-reverse gap-1 max-h-40 overflow-y-auto custom-scrollbar">
+                            <div className="bg-card/90 backdrop-blur border border-border p-4 rounded-2xl shadow-soft pointer-events-auto flex flex-col-reverse gap-1 max-h-40 overflow-y-auto custom-scrollbar">
                                 {runner.visualState.logs.length === 0 ? (
-                                    <span className="text-slate-600 text-xs text-center py-2">
+                                    <span className="text-muted-foreground text-xs text-center py-2">
                                         Ready to run... logs will appear here.
                                     </span>
                                 ) : (
                                     runner.visualState.logs.map((log, i) => (
                                         <div
                                             key={i}
-                                            className="text-[11px] font-mono text-slate-300 border-l-2 border-slate-700 pl-2"
+                                            className="text-[11px] font-mono text-foreground border-l-2 border-primary pl-2"
                                         >
                                             {log}
                                         </div>
@@ -265,37 +263,36 @@ const GraphVisualizer = () => {
                 </Panel>
 
                 {/* Code editor panel */}
-                <Panel defaultSize={34} minSize={20} className="bg-slate-950" id="editor">
-                    <aside className="h-full border-l border-slate-800 flex flex-col bg-[#1e1e1e] shadow-2xl">
+                <Panel defaultSize={34} minSize={20} className="bg-card border-l border-border" id="editor">
+                    <aside className="h-full flex flex-col shadow-soft">
                         {/* Header */}
-                        <header className="h-14 border-b border-slate-800 bg-slate-900 flex items-center justify-between px-4">
-                            <div className="flex items-center gap-2 text-indigo-400 font-bold select-none">
+                        <header className="h-14 border-b border-border bg-muted/30 flex items-center justify-between px-4">
+                            <div className="flex items-center gap-2 text-primary font-bold select-none">
                                 <Code2 size={18} />
                                 <span className="text-sm tracking-wide">ALGORITHM SCRIPT</span>
                             </div>
 
                             {/* Control buttons */}
-                            <div className="flex gap-2">
-                                    <button
-                                        onClick={handleRunCode}
-                                        disabled={runner.isRunning}
-                                        className={`
-                                            flex items-center gap-2 px-6 py-1.5 font-semibold text-xs uppercase tracking-wider rounded-lg transition-all shadow-lg 
-                                            ${runner.isRunning
-                                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-70 shadow-none' 
-                                                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/20'
-                                            }
-                                        `}
-                                    >
-                                        <Play size={14} fill="currentColor" />
-                                        {runner.isRunning ? 'Running...' : 'Run Code'}
-                                    </button>
-
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={handleRunCode}
+                                    disabled={runner.isRunning}
+                                    className={`
+                                        flex items-center gap-2 px-6 py-1.5 font-semibold text-xs uppercase tracking-wider rounded-lg transition-all shadow-lg 
+                                        ${runner.isRunning
+                                        ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-70 shadow-none'
+                                        : 'bg-success hover:brightness-110 text-white shadow-success/20'
+                                    }
+                                    `}
+                                >
+                                    <Play size={14} fill="currentColor" />
+                                    {runner.isRunning ? 'Running...' : 'Run Code'}
+                                </button>
                             </div>
                         </header>
 
                         {/* Editor */}
-                        <div className="flex-1 relative">
+                        <div className="flex-1 relative bg-card">
                             <CodeEditor
                                 value={userCode}
                                 onChange={(value) => setUserCode(value || "")}
@@ -305,10 +302,10 @@ const GraphVisualizer = () => {
                             {/* Reset button */}
                             <button
                                 onClick={handleResetCode}
-                                className="absolute bottom-4 right-6 p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg text-xs flex items-center gap-2 transition-colors opacity-50 hover:opacity-100"
+                                className="absolute bottom-4 right-6 p-2 bg-background hover:bg-muted text-muted-foreground hover:text-foreground border border-border rounded-lg text-xs flex items-center gap-2 transition-all opacity-70 hover:opacity-100 shadow-sm"
                                 title="Reset Code"
                             >
-                                <Eraser size={14}/> Reset
+                                <Eraser size={14} /> Reset
                             </button>
                         </div>
                     </aside>
@@ -317,5 +314,3 @@ const GraphVisualizer = () => {
         </div>
     );
 };
-
-export default GraphVisualizer;

@@ -27,9 +27,12 @@ export const Toolbar = ({
                             onRandomGraph,
                         }: ToolbarProps) => {
     return (
-        <aside className="w-80 bg-slate-900 border-r border-slate-800 p-6 flex flex-col gap-8 overflow-y-auto h-full">
+        <aside className="w-80 bg-background border-r border-border p-6 flex flex-col gap-8 overflow-y-auto h-full transition-colors duration-300">
+            {/* Editor Tools */}
             <section>
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Editor Tools</h3>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">
+                    Editor Tools
+                </h3>
                 <div className="grid grid-cols-2 gap-2">
                     <ToolbarButton
                         active={mode === 'select'}
@@ -62,41 +65,47 @@ export const Toolbar = ({
                     <ToolbarButton
                         active={mode === 'deleteEdge'}
                         onClick={() => setMode('deleteEdge')}
-                        icon={<Scissors/>}
+                        icon={<Scissors size={18}/>}
                         disabled={isRunning}
-                        label={"Delete edge"}
+                        label="Delete edge"
                     />
                     <ToolbarButton
                         active={false}
                         onClick={onRandomGraph}
-                        icon={<Shuffle/>}
+                        icon={<Shuffle size={18}/>}
                         disabled={isRunning}
-                        label={"Random graph"}
+                        label="Random graph"
                     />
                 </div>
             </section>
 
+            {/* Edge Weight Input */}
             {mode === 'addEdge' && (
                 <section
-                    className="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 animate-in fade-in slide-in-from-top-2">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-2">New Edge Weight</label>
+                    className="bg-card p-4 rounded-xl border border-border shadow-soft animate-in fade-in slide-in-from-top-2">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase block mb-2">
+                        New Edge Weight
+                    </label>
                     <input
                         type="number"
                         min="1"
                         value={edgeWeight}
                         onChange={(e) => setEdgeWeight(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                        className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground focus:ring-2 focus:ring-primary transition-all outline-none"
                     />
                 </section>
             )}
 
+            {/* Node Operations */}
             <section>
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Node Operations</h3>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">
+                    Node Operations
+                </h3>
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={onSetStart}
                         disabled={!selectedNodeId || isRunning}
-                        className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600/10 hover:bg-blue-600 text-blue-500 hover:text-white border border-blue-600/30 rounded-xl transition-all font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
+                        className="flex items-center justify-center gap-2 w-full py-3 bg-info/10 hover:bg-info text-info hover:text-white border border-info/30 rounded-xl transition-all font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                     >
                         <Flag size={18} />
                         Set as Start
@@ -104,14 +113,14 @@ export const Toolbar = ({
                     <button
                         onClick={onSetEnd}
                         disabled={!selectedNodeId || isRunning}
-                        className="flex items-center justify-center gap-2 w-full py-3 bg-rose-600/10 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-600/30 rounded-xl transition-all font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
+                        className="flex items-center justify-center gap-2 w-full py-3 bg-error/10 hover:bg-error text-error hover:text-white border border-error/30 rounded-xl transition-all font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                     >
                         <Target size={18} />
                         Set as End
                     </button>
                 </div>
                 {!selectedNodeId && (
-                    <p className="text-[11px] text-slate-600 mt-3 text-center italic">
+                    <p className="text-[11px] text-muted-foreground mt-3 text-center italic">
                         Select a node on the canvas to see actions
                     </p>
                 )}
@@ -119,20 +128,20 @@ export const Toolbar = ({
 
             {/* Legend / Status */}
             <section className="mt-auto">
-                <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4">
-                    <h4 className="text-xs font-bold text-indigo-400 uppercase mb-3">Quick Guide</h4>
-                    <ul className="text-[11px] text-slate-400 space-y-2">
-                        <li className="flex gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1" />
-                            Blue nodes are source points.
+                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 shadow-soft">
+                    <h4 className="text-xs font-bold text-primary uppercase mb-3">Quick Guide</h4>
+                    <ul className="text-[11px] text-muted-foreground space-y-2">
+                        <li className="flex gap-2 items-start">
+                            <span className="w-2 h-2 rounded-full bg-info mt-1 shrink-0" />
+                            <span>Blue nodes are source points.</span>
                         </li>
-                        <li className="flex gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1" />
-                            Red nodes are target points.
+                        <li className="flex gap-2 items-start">
+                            <span className="w-2 h-2 rounded-full bg-error mt-1 shrink-0" />
+                            <span>Red nodes are target points.</span>
                         </li>
-                        <li className="flex gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1" />
-                            Drag nodes in 'Move' mode to layout.
+                        <li className="flex gap-2 items-start">
+                            <span className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0" />
+                            <span>Drag nodes in 'Move' mode to layout.</span>
                         </li>
                     </ul>
                 </div>

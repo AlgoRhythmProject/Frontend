@@ -279,7 +279,7 @@ export const GraphCanvas = ({
     }, [draw]);
 
     return (
-        <div ref={containerRef} className="w-full h-full bg-slate-800">
+        <div ref={containerRef} className="w-full h-full bg-background">
             <canvas
                 ref={canvasRef}
                 className="block cursor-crosshair touch-none"

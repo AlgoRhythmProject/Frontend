@@ -16,38 +16,210 @@ export interface RegisterRequest {
 export interface LoginResponse {
     token: string;
     expiresUtc: string;
+    refreshToken: string;
+    refreshTokenExpiresUtc: string;
     user: User;
+}
+
+export interface RefreshTokenResponse {
+    accessToken: string;
+    accessTokenExpiresUtc: string;
+    refreshToken: string;
+    refreshTokenExpiresUtc: string;
 }
 
 export interface RegisterResponse {
     message: string;
 }
 
+export interface ErrorResponse {
+    code: string;
+    message: string;
+}
+
+export interface VerifyEmailRequest {
+    email: string;
+    code: string;
+}
+
+export interface ResendVerificationCodeRequest {
+    email: string;
+}
+
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface ResetPasswordRequest {
+    email: string;
+    code: string;
+    newPassword: string;
+}
+
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+}
+
+export interface UpdateProfileRequest {
+    firstName: string;
+    lastName: string;
+    email: string;
+}
+
+export class ApiError extends Error {
+    code: string;
+    status?: number;
+
+    constructor(code: string, message: string, status?: number) {
+        super(message);
+        this.name = 'ApiError';
+        this.code = code;
+        this.status = status;
+    }
+}
+
 export const authApi = {
     login: async (credentials: LoginRequest): Promise<User> => {
-        const response = await apiClient.post<LoginResponse>("/Authentication/login", credentials);
-        const { token, user } = response.data;
-        return { ...user, token };
-    },
-    register: async (data: RegisterRequest): Promise<boolean> => {
         try {
-            const response = await apiClient.post("/Authentication/register", data);
-            return response.status >= 200 && response.status < 300;
-        } catch {
-            return false;
+            const response = await apiClient.post<LoginResponse>("/Authentication/login", credentials);
+            const { token, user } = response.data;
+            return { ...user, token };
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Login failed. Please try again.',
+                error.response?.status
+            );
         }
     },
-    verifyEmail: async (email: string, code: string): Promise<User> => {
-        const response = await apiClient.post("/Authentication/verify-email", { email, code });
-        const { token, user } = response.data;
-        return { ...user, token };
-    },
-    logout: async (): Promise<boolean> => {
+
+    register: async (data: RegisterRequest): Promise<void> => {
         try {
-            const response = await apiClient.post("/Authentication/logout");
-            return response.status >= 200 && response.status < 300;
-        } catch {
-            return false;
+            await apiClient.post<RegisterResponse>("/Authentication/register", data);
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Registration failed. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    verifyEmail: async (email: string, code: string): Promise<User> => {
+        try {
+            const response = await apiClient.post<LoginResponse>("/Authentication/verify-email", {
+                email,
+                code
+            });
+            const { token, user } = response.data;
+            return { ...user, token };
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Email verification failed. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    resendVerificationCode: async (email: string): Promise<void> => {
+        try {
+            await apiClient.post("/Authentication/resend-verification-code", { email });
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to resend verification code. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    forgotPassword: async (email: string): Promise<void> => {
+        try {
+            await apiClient.post("/Authentication/forgot-password", { email });
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to send reset code. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
+        try {
+            await apiClient.post("/Authentication/reset-password", data);
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to reset password. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    changePassword: async (data: ChangePasswordRequest): Promise<void> => {
+        try {
+            await apiClient.post("/Authentication/change-password", data);
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to change password. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    updateProfile: async (data: UpdateProfileRequest): Promise<User> => {
+        try {
+            const response = await apiClient.put<User>("/Authentication/update-profile", data);
+            return response.data;
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Failed to update profile. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    logout: async (): Promise<void> => {
+        try {
+            await apiClient.post("/Authentication/logout");
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            throw new ApiError(
+                errorData?.code || 'UNKNOWN_ERROR',
+                errorData?.message || 'Logout failed. Please try again.',
+                error.response?.status
+            );
+        }
+    },
+
+    refreshToken: async (): Promise<string> => {
+        try {
+            const response = await apiClient.post<RefreshTokenResponse>("/Authentication/refresh-token");
+            return response.data.accessToken;
+        } catch (error: any) {
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'INVALID_REFRESH_TOKEN',
+                errorData?.message || 'Session expired. Please login again.',
+                error.response?.status
+            );
         }
     }
 };

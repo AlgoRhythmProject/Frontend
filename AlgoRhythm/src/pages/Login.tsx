@@ -10,7 +10,8 @@ import { AuthenticationFooter } from "../components/Authentication/Authenticatio
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store";
 import { login } from "../store/userSlice";
-import { authApi } from "../api/authApi";
+import { authApi, ApiError } from "../api/authApi";
+import { adminApi } from "../api/adminApi";
 import { Particles } from "@/components/ui/shadcn-io/particles";
 
 export function Login() {
@@ -37,17 +38,70 @@ export function Login() {
     setIsLoading(true);
     try {
       const user = await authApi.login({ email, password });
-      dispatch(login(user));
+
+      localStorage.setItem("token", user.token);
+      localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("isAuthenticated", "true");
-      navigate("/");
+
+      if (user.token) {
+        try {
+          const tokenParts = user.token.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            if (payload.exp) {
+              const expiresUtc = new Date(payload.exp * 1000).toISOString();
+              localStorage.setItem("tokenExpiresAt", expiresUtc);
+            }
+          }
+        } catch (decodeError) {
+          console.error('Failed to decode token:', decodeError);
+        }
+      }
+
+      dispatch(login(user));
+
+      // Sprawdź status admina
+      try {
+        const adminStatus = await adminApi.isCurrentUserAdmin();
+        localStorage.setItem("isAdmin", JSON.stringify(adminStatus.isAdmin));
+
+        // Przekieruj do odpowiedniej strony
+        if (adminStatus.isAdmin) {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      } catch (adminCheckError) {
+        console.error('Failed to check admin status:', adminCheckError);
+        // W przypadku błędu sprawdzania statusu, przekieruj do dashboardu
+        navigate("/");
+      }
     } catch (err: any) {
-      setError("Invalid email or password");
+      if (err instanceof ApiError) {
+        switch (err.code) {
+          case 'USER_NOT_FOUND':
+            setError("Invalid email. Try again or make a new account.");
+            break;
+          case 'INVALID_PASSWORD':
+            setError("Invalid password. Try again.");
+            break;
+          case 'EMAIL_NOT_VERIFIED':
+            setError("Please verify your email address before logging in.");
+            setTimeout(() => {
+              navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+            }, 2000);
+            break;
+          default:
+            setError(err.message || "Login failed. Please try again.");
+        }
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
       console.error("Login failed:", err);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -81,11 +135,28 @@ export function Login() {
                 placeholder="••••••••"
                 delay={0.5}
               />
+
+              {/* Forgot Password Link */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-right"
+              >
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="font-sans text-sm text-primary-light hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </motion.div>
+
               {error && <p className="text-error text-sm">{error}</p>}
               <AuthenticationButton isLoading={isLoading} text="Login" />
             </form>
             <AuthenticationFooter
-              promptText="Don’t have an account?"
+              promptText="Don't have an account?"
               linkText="Sign up"
               onLinkClick={() => navigate("/register")}
             />
@@ -95,7 +166,7 @@ export function Login() {
               transition={{ delay: 0.8 }}
               className="mt-6 text-center"
             >
-              <p className="font-sans text-[#6b6b6b] text-sm">
+              <p className="font-sans text-secondary-foreground text-sm">
                 Your place to learn algorithms and data structures
               </p>
             </motion.div>
