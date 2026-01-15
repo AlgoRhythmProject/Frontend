@@ -10,6 +10,7 @@ import { courseProgressApi } from '../api/courseProgressApi';
 import { taskApi } from '../api/taskApi';
 import { useState, useEffect } from 'react';
 import type { Task } from '@/types/Task';
+import { RecentSubmissions } from '@/components/RecentSubmissions';
 
 export function Profile() {
   const navigate = useNavigate();
@@ -219,48 +220,54 @@ export function Profile() {
               )}
             </motion.div>
 
-            {/* Recent Activity */}
+            {/* Recent Submissions */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <RecentSubmissions limit={5} />
+            </motion.div>
+
+
+          </div>
+
+
+
+          {/* Right Column - Badges */}
+          <div className="space-y-6">
+
+            {/* Settings */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               className="bg-card border border-muted rounded-xl p-6"
             >
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
-                Recent Activity
+                Settings
               </h2>
-              {recentActivity.length > 0 ? (
-                <div className="space-y-3">
-                  {recentActivity.map((activity, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3 bg-background rounded-lg">
-                      {activity.completed ? (
-                        <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-error shrink-0" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-sans font-medium text-foreground truncate">
-                          {activity.task}
-                        </p>
-                        <p className="font-sans text-muted-foreground text-sm">
-                          {activity.date}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="font-sans text-muted-foreground text-sm">
-                    No recent activity yet. Start solving tasks!
-                  </p>
-                </div>
-              )}
+              <div className="space-y-2">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate('/profile/edit')}
+                  className="w-full text-left px-4 py-3 bg-background hover:bg-card-hover cursor-pointer rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4 text-primary" />
+                  <p className="font-sans font-medium text-foreground">Edit Profile</p>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-3 bg-background hover:bg-error/20 cursor-pointer rounded-lg transition-colors flex items-center gap-2 group"
+                >
+                  <LogOut className="w-4 h-4 text-error" />
+                  <p className="font-sans font-medium text-error">Logout</p>
+                </motion.button>
+              </div>
             </motion.div>
-          </div>
-
-          {/* Right Column - Badges */}
-          <div className="space-y-6">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -338,37 +345,6 @@ export function Profile() {
               )}
             </motion.div>
 
-            {/* Settings */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-card border border-muted rounded-xl p-6"
-            >
-              <h2 className="font-sans font-medium text-foreground text-xl mb-4">
-                Settings
-              </h2>
-              <div className="space-y-2">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate('/profile/edit')}
-                  className="w-full text-left px-4 py-3 bg-background hover:bg-card-hover cursor-pointer rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <Settings className="w-4 h-4 text-primary" />
-                  <p className="font-sans font-medium text-foreground">Edit Profile</p>
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-3 bg-background hover:bg-error/20 cursor-pointer rounded-lg transition-colors flex items-center gap-2 group"
-                >
-                  <LogOut className="w-4 h-4 text-error" />
-                  <p className="font-sans font-medium text-error">Logout</p>
-                </motion.button>
-              </div>
-            </motion.div>
           </div>
         </div>
       </div>
