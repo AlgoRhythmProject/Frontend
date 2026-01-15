@@ -63,7 +63,7 @@ public class Solution
             await graph.SetNodeColor(current, "#fbbf24"); // Yellow
             await graph.Sleep(1000);
             
-            var neighbors = graph.GetNeighbors(current, true);
+            var neighbors = await graph.GetNeighbors(current);
             foreach (var neighbor in neighbors)
             {
                 if (!visited.Contains(neighbor.Id))
