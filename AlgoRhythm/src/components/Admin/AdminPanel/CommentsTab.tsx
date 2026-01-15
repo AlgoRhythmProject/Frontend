@@ -90,11 +90,9 @@ export function CommentsTab({ comments, tasks, loading }: CommentsTabProps) {
                             View and monitor all user comments across tasks
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="px-4 py-2 bg-primary/30 rounded-lg">
-                            <p className="font-sans text-sm text-muted-foreground">Total Comments</p>
-                            <p className="font-sans font-medium text-foreground text-2xl">{comments.length}</p>
-                        </div>
+                    <div className="px-4 py-2 bg-primary/30 rounded-lg flex items-center gap-3">
+                        <p className="font-sans font-medium text-foreground text-2xl">{comments.length}</p>
+                        <p className="font-sans text-sm text-muted-foreground">Total Comments</p>
                     </div>
                 </div>
 
