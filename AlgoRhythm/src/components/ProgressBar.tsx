@@ -14,7 +14,7 @@ interface ProgressBarProps {
 export function ProgressBar({
     value,
     total,
-    color = "primary",
+    color = "bg-primary",
     animate = true,
     delay = 0,
     height = "h-2",
@@ -22,8 +22,17 @@ export function ProgressBar({
 }: Readonly<ProgressBarProps>) {
     const percentage = total > 0 ? (value / total) * 100 : 0;
 
-    const barClass = clsx(`bg-${color}`, height, "rounded-full");
-    const containerClass = clsx(backgroundClassName, height, "rounded-full overflow-hidden");
+    const barClass = clsx(
+        color,
+        height,
+        "rounded-full"
+    );
+
+    const containerClass = clsx(
+        backgroundClassName,
+        height,
+        "rounded-full overflow-hidden"
+    );
 
     if (animate) {
         return (

@@ -1,10 +1,9 @@
-import {Editor, type Monaco, type OnMount} from '@monaco-editor/react';
-import {useEffect, useState} from "react";
-import {useMonacoRoslyn} from "@/hooks/useMonacoRoslynEditor.ts";
+import { Editor, type Monaco, type OnMount } from '@monaco-editor/react';
+import { useEffect, useState } from "react";
+import { useMonacoRoslyn } from "@/hooks/useMonacoRoslynEditor.ts";
 import { useRoslynLanguageServer } from "@/hooks/useRoslynLanguageServer.ts";
 import type { editor } from 'monaco-editor';
 import type { ExecutionError } from "@/types/CodeAnalysis.ts";
-
 
 interface CodeEditorProps {
     value: string;

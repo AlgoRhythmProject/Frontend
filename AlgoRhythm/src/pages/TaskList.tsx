@@ -1,47 +1,61 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, CheckCircle2, Circle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { PageHeader } from '../components/PageHeader';
 import { StatBox } from '../components/StatBox';
 
 import { taskApi } from '../api/taskApi';
 import { courseApi } from '../api/courseApi';
+import { tagApi, type Tag } from '../api/tagApi';
+import { courseProgressApi } from '../api/courseProgressApi';
 import type { Course } from '@/types/Course';
 import type { Task } from '@/types/Task';
+import { DifficultyLabel, type Difficulty } from '@/utils/difficulty';
+import { FilterButton } from '@/components/Tasks/FilterButton';
+import { Pagination } from '@/components/Tasks/Pagination';
+import { SearchBox } from '@/components/Tasks/SearchBox';
+import { TaskListBox } from '@/components/Tasks/TaskListBox';
 
 type TaskWithCourses = Task & {
   courseIds: string[];
+  completed: boolean;
 };
 
 export function TaskList() {
   const [tasks, setTasks] = useState<TaskWithCourses[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [, setCompletedTaskIds] = useState<Set<string>>(new Set());
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // FETCH TASKS + COURSES
+  // FETCH TASKS + COURSES + TAGS + COMPLETED TASKS
   useEffect(() => {
     const fetchAll = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        const [taskResp, courseResp] = await Promise.all([
-          taskApi.getAll(),
+        const [taskResp, courseResp, tagResp, completedResp] = await Promise.all([
+          taskApi.getPublished(),
           courseApi.getAll(),
+          tagApi.getAll(),
+          courseProgressApi.getMyCompletedTasks(),
         ]);
 
         const tasks = taskResp;
         const courses = courseResp;
+        const tags = tagResp;
+        const completedIds = new Set(completedResp.completedTaskIds);
 
         const taskToCourses: Record<string, string[]> = {};
 
@@ -56,11 +70,14 @@ export function TaskList() {
 
         const tasksWithCourseIds: TaskWithCourses[] = tasks.map(t => ({
           ...t,
-          courseIds: taskToCourses[t.id] ?? []
+          courseIds: taskToCourses[t.id] ?? [],
+          completed: completedIds.has(t.id)
         }));
 
         setTasks(tasksWithCourseIds);
         setCourses(courses);
+        setTags(tags);
+        setCompletedTaskIds(completedIds);
       } catch (err: any) {
         console.error('Failed to load tasks or courses:', err);
         setError(err.response?.data?.message || 'Failed to load data. Please try again.');
@@ -80,9 +97,12 @@ export function TaskList() {
       !selectedCourse || task.courseIds.includes(selectedCourse);
 
     const matchesDifficulty =
-      !selectedDifficulty || task.difficulty === selectedDifficulty;
+      selectedDifficulty === null || task.difficulty === selectedDifficulty;
 
-    return matchesSearch && matchesCourse && matchesDifficulty;
+    const matchesTag =
+      !selectedTag || (task.tagIds && task.tagIds.includes(selectedTag));
+
+    return matchesSearch && matchesCourse && matchesDifficulty && matchesTag;
   });
 
   const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
@@ -114,7 +134,7 @@ export function TaskList() {
           <p className="text-error text-xl mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-[#7952e5] transition-colors cursor-pointer"
+            className="bg-primary text-foreground px-6 py-2 rounded-lg hover:bg-primary-hover transition-colors cursor-pointer"
           >
             Retry
           </button>
@@ -187,8 +207,8 @@ export function TaskList() {
                 </div>
 
                 {/* DIFFICULTY FILTER */}
-                <div>
-                  <h3 className=" font-sans font-medium text-foreground text-sm mb-3">DIFFICULTY</h3>
+                <div className="mb-6">
+                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">DIFFICULTY</h3>
 
                   <div className="space-y-2">
                     <FilterButton
@@ -198,21 +218,62 @@ export function TaskList() {
                       All Levels
                     </FilterButton>
 
-                    {['Easy', 'Medium', 'Hard'].map(d => {
-                      const count = tasks.filter(t => t.difficulty === d).length;
+                    {([0, 1, 2] as const).map(difficulty => {
+                      const diff = difficulty as Difficulty;
+                      const count = tasks.filter(t => t.difficulty === diff).length;
 
                       return (
                         <FilterButton
-                          key={d}
-                          active={selectedDifficulty === d}
-                          onClick={() => { setSelectedDifficulty(d); setCurrentPage(1); }}
+                          key={difficulty}
+                          active={selectedDifficulty === diff}
+                          onClick={() => {
+                            setSelectedDifficulty(diff);
+                            setCurrentPage(1);
+                          }}
                         >
-                          {d} ({count})
+                          {DifficultyLabel[diff]} ({count})
                         </FilterButton>
                       );
                     })}
                   </div>
                 </div>
+
+                {/* TAG FILTER */}
+                <div>
+                  <h3 className="font-sans font-medium text-foreground text-sm mb-3">TAGS</h3>
+
+                  <div className="space-y-2">
+                    <FilterButton
+                      active={selectedTag === null}
+                      onClick={() => { setSelectedTag(null); setCurrentPage(1); }}
+                    >
+                      All Tags
+                    </FilterButton>
+
+                    {tags.map((tag) => {
+                      const count = tasks.filter(t =>
+                        t.tagIds && t.tagIds.includes(tag.id)
+                      ).length;
+
+                      if (count === 0) return null;
+
+                      return (
+                        <FilterButton
+                          key={tag.id}
+                          active={selectedTag === tag.id}
+                          onClick={() => {
+                            setSelectedTag(tag.id);
+                            setCurrentPage(1);
+                          }}
+                        >
+                          <span className="truncate">{tag.name}</span>
+                          <span className="text-xs ml-2">({count})</span>
+                        </FilterButton>
+                      );
+                    })}
+                  </div>
+                </div>
+
               </div>
             </motion.div>
 
@@ -241,140 +302,5 @@ export function TaskList() {
         </motion.div>
       </div>
     </div>
-  );
-}
-
-/* ----------- Reusable Small Components ----------- */
-
-function FilterButton({ active, onClick, children }: any) {
-  return (
-    <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={onClick}
-      className={`
-        w-full cursor-pointer text-left px-3 py-2 rounded-lg font-sans transition-colors flex items-center justify-between
-        ${active ? 'bg-primary text-foreground' : 'text-muted-foreground hover:bg-background'}
-      `}
-    >
-      {children}
-    </motion.button>
-  );
-}
-
-function SearchBox({ value, onChange }: any) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
-      className="mb-6"
-    >
-      <div className="box-border flex items-center px-4 py-3 relative rounded-xl bg-transparent">
-        <div aria-hidden="true" className="absolute border border-muted inset-0 pointer-events-none rounded-xl" />
-        <input
-          type="text"
-          placeholder="Search tasks by name..."
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="bg-transparent border-none outline-none text-foreground placeholder-[#6b6b6b] flex-1"
-        />
-        <Search className="w-5 h-5 text-muted-foreground" />
-      </div>
-    </motion.div>
-  );
-}
-
-function TaskListBox({ tasks }: { tasks: TaskWithCourses[] }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.3 }}
-      className="bg-card flex flex-col rounded-2xl border border-muted overflow-hidden mb-6"
-    >
-      {tasks.length > 0 ? (
-        tasks.map((task, index) => (
-          <div key={task.id} className="w-full">
-            <Link
-              to={`/tasks/${task.id}`}
-              className="flex items-center hover:bg-card-hover transition-colors group"
-            >
-              {/* Completion */}
-              <div className="px-4 py-4">
-                {task.completed ? (
-                  <CheckCircle2 className="w-5 h-5 text-success" />
-                ) : (
-                  <Circle className="w-5 h-5 text-muted group-hover:text-primary" />
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="flex flex-col flex-1 min-w-0 py-4 pr-4">
-                <p className="text-primary text-xs">{task.id}</p>
-                <p className="text-[#f6f6f6] text-lg truncate">{task.title}</p>
-                <p className="text-[#6b6b6b] text-sm">{task.category}</p>
-              </div>
-
-              {/* Difficulty */}
-              <div className="px-4 py-4 flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{
-                      backgroundColor:
-                        task.difficulty === 'Easy'
-                          ? '#ACE798'
-                          : task.difficulty === 'Medium'
-                            ? '#FFEE9C'
-                            : '#FE6868'
-                    }}
-                  />
-                  <p className="text-[#f6f6f6] text-sm hidden md:block">{task.difficulty}</p>
-                </div>
-              </div>
-            </Link>
-
-            {index < tasks.length - 1 && <div className="h-px bg-muted w-full" />}
-          </div>
-        ))
-      ) : (
-        <div className="w-full py-16 text-center">
-          <p className="text-[#6b6b6b] text-lg">No tasks found</p>
-        </div>
-      )}
-    </motion.div>
-  );
-}
-
-function Pagination({ totalPages, currentPage, onChange }: any) {
-  if (totalPages <= 1) return null;
-
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-between">
-      <div className="text-muted-foreground">Page <span className="text-primary">{currentPage}</span> of {totalPages}</div>
-
-      <div className="flex gap-2">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => onChange(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
-          className="px-4 py-2 bg-card border border-muted rounded-lg disabled:opacity-30 hover:border-primary"
-        >
-          Previous
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => onChange(Math.min(totalPages, currentPage + 1))}
-          disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-card border border-muted rounded-lg disabled:opacity-30 hover:border-primary"
-        >
-          Next
-        </motion.button>
-      </div>
-    </motion.div>
   );
 }

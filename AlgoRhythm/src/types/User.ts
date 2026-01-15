@@ -6,5 +6,5 @@ export interface User {
     createdAt: string;
     updatedAt?: string;
     isDeleted: boolean;
-    token?: string;
+    token: string;
 }
