@@ -134,12 +134,17 @@ export const useAlgorithmRunner = () => {
         }
     };
 
+    const reset = () => {
+        setVisualState({ nodeColors: {}, edgeColors: {}, edgeLabels: {}, logs: [] });
+    }
+
     return {
         visualState,
         isRunning,
         isPaused,
         run,
         togglePause,
-        stop
+        stop,
+        reset
     };
 };

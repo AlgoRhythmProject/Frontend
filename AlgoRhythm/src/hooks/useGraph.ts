@@ -125,6 +125,11 @@ export const useGraph = () => {
         setEdges(newEdges);
     }, []);
 
+    const clear = useCallback(() => {
+        setNodes([]);
+        setEdges([]);
+    }, []);
+
     return {
         nodes,
         edges,
@@ -136,6 +141,7 @@ export const useGraph = () => {
         moveNode,
         resetGraphState,
         updateNode,
-        generateRandomGraph
+        generateRandomGraph,
+        clear
     };
 };

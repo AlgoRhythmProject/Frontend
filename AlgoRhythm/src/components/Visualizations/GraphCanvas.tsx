@@ -123,10 +123,13 @@ export const GraphCanvas = ({
                 glowColor = visualState.nodeColors[node.id];
                 strokeColor = '#ffffff';
             } else if (node.isStart) {
-                fillColor = '#10b981'; // Emerald
-                glowColor = '#10b981';
+                fillColor = '#1086b9';
+                glowColor = '#104bb9';
+                strokeColor =  '#107eb9';
             } else if (node.isEnd) {
-                fillColor = '#ef4444'; // Red
+                fillColor = '#ef4444';
+                glowColor = '#f62626';
+                strokeColor =  '#ed3535';
             }
 
             if (selectedNodeId === node.id) {

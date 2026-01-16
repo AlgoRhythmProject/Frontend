@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import { Panel, Group } from "react-resizable-panels";
 import { CodeEditor } from "@/components/CodeEditor.tsx";
-import { Play, Code2, Eraser } from 'lucide-react';
+import { Play, Code2, Eraser, RefreshCcw, X } from 'lucide-react';
 import { useGraph } from '@/hooks/useGraph';
 import { useAlgorithmRunner } from '@/hooks/useAlgorithmRunner.ts';
 import { GraphCanvas } from '@/components/Visualizations/GraphCanvas';
@@ -181,6 +181,14 @@ export const GraphVisualizer = () => {
         setUserCode(DEFAULT_CODE);
     };
 
+    const clear = () => {
+        graph.clear();
+        setSelectedNodeId(null);
+        setStartNodeId(null);
+        setEndNodeId(null);
+        setDraggingNodeId(null);
+    }
+
     return (
         <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans transition-colors duration-300">
             {/* Left sidebar - Tools */}
@@ -204,20 +212,47 @@ export const GraphVisualizer = () => {
                 <Panel defaultSize={66} minSize={30} className="bg-background relative" id="canvas">
                     <main className="h-full relative flex flex-col">
                         {/* Info bar */}
-                        <div className="absolute top-4 left-4 z-10 flex gap-2 pointer-events-none">
-                            <div className="bg-card/90 backdrop-blur px-3 py-1.5 rounded-lg border border-border text-xs font-mono text-muted-foreground shadow-soft">
-                                Nodes: <span className="text-foreground font-bold">{graph.nodes.length}</span>
+                        <div
+                            className="h-14 border-b border-border bg-muted/30 flex items-center justify-start p-4 gap-4">
+                            <div
+                                className="bg-card/90 backdrop-blur px-3 py-1.5 rounded-lg border border-border text-xs font-mono text-muted-foreground shadow-soft">
+                                Vertex count: <span className="text-foreground font-bold">{graph.nodes.length}</span>
                             </div>
                             {startNodeId && (
-                                <div className="bg-primary/10 backdrop-blur px-3 py-1.5 rounded-lg border border-primary/20 text-xs font-mono text-primary shadow-soft animate-in fade-in">
-                                    Start: {graph.nodes.find(n => n.id === startNodeId)?.label}
-                                </div>
+                                <button
+                                    onClick={() => setStartNodeId(null)}
+                                    className="bg--background hover:bg-primary/20 backdrop-blur px-3 py-1.5 rounded-lg
+                                        border border-primary text-xs font-mono text-primary hover:primary-hover
+                                        shadow-soft animate-in fade-in flex items-center">
+                                    Start: <span className="text-bold text-primary-light">
+                                        {graph.nodes.find(n => n.id === startNodeId)?.label}</span>
+                                    <X size={16} className="pt-0.5 pl-1 ml-1"/>
+                                </button>
                             )}
                             {endNodeId && (
-                                <div className="bg-primary/10 backdrop-blur px-3 py-1.5 rounded-lg border border-primary/20 text-xs font-mono text-primary shadow-soft animate-in fade-in">
-                                    End: {graph.nodes.find(n => n.id === endNodeId)?.label}
-                                </div>
+                                <button
+                                    onClick={() => setEndNodeId(null)}
+                                    className="bg--background hover:bg-primary/20 backdrop-blur px-3 py-1.5 rounded-lg
+                                        border border-primary text-xs font-mono text-primary hover:primary-hover
+                                        shadow-soft animate-in fade-in flex items-center">
+                                    End: <span className="text-bold text-primary-light">
+                                        {graph.nodes.find(n => n.id === endNodeId)?.label}</span>
+                                    <X size={16} className="pt-0.5 pl-1 ml-1"/>
+                                </button>
                             )}
+
+                            <button
+                                onClick={() => runner.reset()}
+                                className="p-2 ml-auto bg-background hover:bg-muted text-muted-foreground hover:text-foreground border border-border rounded-lg text-xs flex items-center gap-2 transition-all opacity-70 hover:opacity-100 shadow-sm"
+                                title="Reset graph to original state">
+                                <RefreshCcw size={14}/> Reset
+                            </button>
+                            <button
+                                onClick={clear}
+                                className="p-2 bg-background hover:bg-muted text-muted-foreground hover:text-foreground border border-border rounded-lg text-xs flex items-center gap-2 transition-all opacity-70 hover:opacity-100 shadow-sm"
+                                title="Clear canvas">
+                                <Eraser size={14}/> Clear
+                            </button>
                         </div>
 
                         {/* Graph canvas */}
@@ -304,9 +339,9 @@ export const GraphVisualizer = () => {
                             <button
                                 onClick={handleResetCode}
                                 className="absolute bottom-4 right-6 p-2 bg-background hover:bg-muted text-muted-foreground hover:text-foreground border border-border rounded-lg text-xs flex items-center gap-2 transition-all opacity-70 hover:opacity-100 shadow-sm"
-                                title="Reset Code"
+                                title="Reset Code to original state"
                             >
-                                <Eraser size={14} /> Reset
+                                <Eraser size={14} /> Reset code
                             </button>
                         </div>
                     </aside>

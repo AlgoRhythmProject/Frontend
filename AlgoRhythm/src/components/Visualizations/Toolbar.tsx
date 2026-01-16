@@ -1,4 +1,4 @@
-import {Move, Link as LinkIcon, Trash2, MousePointer2, Flag, Target, Scissors, Shuffle} from 'lucide-react';
+import { Move, Link as LinkIcon, Trash2, MousePointer2, MapPin, MapPinOff, Scissors, Shuffle } from 'lucide-react';
 import { ToolbarButton } from "./ToolbarButton";
 
 type EditorMode = 'select' | 'addEdge' | 'move' | 'delete' | 'deleteEdge';
@@ -27,7 +27,8 @@ export const Toolbar = ({
                             onRandomGraph,
                         }: ToolbarProps) => {
     return (
-        <aside className="w-80 bg-background border-r border-border p-6 flex flex-col gap-8 overflow-y-auto h-full transition-colors duration-300">
+        <aside className="w-80 bg-background border-r border-border p-6 flex flex-col gap-8 overflow-y-auto
+            h-full transition-colors duration-300">
             {/* Editor Tools */}
             <section>
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">
@@ -39,14 +40,14 @@ export const Toolbar = ({
                         onClick={() => setMode('select')}
                         disabled={isRunning}
                         icon={<MousePointer2 size={18}/>}
-                        label="Add Nodes"
+                        label="Add vertex"
                     />
                     <ToolbarButton
                         active={mode === 'addEdge'}
                         onClick={() => setMode('addEdge')}
                         disabled={isRunning}
                         icon={<LinkIcon size={18}/>}
-                        label="Add Edges"
+                        label="Add edge"
                     />
                     <ToolbarButton
                         active={mode === 'move'}
@@ -99,29 +100,35 @@ export const Toolbar = ({
             {/* Node Operations */}
             <section id="node-operations">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">
-                    Node Operations
+                    Vertices operations
                 </h3>
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={onSetStart}
                         disabled={!selectedNodeId || isRunning || mode !== 'move'}
-                        className="flex items-center justify-center gap-2 w-full py-3 bg-info/10 hover:bg-info text-info hover:text-white border border-info/30 rounded-xl transition-all font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                        className="flex items-center justify-center gap-2 w-full py-3 bg-info/10
+                         hover:bg-info text-info hover:text-white border border-info/30 rounded-xl transition-all
+                          font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed
+                          shadow-sm hover:shadow-md"
                     >
-                        <Flag size={18} />
+                        <MapPin size={18} />
                         Set as Start
                     </button>
                     <button
                         onClick={onSetEnd}
                         disabled={!selectedNodeId || isRunning || mode !== 'move'}
-                        className="flex items-center justify-center gap-2 w-full py-3 bg-error/10 hover:bg-error text-error hover:text-white border border-error/30 rounded-xl transition-all font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                        className="flex items-center justify-center gap-2 w-full py-3 bg-error/10
+                         hover:bg-error text-error hover:text-white border border-error/30 rounded-xl transition-all
+                         font-semibold disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed shadow-sm
+                         hover:shadow-md"
                     >
-                        <Target size={18} />
+                        <MapPinOff size={18} />
                         Set as End
                     </button>
                 </div>
                 {!selectedNodeId && (
                     <p className="text-[11px] text-muted-foreground mt-3 text-center italic">
-                        Select a node on the canvas to see actions
+                        Select a vertex on the canvas to see actions
                     </p>
                 )}
             </section>
@@ -133,15 +140,15 @@ export const Toolbar = ({
                     <ul className="text-[11px] text-muted-foreground space-y-2">
                         <li className="flex gap-2 items-start">
                             <span className="w-2 h-2 rounded-full bg-info mt-1 shrink-0" />
-                            <span>Blue nodes are source points.</span>
+                            <span>Blue vertices are source points.</span>
                         </li>
                         <li className="flex gap-2 items-start">
                             <span className="w-2 h-2 rounded-full bg-error mt-1 shrink-0" />
-                            <span>Red nodes are target points.</span>
+                            <span>Red vertices are target points.</span>
                         </li>
                         <li className="flex gap-2 items-start">
                             <span className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0" />
-                            <span>Drag nodes in 'Move' mode to layout.</span>
+                            <span>Drag vertices in 'Move' mode to layout.</span>
                         </li>
                     </ul>
                 </div>
