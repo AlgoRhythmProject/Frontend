@@ -220,7 +220,7 @@ export function CourseDetail() {
                 </div>
               </div>
 
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+              <div className="space-y-2 max-h-150 overflow-y-auto">
                 {courseLectures.length > 0 ? (
                   courseLectures.map((lecture, index) => (
                     <LectureCard
@@ -262,7 +262,7 @@ export function CourseDetail() {
                 </div>
               </div>
 
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+              <div className="space-y-2 max-h-150 overflow-y-auto">
                 {courseTasks.length > 0 ? (
                   courseTasks.map((task) => (
                     <TaskCard

@@ -9,6 +9,7 @@ import { taskApi } from '../api/taskApi';
 import { courseApi } from '../api/courseApi';
 import { courseProgressApi } from '@/api/courseProgressApi';
 import { userStreakApi, type UserStreakDto } from '@/api/userStreakApi';
+import { achievementApi, type UserAchievementDto } from '@/api/achievementApi';
 import type { Task } from '@/types/Task';
 import type { Course } from '@/types/Course';
 import type { CourseProgress } from '@/types/CourseProgress';
@@ -29,22 +30,25 @@ export function Dashboard() {
   const [coursesWithProgressCount, setCoursesWithProgressCount] = useState<number>(0);
   const [completedTasksCount, setCompletedTasksCount] = useState<number>(0);
   const [streak, setStreak] = useState<UserStreakDto | null>(null);
+  const [achievements, setAchievements] = useState<UserAchievementDto[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
 
-        const [taskResp, courseResp, completedTasksResp, streakResp] = await Promise.all([
-          taskApi.getAll(),
-          courseApi.getAll(),
+        const [taskResp, courseResp, completedTasksResp, streakResp, achievementsResp] = await Promise.all([
+          taskApi.getPublished(),
+          courseApi.getPublished(),
           courseProgressApi.getMyCompletedTasks(),
           userStreakApi.getMyStreak(),
+          achievementApi.getMyAchievements(),
         ]);
 
         const completedTaskIds = new Set(completedTasksResp.completedTaskIds);
         setCompletedTasksCount(completedTaskIds.size);
         setStreak(streakResp);
+        setAchievements(achievementsResp);
 
         const taskToCourses: Record<string, string[]> = {};
         courseResp.forEach(course => {
@@ -100,16 +104,15 @@ export function Dashboard() {
   }, []);
 
   // User stats
+  const earnedAchievementsCount = achievements.filter(a => a.isCompleted).length;
+  const totalAchievementsCount = achievements.length;
+
   const userStats = {
     tasksCompleted: completedTasksCount,
     totalTasks: tasks.length,
     currentStreak: streak?.currentStreak ?? 0,
-    badges: [
-      { earned: true },
-      { earned: true },
-      { earned: false },
-      { earned: false },
-    ]
+    achievementsEarned: earnedAchievementsCount,
+    totalAchievements: totalAchievementsCount,
   };
 
   const recentTasks = tasks
@@ -204,9 +207,9 @@ export function Dashboard() {
             {
               icon: <Trophy className="w-5 h-5 text-warning" />,
               bg: "bg-warning/20",
-              label: "Badges Earned",
-              value: userStats.badges.filter(b => b.earned).length,
-              sub: `of ${userStats.badges.length} total`,
+              label: "Achievements Earned",
+              value: userStats.achievementsEarned,
+              sub: `of ${userStats.totalAchievements} total`,
               color: "text-warning"
             }
           ].map((stat, idx) => (

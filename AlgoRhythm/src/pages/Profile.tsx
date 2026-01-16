@@ -161,7 +161,7 @@ export function Profile() {
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Award className="w-4 h-4 text-success" />
-                  <p className="font-sans text-muted-foreground text-sm">Badges</p>
+                  <p className="font-sans text-muted-foreground text-sm">Achievements</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
                   {isLoadingAchievements ? '...' : earnedAchievementsCount}

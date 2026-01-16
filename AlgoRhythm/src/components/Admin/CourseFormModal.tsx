@@ -62,7 +62,7 @@ export function CourseFormModal({ isOpen, onClose, onSuccess, course }: CourseFo
         try {
             const [lectures, tasks] = await Promise.all([
                 lectureApi.getAll(),
-                taskApi.getAll()
+                taskApi.getPublished()
             ]);
             setAllLectures(lectures);
             setAllTasks(tasks);

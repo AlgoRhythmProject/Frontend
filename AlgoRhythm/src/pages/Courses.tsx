@@ -28,7 +28,7 @@ export function Courses() {
       setError(null);
 
       try {
-        const allCourses = await courseApi.getAll();
+        const allCourses = await courseApi.getPublished();
 
         const settled = await Promise.allSettled(
           allCourses.map((c) => courseProgressApi.getMyCourseProgress(c.id))

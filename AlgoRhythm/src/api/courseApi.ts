@@ -18,6 +18,11 @@ export const courseApi = {
         return res.data;
     },
 
+    getPublished: async (): Promise<Course[]> => {
+        const res = await apiClient.get<Course[]>("/Course/published");
+        return res.data;
+    },
+
     getListItems: async (): Promise<CourseListItem[]> => {
         const res = await apiClient.get<Course[]>("/Course");
         return res.data.map(course => ({

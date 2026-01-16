@@ -47,7 +47,7 @@ export function TaskList() {
 
         const [taskResp, courseResp, tagResp, completedResp] = await Promise.all([
           taskApi.getPublished(),
-          courseApi.getAll(),
+          courseApi.getPublished(),
           tagApi.getAll(),
           courseProgressApi.getMyCompletedTasks(),
         ]);
