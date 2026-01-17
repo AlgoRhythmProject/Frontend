@@ -9,6 +9,7 @@
     }
   ],
   "compilerOptions": {
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "paths": {

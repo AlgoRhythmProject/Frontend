@@ -4,7 +4,7 @@ const tsJestTransformCfg = createDefaultPreset().transform;
 
 /** @type {import("jest").Config} **/
 module.exports = {
-  testEnvironment: "node",
+  testEnvironment: "jsdom",
   transform: {
     ...tsJestTransformCfg,
   },
@@ -28,6 +28,14 @@ module.exports = {
     '/dist/',
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  testMatch: [
+    "**/__tests__/**/*.[jt]s?(x)",
+    "**/?(*.)+(spec|test|[_]test).[jt]s?(x)"
+  ],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^lucide-react$': require.resolve('lucide-react'),
+  },
   // Clear mocks between tests
   clearMocks: true,
   // Restore mocks between tests
