@@ -67,6 +67,20 @@ export interface UpdateProfileRequest {
     email: string;
 }
 
+export interface GoogleAuthRequest {
+    idToken: string;
+    firstName?: string;
+    lastName?: string;
+}
+
+export interface GoogleAuthResponse {
+    token: string;
+    expiresUtc: string;
+    refreshToken: string;
+    refreshTokenExpiresUtc: string;
+    user: User;
+}
+
 export class ApiError extends Error {
     code: string;
     status?: number;
@@ -221,5 +235,38 @@ export const authApi = {
                 error.response?.status
             );
         }
-    }
+    },
+
+    googleLogin: async (idToken: string, firstName?: string, lastName?: string): Promise<User> => {
+        try {
+            console.log("=== Sending Google Login Request ===");
+            console.log("Token length:", idToken.length);
+            console.log("Request body:", { idToken: idToken.substring(0, 50) + "...", firstName, lastName });
+
+            const response = await apiClient.post<GoogleAuthResponse>("/Authentication/google", {
+                idToken,
+                firstName,
+                lastName
+            });
+
+            console.log("=== Google Login Response ===");
+            console.log("Response status:", response.status);
+            console.log("Response data:", response.data);
+
+            const { token, user } = response.data;
+            return { ...user, token };
+        } catch (error: any) {
+            console.error("=== Google Login API Error ===");
+            console.error("Error response:", error.response);
+            console.error("Error data:", error.response?.data);
+            console.error("Error status:", error.response?.status);
+
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'GOOGLE_LOGIN_FAILED',
+                errorData?.message || 'Google login failed. Please try again.',
+                error.response?.status
+            );
+        }
+    },
 };

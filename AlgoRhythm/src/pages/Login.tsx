@@ -7,12 +7,14 @@ import { AuthenticationHeader } from "../components/Authentication/Authenticatio
 import { AuthenticationBackground } from "../components/Authentication/AuthenticationBackground";
 import { AuthenticationButton } from "../components/Authentication/AuthenticationButton";
 import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
+import { GoogleLoginButton } from "../components/Authentication/GoogleLoginButton";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store";
 import { login } from "../store/userSlice";
 import { authApi, ApiError } from "../api/authApi";
 import { adminApi } from "../api/adminApi";
 import { Particles } from "@/components/ui/shadcn-io/particles";
+import { useTheme } from "@/hooks/themeContext";
 
 export function Login() {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,6 +23,39 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isDark } = useTheme();
+
+  const handleLoginSuccess = async (user: any) => {
+    localStorage.setItem("token", user.token);
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("isAuthenticated", "true");
+
+    if (user.token) {
+      try {
+        const tokenParts = user.token.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          if (payload.exp) {
+            const expiresUtc = new Date(payload.exp * 1000).toISOString();
+            localStorage.setItem("tokenExpiresAt", expiresUtc);
+          }
+        }
+      } catch (decodeError) {
+        console.error('Failed to decode token:', decodeError);
+      }
+    }
+
+    dispatch(login(user));
+
+    try {
+      const adminStatus = await adminApi.isCurrentUserAdmin();
+      localStorage.setItem("isAdmin", JSON.stringify(adminStatus.isAdmin));
+      navigate(adminStatus.isAdmin ? "/admin" : "/");
+    } catch (adminCheckError) {
+      console.error('Failed to check admin status:', adminCheckError);
+      navigate("/");
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,44 +73,7 @@ export function Login() {
     setIsLoading(true);
     try {
       const user = await authApi.login({ email, password });
-
-      localStorage.setItem("token", user.token);
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("isAuthenticated", "true");
-
-      if (user.token) {
-        try {
-          const tokenParts = user.token.split('.');
-          if (tokenParts.length === 3) {
-            const payload = JSON.parse(atob(tokenParts[1]));
-            if (payload.exp) {
-              const expiresUtc = new Date(payload.exp * 1000).toISOString();
-              localStorage.setItem("tokenExpiresAt", expiresUtc);
-            }
-          }
-        } catch (decodeError) {
-          console.error('Failed to decode token:', decodeError);
-        }
-      }
-
-      dispatch(login(user));
-
-      // Sprawdź status admina
-      try {
-        const adminStatus = await adminApi.isCurrentUserAdmin();
-        localStorage.setItem("isAdmin", JSON.stringify(adminStatus.isAdmin));
-
-        // Przekieruj do odpowiedniej strony
-        if (adminStatus.isAdmin) {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
-      } catch (adminCheckError) {
-        console.error('Failed to check admin status:', adminCheckError);
-        // W przypadku błędu sprawdzania statusu, przekieruj do dashboardu
-        navigate("/");
-      }
+      await handleLoginSuccess(user);
     } catch (err: any) {
       if (err instanceof ApiError) {
         switch (err.code) {
@@ -103,6 +101,29 @@ export function Login() {
     }
   };
 
+  const handleGoogleSuccess = async (credential: string) => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      const user = await authApi.googleLogin(credential);
+      await handleLoginSuccess(user);
+    } catch (err: any) {
+      if (err instanceof ApiError) {
+        setError(err.message || "Google login failed. Please try again.");
+      } else {
+        setError("An unexpected error occurred during Google login.");
+      }
+      console.error("Google login failed:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = (error: any) => {
+    console.error("Google Sign-In error:", error);
+    setError("Google Sign-In was cancelled or failed.");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <AuthenticationBackground />
@@ -116,6 +137,11 @@ export function Login() {
         >
           <div className="bg-background/80 backdrop-blur-xl z-20 border border-muted rounded-2xl p-8 shadow-2xl">
             <AuthenticationHeader />
+
+
+
+
+
             <form onSubmit={handleLogin} className="space-y-5">
               <AuthenticationInput
                 label="Email"
@@ -136,7 +162,6 @@ export function Login() {
                 delay={0.5}
               />
 
-              {/* Forgot Password Link */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -155,6 +180,21 @@ export function Login() {
               {error && <p className="text-error text-sm">{error}</p>}
               <AuthenticationButton isLoading={isLoading} text="Login" />
             </form>
+
+            {/* Divider */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.0 }}
+              className="relative my-6"
+            />
+            {/* Google Sign-In Button */}
+            <GoogleLoginButton
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="signin_with"
+              isDark={isDark}
+            />
             <AuthenticationFooter
               promptText="Don't have an account?"
               linkText="Sign up"
