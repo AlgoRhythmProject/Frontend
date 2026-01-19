@@ -13,6 +13,10 @@ export const lectureApi = {
         const res = await apiClient.get<Lecture[]>("/Lecture");
         return res.data;
     },
+    getPublished: async (): Promise<Lecture[]> => {
+        const res = await apiClient.get<Lecture[]>("/Lecture/published");
+        return res.data;
+    },
     getByCourseId: async (courseId: string): Promise<Lecture[]> => {
         const res = await apiClient.get<Lecture[]>(`/Lecture/course/${courseId}`);
         return res.data;

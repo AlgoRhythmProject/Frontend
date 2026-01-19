@@ -166,7 +166,7 @@ export function RecentSubmissions({ limit = 5 }: RecentSubmissionsProps) {
             {submissions.length > 0 && (
                 <button
                     onClick={() => navigate('/tasks')}
-                    className="w-full mt-4 px-4 py-2 text-center font-sans text-sm text-primary hover:text-primary-hover transition-colors"
+                    className="cursor-pointer w-full mt-4 px-4 py-2 text-center font-sans text-sm text-primary hover:text-primary-hover transition-colors"
                 >
                     View all tasks →
                 </button>

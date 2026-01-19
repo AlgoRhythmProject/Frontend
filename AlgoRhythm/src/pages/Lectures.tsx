@@ -24,7 +24,7 @@ export function Lectures() {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await lectureApi.getAll();
+        const data = await lectureApi.getPublished();
         setLectures(data);
       } catch (err: any) {
         console.error('Failed to load lectures:', err);

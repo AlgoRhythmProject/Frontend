@@ -61,7 +61,7 @@ export function CourseFormModal({ isOpen, onClose, onSuccess, course }: CourseFo
         setLoadingResources(true);
         try {
             const [lectures, tasks] = await Promise.all([
-                lectureApi.getAll(),
+                lectureApi.getPublished(),
                 taskApi.getPublished()
             ]);
             setAllLectures(lectures);

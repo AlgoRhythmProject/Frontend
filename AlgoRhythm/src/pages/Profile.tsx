@@ -38,7 +38,7 @@ export function Profile() {
 
         const [completedTasksResp, tasksResp, achievementsResp, streakResp] = await Promise.all([
           courseProgressApi.getMyCompletedTasks(),
-          taskApi.getAll(),
+          taskApi.getPublished(),
           achievementApi.getMyAchievements(),
           userStreakApi.getMyStreak(),
         ]);
