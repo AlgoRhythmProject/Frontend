@@ -207,7 +207,6 @@ export function Admin() {
 
   const loadComments = async () => {
     try {
-      // Pobierz komentarze dla wszystkich zadań
       const allComments: Comment[] = [];
       for (const task of tasks) {
         const taskComments = await commentApi.getByTaskId(task.id);

@@ -53,7 +53,6 @@ export function TagManager({
         } catch (err: any) {
             console.error('Failed to create tag:', err);
 
-            // Wyświetl konkretny błąd z backendu
             if (err.response?.data?.message) {
                 setError(err.response.data.message);
             } else if (err.response?.data?.errors) {

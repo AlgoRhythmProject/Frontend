@@ -1,7 +1,3 @@
-
-// ==========================================
-// 2. Aktualizacja TaskDescription.tsx
-// ==========================================
 import { useState } from "react";
 import { MessageSquare, Code } from "lucide-react";
 import type { Task } from "@/types/Task";

@@ -36,7 +36,7 @@ export function useRoslynLanguageServer() {
             reconnectAttempts.current = 0;
         });
 
-        hubConnection.onclose((error: Error | undefined) => {  // ← TUTAJ
+        hubConnection.onclose((error: Error | undefined) => {
             console.log('SignalR: Connection closed', error);
             setIsConnected(false);
 

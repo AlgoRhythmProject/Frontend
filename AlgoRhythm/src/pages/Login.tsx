@@ -60,12 +60,10 @@ export function Login() {
 
       dispatch(login(user));
 
-      // Sprawdź status admina
       try {
         const adminStatus = await adminApi.isCurrentUserAdmin();
         localStorage.setItem("isAdmin", JSON.stringify(adminStatus.isAdmin));
 
-        // Przekieruj do odpowiedniej strony
         if (adminStatus.isAdmin) {
           navigate("/admin");
         } else {
@@ -73,7 +71,6 @@ export function Login() {
         }
       } catch (adminCheckError) {
         console.error('Failed to check admin status:', adminCheckError);
-        // W przypadku błędu sprawdzania statusu, przekieruj do dashboardu
         navigate("/");
       }
     } catch (err: any) {

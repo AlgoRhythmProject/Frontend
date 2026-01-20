@@ -29,11 +29,9 @@ export function CourseDetail() {
       const progressData = await courseProgressApi.getMyCourseProgress(courseId);
       setProgress(progressData);
     } catch (err: any) {
-      // 404 to OK - użytkownik jeszcze nie zaczął kursu
       if (err.response?.status !== 404) {
         console.error('Failed to load progress:', err);
       }
-      // Jeśli 404, progress pozostaje null
       setProgress(null);
     }
   };
@@ -62,7 +60,6 @@ export function CourseDetail() {
         );
         setCourseTasks(tasksForThisCourse);
 
-        // Pobierz progress
         await fetchCourseProgress(id);
       } catch (err: any) {
         console.error('Failed to load course:', err);

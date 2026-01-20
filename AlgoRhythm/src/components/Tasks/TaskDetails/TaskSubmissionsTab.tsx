@@ -1,6 +1,3 @@
-// ==========================================
-// 1. components/Tasks/TaskDetails/TaskSubmissionsTab.tsx
-// ==========================================
 import { useState, useEffect } from 'react';
 import { CheckCircle2, XCircle, Clock, Code, ChevronDown, ChevronUp } from 'lucide-react';
 import { submissionApi, type SubmissionResponse } from '@/api/submissionApi';

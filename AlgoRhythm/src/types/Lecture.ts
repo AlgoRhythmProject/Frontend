@@ -4,20 +4,10 @@ export interface LectureContent {
     type: "Photo" | "Text" | "Video";
     order: number;
     createdAt: string;
-
-    // Text content
     htmlContent?: string;
-
-    // Photo content
     path?: string;
     alt?: string;
     title?: string;
-
-    // Video content
-    fileName?: string;
-    streamUrl?: string;
-    fileSize?: number;
-    lastModified?: string;
 }
 
 export interface Lecture {
@@ -42,13 +32,11 @@ export interface LectureInputDto {
 }
 
 export interface LectureContentInputDto {
-    type: string; // "Text", "Photo", or "Video"
+    type: string;
     htmlContent?: string;
-    path?: string;
+    path?: string
     alt?: string;
     title?: string;
-    fileName?: string;
-    streamUrl?: string;
 }
 
 export interface ChangeContentOrderDto {

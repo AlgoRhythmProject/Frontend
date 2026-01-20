@@ -23,12 +23,11 @@ export function RecentSubmissions({ limit = 5 }: RecentSubmissionsProps) {
             setError(null);
             const data = await submissionApi.getMySubmissions();
 
-            // Map to history items and sort by date
             const historyItems: SubmissionHistoryItem[] = data
                 .map(sub => ({
                     id: sub.submissionId,
                     taskItemId: sub.taskItemId,
-                    taskTitle: null, // Backend może nie zwracać, możesz to rozbudować
+                    taskTitle: null,
                     status: sub.status,
                     score: sub.score,
                     submittedAt: sub.submittedAt,
