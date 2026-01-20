@@ -137,11 +137,6 @@ export function Login() {
         >
           <div className="bg-background/80 backdrop-blur-xl z-20 border border-muted rounded-2xl p-8 shadow-2xl">
             <AuthenticationHeader />
-
-
-
-
-
             <form onSubmit={handleLogin} className="space-y-5">
               <AuthenticationInput
                 label="Email"

@@ -83,18 +83,18 @@ export function LecturePreviewModal({ isOpen, onClose, lecture }: LecturePreview
                                         </figure>
                                     );
                                 }
-                                if (content.type === 'Video' && content.fileName) {
+                                if (content.type === 'Video' && content.title) {
                                     return (
                                         <div key={content.id} className="my-8 bg-muted/30 rounded-xl p-6 text-center">
                                             <p className="font-sans text-foreground font-medium mb-2">
                                                 Video Content
                                             </p>
                                             <p className="font-mono text-sm text-muted-foreground">
-                                                {content.fileName}
+                                                {content.path}
                                             </p>
-                                            {content.streamUrl && (
+                                            {content.path && (
                                                 <p className="text-xs text-muted-foreground mt-2 truncate">
-                                                    Stream URL: {content.streamUrl}
+                                                    Stream URL: {content.path}
                                                 </p>
                                             )}
                                         </div>

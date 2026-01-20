@@ -103,7 +103,6 @@
    LIGHT THEME
    ============================================ */
 [data-theme="light"] {
-  /* Brand Colors - pozostają takie same */
   --primary: #9072e0;
   --primary-hover: rgb(121, 83, 226);
   --primary-foreground: #ffffff;
@@ -150,7 +149,6 @@
   --course-8-from: #34d399;
   --course-8-to: #2dd4bf;
 
-  /* Fallback Gradients - bardziej nasycone wersje */
   --fallback-1-from: #818cf8;
   --fallback-1-to: #a78bfa;
   --fallback-2-from: #fb7185;
