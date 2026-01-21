@@ -37,7 +37,7 @@ export const fileApi = {
         return res.data;
     },
 
-    list: async (pageSize: number = 50, continuationToken?: string): Promise<FileListResponse> => {
+    list: async (pageSize: number = 3, continuationToken?: string): Promise<FileListResponse> => {
         const res = await apiClient.get<FileListResponse>('/File/list', {
             params: {
                 pageSize,

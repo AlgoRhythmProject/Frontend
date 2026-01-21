@@ -547,7 +547,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         <button
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : task ? 'Update Task' : 'Create Task'}
                         </button>

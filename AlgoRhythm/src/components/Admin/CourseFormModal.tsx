@@ -398,7 +398,7 @@ export function CourseFormModal({ isOpen, onClose, onSuccess, course }: CourseFo
                         <button
                             type="submit"
                             disabled={loading || loadingResources}
-                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : course ? 'Update Course' : 'Create Course'}
                         </button>
