@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { courseApi, type CourseInputDto } from '@/api/courseApi';
-import { lectureApi } from '@/api/lectureApi';
-import { taskApi } from '@/api/taskApi';
+import { taskApi } from '@/api/task/taskApi';
 import type { Course } from '@/types/Course';
 import type { Lecture } from '@/types/Lecture';
 import type { Task } from '@/types/Task';
+import { courseApi } from '@/api/course/courseApi';
+import type { CourseInputDto } from '@/api/course/types';
+import { lectureApi } from '@/api/lecture/lectureApi';
 
 interface CourseFormModalProps {
     isOpen: boolean;

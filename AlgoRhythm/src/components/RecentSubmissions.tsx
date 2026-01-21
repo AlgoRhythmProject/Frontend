@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle2, XCircle, Clock, Code, ChevronRight } from 'lucide-react';
-import { submissionApi, type SubmissionHistoryItem } from '@/api/submissionApi';
+import { submissionApi } from '@/api/submission/submissionApi';
 import { useNavigate } from 'react-router-dom';
+import type { SubmissionHistoryItem } from '@/api/submission/types';
 
 interface RecentSubmissionsProps {
     limit?: number;

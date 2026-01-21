@@ -1,28 +1,6 @@
-import apiClient from "./apiClient";
-
-export interface TestCase {
-    id: string;
-    programmingTaskItemId: string;
-    inputJson: string | null;
-    expectedJson: string | null;
-    isVisible: boolean;
-    maxPoints: number;
-}
-
-export interface CreateTestCaseDto {
-    programmingTaskItemId: string;
-    inputJson: string | null;
-    expectedJson: string | null;
-    isVisible: boolean;
-    maxPoints: number;
-}
-
-export interface UpdateTestCaseDto {
-    inputJson: string | null;
-    expectedJson: string | null;
-    isVisible: boolean;
-    maxPoints: number;
-}
+import type { TestCase } from "@/types/TestCase";
+import apiClient from "../apiClient";
+import type { CreateTestCaseDto, UpdateTestCaseDto } from "./types";
 
 export const testCaseApi = {
     getAll: async (): Promise<TestCase[]> => {

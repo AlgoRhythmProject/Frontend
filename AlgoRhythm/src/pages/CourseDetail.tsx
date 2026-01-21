@@ -3,9 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, BookOpen, Code, CheckCircle2, Loader2, Circle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-import { courseApi } from '../api/courseApi';
-import { taskApi } from '../api/taskApi';
-import { courseProgressApi } from '../api/courseProgressApi';
+import { courseApi } from '../api/course/courseApi';
+import { taskApi } from '../api/task/taskApi';
 import { ProgressBar } from '../components/ProgressBar';
 import { TaskCard } from '@/components/TaskCard';
 
@@ -13,6 +12,7 @@ import type { Course } from '@/types/Course';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
 import type { CourseProgress } from '@/types/CourseProgress';
+import { courseProgressApi } from '@/api/courseProgress/courseProgressApi';
 
 export function CourseDetail() {
   const { id } = useParams<{ id: string }>();

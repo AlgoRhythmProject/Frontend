@@ -1,16 +1,6 @@
 import type { Course } from "@/types/Course";
-import apiClient from "./apiClient";
-
-export interface CourseListItem {
-    id: string;
-    name: string;
-}
-
-export interface CourseInputDto {
-    name: string;
-    description?: string;
-    isPublished: boolean;
-}
+import apiClient from "../apiClient";
+import type { CourseListItem, CourseInputDto } from "./types";
 
 export const courseApi = {
     getAll: async (): Promise<Course[]> => {

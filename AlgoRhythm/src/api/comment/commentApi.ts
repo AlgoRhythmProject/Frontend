@@ -1,5 +1,6 @@
-import apiClient from "./apiClient";
-import type { Comment, CommentInputDto } from "@/types/Comment";
+import apiClient from "../apiClient";
+import type { Comment } from "@/types/Comment";
+import type { CommentInputDto } from "./types";
 
 export const commentApi = {
     getByTaskId: async (taskId: string): Promise<Comment[]> => {
@@ -13,13 +14,11 @@ export const commentApi = {
     },
 
     create: async (dto: CommentInputDto): Promise<Comment> => {
-        console.log("🔵 commentApi.create called with:", dto);
         const res = await apiClient.post<Comment>("/Comment", dto, {
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        console.log("🟢 commentApi.create response:", res.data);
         return res.data;
     },
 

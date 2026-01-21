@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import type { Lecture } from "../../types/Lecture";
-import { courseProgressApi } from "@/api/courseProgressApi";
-import { achievementApi } from "@/api/achievementApi";
-import type { UserAchievementDto } from "@/api/achievementApi";
+import { achievementApi } from "@/api/achievements/achievementApi";
 import { useState, useEffect } from "react";
 import { useAchievementNotification } from "@/components/AchievementNotification";
 import { checkAndShowNewAchievements } from "@/utils/achievementUtils";
 import { ImageViewer, VideoViewer } from "@/components/MediaViewer";
+import type { UserAchievementDto } from "@/api/achievements/types";
+import { courseProgressApi } from "@/api/courseProgress/courseProgressApi";
 
 interface LectureViewProps {
     lecture: Lecture;
@@ -161,11 +161,11 @@ export function LectureView({
                             );
                         }
 
-                        if (content.type === "Video" && content.path) {
+                        if (content.type === "Video" && content.fileName) {
                             return (
                                 <VideoViewer
                                     key={content.id}
-                                    fileName={content.path}
+                                    fileName={content.fileName}
                                     title={content.title}
                                 />
                             );

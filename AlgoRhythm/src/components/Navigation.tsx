@@ -20,7 +20,7 @@ export function Navigation() {
   };
 
   return (
-    <div className="bg-primary-background box-border flex items-center h-[60px] px-4 md:pl-[82px] md:pr-[76px] w-full">
+    <div className="bg-primary-background box-border flex items-center h-15 px-4 md:pl-20.5 md:pr-19 w-full">
       <div className="flex gap-4 md:gap-8">
         {navItems.map((item) => (
           <Link

@@ -8,8 +8,9 @@ import { AuthenticationBackground } from "../components/Authentication/Authentic
 import { AuthenticationButton } from "../components/Authentication/AuthenticationButton";
 import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
 import { Particles } from "../components/ui/shadcn-io/particles";
-import { authApi, ApiError } from "../api/authApi";
+import { authApi } from "../api/auth/authApi";
 import { validateName, validateEmail, validatePassword, sanitizeInput } from "@/utils/validationUtils";
+import { ApiError } from "@/api/auth/types";
 
 export function Register() {
     const navigate = useNavigate();

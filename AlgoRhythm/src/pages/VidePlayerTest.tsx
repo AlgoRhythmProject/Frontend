@@ -20,7 +20,6 @@ function VideoPlayer({ fileName }: Readonly<VideoPlayerProps>) {
         setLoading(true);
         setError(null);
 
-        // Pobierz metadata z video_info endpoint
         fetch(`http://localhost:7062/api/File/video_info?fileName=${encodeURIComponent(fileName)}`)
             .then(r => {
                 if (!r.ok) throw new Error('Video not found');
@@ -59,7 +58,6 @@ function VideoPlayer({ fileName }: Readonly<VideoPlayerProps>) {
         );
     }
 
-    // URL do streamowania video (przez get_file endpoint)
     const videoStreamUrl = `http://localhost:7062/api/File/get_file?fileName=${encodeURIComponent(fileName)}`;
 
     return (

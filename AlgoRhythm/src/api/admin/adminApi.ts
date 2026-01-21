@@ -1,15 +1,5 @@
-import apiClient from "./apiClient";
-
-export interface UserWithRoles {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    emailConfirmed: boolean;
-    roles: string[];
-    createdAt: string;
-    updatedAt: string;
-}
+import apiClient from "../apiClient";
+import type { UserWithRoles } from "./types";
 
 export const adminApi = {
 
@@ -17,7 +7,6 @@ export const adminApi = {
         const response = await apiClient.get<UserWithRoles[]>('/Admin/users');
         return response.data;
     },
-
 
     getUserWithRoles: async (userId: string): Promise<UserWithRoles> => {
         const response = await apiClient.get<UserWithRoles>(`/Admin/users/${userId}`);

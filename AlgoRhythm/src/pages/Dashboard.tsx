@@ -5,14 +5,16 @@ import arrowImage from "../assets/ArrowImage.svg";
 import { motion } from 'framer-motion';
 import { StatCard } from '../components/Dashboard/StatCard';
 import { TaskCard } from '@/components/TaskCard';
-import { taskApi } from '../api/taskApi';
-import { courseApi } from '../api/courseApi';
-import { courseProgressApi } from '@/api/courseProgressApi';
-import { userStreakApi, type UserStreakDto } from '@/api/userStreakApi';
-import { achievementApi, type UserAchievementDto } from '@/api/achievementApi';
+import { taskApi } from '../api/task/taskApi';
+import { courseApi } from '../api/course/courseApi';
 import type { Task } from '@/types/Task';
 import type { Course } from '@/types/Course';
 import type { CourseProgress } from '@/types/CourseProgress';
+import { achievementApi } from '@/api/achievements/achievementApi';
+import type { UserAchievementDto } from '@/api/achievements/types';
+import { courseProgressApi } from '@/api/courseProgress/courseProgressApi';
+import type { UserStreakDto } from '@/api/userStreak/types';
+import { userStreakApi } from '@/api/userStreak/userStreakApi';
 
 type TaskWithCourses = Task & {
   courseIds: string[];

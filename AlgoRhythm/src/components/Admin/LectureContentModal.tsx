@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Edit, Trash2, MoveUp, MoveDown, Type, Image, Video } from 'lucide-react';
-import { lectureApi } from '@/api/lectureApi';
-import { fileApi } from '@/api/fileApi';
-import type { Lecture, LectureContent, LectureContentInputDto } from '@/types/Lecture';
+import { fileApi } from '@/api/file/fileApi';
+import type { Lecture, LectureContent } from '@/types/Lecture';
 import { FileUpload } from './FileUpload';
+import type { LectureContentInputDto } from '@/api/lecture/types';
+import { lectureApi } from '@/api/lecture/lectureApi';
+import { FileSelector } from './FileSelector';
 
 interface LectureContentModalProps {
     isOpen: boolean;
@@ -68,7 +70,7 @@ export function LectureContentModal({ isOpen, onClose, lecture }: LectureContent
             alert('Please upload an image first');
             return;
         }
-        if (formData.type === 'Video' && !formData.path?.trim()) {
+        if (formData.type === 'Video' && !formData.fileName?.trim()) {
             alert('Please upload a video first');
             return;
         }
@@ -206,15 +208,14 @@ export function LectureContentModal({ isOpen, onClose, lecture }: LectureContent
                                     </p>
                                 </div>
                             )}
-
                             {/* Photo Content */}
                             {formData.type === 'Photo' && (
                                 <>
-                                    <FileUpload
+                                    <FileSelector
                                         accept="image/*"
-                                        onUploadSuccess={(fileName) => setFormData({ ...formData, path: fileName })}
+                                        onSelect={(fileName) => setFormData({ ...formData, path: fileName })}
                                         currentFile={formData.path}
-                                        label="Upload Image *"
+                                        label="Image *"
                                     />
 
                                     <div>
@@ -245,15 +246,54 @@ export function LectureContentModal({ isOpen, onClose, lecture }: LectureContent
                                 </>
                             )}
 
+                            {/* Video Content */}
+                            {formData.type === 'Video' && (
+                                <>
+                                    <FileSelector
+                                        accept="video/*"
+                                        onSelect={(fileName) => {
+                                            setFormData({
+                                                ...formData,
+                                                fileName: fileName,
+                                                streamUrl: fileApi.getFileUrl(fileName)
+                                            });
+                                        }}
+                                        currentFile={formData.fileName}
+                                        label="Video *"
+                                    />
+
+                                    <div>
+                                        <label className="block font-sans font-medium text-foreground mb-2">
+                                            Caption (optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.title || ''}
+                                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                            className="w-full px-4 py-2 bg-card border border-muted rounded-lg font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                            placeholder="Caption displayed below the video"
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Video Content */}
                             {formData.type === 'Video' && (
                                 <>
                                     <FileUpload
                                         accept="video/*"
-                                        onUploadSuccess={(fileName) => setFormData({
-                                            ...formData,
-                                            path: fileName  // ← ZMIEŃ z fileName na path!
-                                        })}
-                                        currentFile={formData.path}  // ← ZMIEŃ z fileName na path!
+                                        onUploadSuccess={(fileName) => {
+                                            // fileName to już nazwa pliku z GUID z backendu
+                                            // Backend sam wygeneruje streamUrl na podstawie fileName
+                                            setFormData({
+                                                ...formData,
+                                                fileName: fileName,
+                                                // streamUrl może być null - backend go wygeneruje
+                                                // lub możemy go ustawić jako URL do /api/File/get_file
+                                                streamUrl: `/api/File/get_file?fileName=${encodeURIComponent(fileName)}`
+                                            });
+                                        }}
+                                        currentFile={formData.fileName}
                                         label="Upload Video *"
                                     />
 
@@ -388,14 +428,19 @@ export function LectureContentModal({ isOpen, onClose, lecture }: LectureContent
                                             )}
 
                                             {/* Video preview */}
-                                            {content.type === 'Video' && content.path && (
+                                            {content.type === 'Video' && content.fileName && (
                                                 <div className="bg-card p-3 rounded border border-muted">
                                                     <div className="flex items-center gap-2 mb-2">
                                                         <Video className="w-4 h-4 text-muted-foreground" />
                                                         <p className="text-sm text-foreground font-mono break-all">
-                                                            {content.path}
+                                                            {content.fileName}
                                                         </p>
                                                     </div>
+                                                    {content.streamUrl && (
+                                                        <p className="text-xs text-muted-foreground mb-2">
+                                                            <span className="font-medium">URL:</span> {content.streamUrl}
+                                                        </p>
+                                                    )}
                                                     {content.title && (
                                                         <p className="text-xs text-muted-foreground">
                                                             <span className="font-medium">Caption:</span> {content.title}

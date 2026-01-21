@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon, Video as VideoIcon } from 'lucide-react';
-import { fileApi } from '@/api/fileApi';
+import { fileApi } from '@/api/file/fileApi';
 
 interface FileUploadProps {
     accept: 'image/*' | 'video/*';
@@ -41,25 +41,29 @@ export function FileUpload({ accept, onUploadSuccess, currentFile, label }: File
 
             console.log('Upload result:', result);
 
-
+            // Backend zwraca { Url: "...", Message: "..." }
+            // URL ma format: /api/File/get_file?fileName=guid_originalname.ext
             let fileName = file.name;
 
             if (result.url) {
                 try {
-                    const url = new URL(result.url);
+                    const url = new URL(result.url, window.location.origin);
                     const fileNameParam = url.searchParams.get('fileName');
                     if (fileNameParam) {
+                        // To jest prawidłowa nazwa pliku z GUID prefixem
                         fileName = fileNameParam;
                     } else {
+                        // Fallback - spróbuj wyciągnąć z path
                         const pathParts = url.pathname.split('/');
                         fileName = pathParts[pathParts.length - 1] || file.name;
                     }
-                } catch {
+                } catch (urlError) {
+                    console.warn('Failed to parse URL, using original filename:', urlError);
                     fileName = file.name;
                 }
             }
 
-            console.log('Extracted fileName:', fileName);
+            console.log('Extracted fileName for storage:', fileName);
 
             setUploadedFileName(fileName);
             onUploadSuccess(fileName);
@@ -169,7 +173,7 @@ export function FileUpload({ accept, onUploadSuccess, currentFile, label }: File
                                 </span>
                             </div>
                             {uploadedFileName && (
-                                <p className="text-sm text-muted-foreground font-mono">
+                                <p className="text-sm text-muted-foreground font-mono break-all">
                                     {uploadedFileName}
                                 </p>
                             )}

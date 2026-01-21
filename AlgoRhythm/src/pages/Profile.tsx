@@ -4,14 +4,16 @@ import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { ProgressBar } from '../components/ProgressBar';
-import { authApi } from '../api/authApi';
-import { achievementApi, type UserAchievementDto } from '../api/achievementApi';
-import { courseProgressApi } from '../api/courseProgressApi';
-import { taskApi } from '../api/taskApi';
+import { authApi } from '../api/auth/authApi';
+import { taskApi } from '../api/task/taskApi';
 import { useState, useEffect } from 'react';
 import type { Task } from '@/types/Task';
 import { RecentSubmissions } from '@/components/RecentSubmissions';
-import { userStreakApi, type UserStreakDto } from '@/api/userStreakApi';
+import { achievementApi } from '@/api/achievements/achievementApi';
+import type { UserAchievementDto } from '@/api/achievements/types';
+import { courseProgressApi } from '@/api/courseProgress/courseProgressApi';
+import type { UserStreakDto } from '@/api/userStreak/types';
+import { userStreakApi } from '@/api/userStreak/userStreakApi';
 
 export function Profile() {
   const navigate = useNavigate();

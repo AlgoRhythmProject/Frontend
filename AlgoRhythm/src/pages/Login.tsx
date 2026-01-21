@@ -11,10 +11,11 @@ import { GoogleLoginButton } from "../components/Authentication/GoogleLoginButto
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store";
 import { login } from "../store/userSlice";
-import { authApi, ApiError } from "../api/authApi";
-import { adminApi } from "../api/adminApi";
+import { authApi } from "../api/auth/authApi";
+import { adminApi } from "../api/admin/adminApi";
 import { Particles } from "@/components/ui/shadcn-io/particles";
 import { useTheme } from "@/hooks/themeContext";
+import { ApiError } from "@/api/auth/types";
 
 export function Login() {
   const dispatch = useDispatch<AppDispatch>();

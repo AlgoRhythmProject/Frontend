@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { taskApi } from '@/api/taskApi';
-import { lectureApi } from '@/api/lectureApi';
-import { courseApi } from '@/api/courseApi';
-import { adminApi, type UserWithRoles } from '@/api/adminApi';
+import { taskApi } from '@/api/task/taskApi';
+import { courseApi } from '@/api/course/courseApi';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
 import type { Course } from '@/types/Course';
@@ -17,11 +15,15 @@ import { UsersTab } from '@/components/Admin/AdminPanel/UsersTab';
 import { TasksTab } from '@/components/Admin/AdminPanel/TasksTab';
 import { LecturesTab } from '@/components/Admin/AdminPanel/LecturesTab';
 import { CoursesTab } from '@/components/Admin/AdminPanel/CoursesTab';
-import { commentApi } from '@/api/commentApi';
+import { commentApi } from '@/api/comment/commentApi';
 import type { Comment } from '@/types/Comment';
 import { CommentsTab } from '@/components/Admin/AdminPanel/CommentsTab';
-import { submissionApi, type SubmissionResponse } from '@/api/submissionApi';
 import { SubmissionsTab } from '@/components/Admin/AdminPanel/SubmissionsTab';
+import { adminApi } from '@/api/admin/adminApi';
+import type { UserWithRoles } from '@/api/admin/types';
+import { submissionApi } from '@/api/submission/submissionApi';
+import type { SubmissionResponse } from '@/api/submission/types';
+import { lectureApi } from '@/api/lecture/lectureApi';
 
 type TabType = 'users' | 'tasks' | 'lectures' | 'courses' | 'comments' | 'submissions';
 export function Admin() {

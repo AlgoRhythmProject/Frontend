@@ -1,11 +1,6 @@
-import type {
-    Lecture,
-    LectureInputDto,
-    LectureContent,
-    LectureContentInputDto,
-    ChangeContentOrderDto
-} from "@/types/Lecture";
-import apiClient from "./apiClient";
+import type { Lecture, LectureContent } from "@/types/Lecture";
+import apiClient from "../apiClient";
+import type { LectureInputDto, LectureContentInputDto, ChangeContentOrderDto } from "./types";
 
 export const lectureApi = {
     // Lecture endpoints

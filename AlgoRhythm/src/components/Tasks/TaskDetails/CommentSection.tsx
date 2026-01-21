@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Loader2, Send, Edit2, Trash2, X, Check } from "lucide-react";
-import { commentApi } from "@/api/commentApi";
-import type { Comment, CommentInputDto } from "@/types/Comment";
+import { commentApi } from "@/api/comment/commentApi";
+import type { Comment } from "@/types/Comment";
 import type { RootState } from "@/store";
 import { useSelector } from "react-redux";
+import type { CommentInputDto } from "@/api/comment/types";
 
 interface CommentsSectionProps {
     taskId: string;

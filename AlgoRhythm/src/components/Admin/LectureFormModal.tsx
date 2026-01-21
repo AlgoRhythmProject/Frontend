@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { lectureApi } from '@/api/lectureApi';
-import { tagApi, type Tag } from '@/api/tagApi';
-import type { Lecture, LectureInputDto } from '@/types/Lecture';
-import type { CourseListItem } from '@/api/courseApi';
 import { TagManager } from '@/components/Admin/TagManager';
+import type { CourseListItem } from '@/api/course/types';
+import { lectureApi } from '@/api/lecture/lectureApi';
+import type { LectureInputDto } from '@/api/lecture/types';
+import { tagApi } from '@/api/tag/tagApi';
+import type { Lecture } from '@/types/Lecture';
+import type { Tag } from '@/types/Tag';
 
 interface LectureFormModalProps {
     isOpen: boolean;

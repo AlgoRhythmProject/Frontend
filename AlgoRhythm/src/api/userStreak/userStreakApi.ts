@@ -1,11 +1,5 @@
-import apiClient from "./apiClient";
-
-export interface UserStreakDto {
-    userId: string;
-    currentStreak: number;
-    longestStreak: number;
-    lastLoginDate: string | null;
-}
+import apiClient from "../apiClient";
+import type { UserStreakDto } from "./types";
 
 export const userStreakApi = {
     getMyStreak: async (): Promise<UserStreakDto> => {

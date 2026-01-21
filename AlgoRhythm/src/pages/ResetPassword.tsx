@@ -6,8 +6,9 @@ import { AuthenticationInput } from "../components/Authentication/Authentication
 import { AuthenticationHeader } from "../components/Authentication/AuthenticationHeader";
 import { AuthenticationBackground } from "../components/Authentication/AuthenticationBackground";
 import { AuthenticationButton } from "../components/Authentication/AuthenticationButton";
-import { authApi, ApiError } from "../api/authApi";
+import { authApi } from "../api/auth/authApi";
 import { Particles } from "@/components/ui/shadcn-io/particles";
+import { ApiError } from "@/api/auth/types";
 
 export function ResetPassword() {
     const navigate = useNavigate();

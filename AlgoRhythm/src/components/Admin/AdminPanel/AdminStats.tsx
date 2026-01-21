@@ -1,7 +1,7 @@
 import { Users, FileCode, BookOpen, Activity } from 'lucide-react';
-import type { UserWithRoles } from '@/api/adminApi';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
+import type { UserWithRoles } from '@/api/admin/types';
 
 interface AdminStatsProps {
     users: UserWithRoles[];

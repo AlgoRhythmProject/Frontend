@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle2, XCircle, Clock, Code, ChevronDown, ChevronUp } from 'lucide-react';
-import { submissionApi, type SubmissionResponse } from '@/api/submissionApi';
+import { submissionApi } from '@/api/submission/submissionApi';
 import type { TestResult } from '@/types/TestResult';
+import type { SubmissionResponse } from '@/api/submission/types';
 
 interface TaskSubmissionsTabProps {
     taskId: string;

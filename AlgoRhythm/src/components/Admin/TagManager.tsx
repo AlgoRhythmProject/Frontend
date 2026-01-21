@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Plus, Tag as TagIcon } from 'lucide-react';
-import type { Tag } from '@/api/tagApi';
-import { tagApi } from '@/api/tagApi';
+import { tagApi } from '@/api/tag/tagApi';
+import type { Tag } from '@/types/Tag';
 
 interface TagManagerProps {
     selectedTags: Tag[];

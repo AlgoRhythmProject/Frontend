@@ -8,8 +8,3 @@ export interface Comment {
     updatedAt?: string;
     isEdited?: boolean;
 }
-
-export interface CommentInputDto {
-    taskItemId: string;
-    content: string;
-}

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { MessageSquare, Code } from "lucide-react";
-import type { Task } from "@/types/Task";
 import { CommentsSection } from "./CommentSection";
 import { TaskSubmissionsTab } from "./TaskSubmissionsTab";
+import type { Task } from "@/types/Task";
 
 interface TaskDescriptionProps {
     task: Task;
@@ -67,34 +67,6 @@ export function TaskDescription({ task }: TaskDescriptionProps) {
                         <p className="font-sans text-foreground mb-6 whitespace-pre-wrap">
                             {task.description}
                         </p>
-
-                        {task.examples && task.examples.length > 0 && (
-                            <>
-                                <h3 className="font-sans font-medium text-foreground text-xl mb-3">
-                                    Examples
-                                </h3>
-                                <div className="space-y-4 mb-6">
-                                    {task.examples.map((example, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="bg-background border border-muted rounded-lg p-4"
-                                        >
-                                            <p className="font-mono text-success mb-2">
-                                                Input: {example.input}
-                                            </p>
-                                            <p className="font-mono text-warning mb-2">
-                                                Output: {example.output}
-                                            </p>
-                                            {example.explanation && (
-                                                <p className="font-sans text-muted-foreground text-sm">
-                                                    {example.explanation}
-                                                </p>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        )}
                     </div>
                 ) : activeTab === "discussion" ? (
                     <div className="max-w-2xl">

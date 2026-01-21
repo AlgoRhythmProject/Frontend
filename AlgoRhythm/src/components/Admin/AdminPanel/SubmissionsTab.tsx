@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Code, User, FileCode, Calendar, Search, CheckCircle2, XCircle, Clock } from 'lucide-react';
-import type { SubmissionResponse } from '@/api/submissionApi';
 import type { Task } from '@/types/Task';
+import type { SubmissionResponse } from '@/api/submission/types';
 
 interface SubmissionsTabProps {
     submissions: SubmissionResponse[];

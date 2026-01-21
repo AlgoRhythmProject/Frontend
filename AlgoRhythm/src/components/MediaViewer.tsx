@@ -1,6 +1,6 @@
 // src/components/MediaViewer.tsx
 import { useState, useEffect } from 'react';
-import { fileApi } from '@/api/fileApi';
+import { fileApi } from '@/api/file/fileApi';
 
 interface MediaViewerProps {
     fileName: string;
