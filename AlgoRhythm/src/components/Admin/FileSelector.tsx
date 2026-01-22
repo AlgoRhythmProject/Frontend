@@ -116,8 +116,8 @@ export function FileSelector({ accept, onSelect, currentFile, label }: FileSelec
                     type="button"
                     onClick={() => setMode('select')}
                     className={`flex-1 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${mode === 'select'
-                            ? 'bg-primary text-white'
-                            : 'bg-muted text-foreground hover:bg-muted/80'
+                        ? 'bg-primary text-white'
+                        : 'bg-muted text-foreground hover:bg-muted/80'
                         }`}
                 >
                     Select Existing
@@ -126,8 +126,8 @@ export function FileSelector({ accept, onSelect, currentFile, label }: FileSelec
                     type="button"
                     onClick={() => setMode('upload')}
                     className={`flex-1 px-4 py-2 rounded-lg font-sans font-medium transition-colors ${mode === 'upload'
-                            ? 'bg-primary text-white'
-                            : 'bg-muted text-foreground hover:bg-muted/80'
+                        ? 'bg-primary text-white'
+                        : 'bg-muted text-foreground hover:bg-muted/80'
                         }`}
                 >
                     Upload New
@@ -185,8 +185,8 @@ export function FileSelector({ accept, onSelect, currentFile, label }: FileSelec
                     ) : (
                         <div className="bg-background border border-muted rounded-lg p-3 max-h-96 overflow-y-auto">
                             <div className={`grid gap-2 ${fileType === 'image'
-                                    ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
-                                    : 'grid-cols-1'
+                                ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
+                                : 'grid-cols-1'
                                 }`}>
                                 {existingFiles.map((file) => (
                                     <button
@@ -194,8 +194,8 @@ export function FileSelector({ accept, onSelect, currentFile, label }: FileSelec
                                         type="button"
                                         onClick={() => handleSelectFile(file.fileName)}
                                         className={`relative p-2 border-2 rounded-lg transition-all hover:border-primary ${selectedFile === file.fileName
-                                                ? 'border-primary bg-primary/10'
-                                                : 'border-muted'
+                                            ? 'border-primary bg-primary/10'
+                                            : 'border-muted'
                                             }`}
                                     >
                                         {/* Image preview */}
@@ -215,7 +215,7 @@ export function FileSelector({ accept, onSelect, currentFile, label }: FileSelec
                                         {/* Video preview */}
                                         {file.contentType.startsWith('video/') && (
                                             <div className="flex items-center gap-3 mb-2">
-                                                <div className="w-16 h-16 flex items-center justify-center bg-muted rounded flex-shrink-0">
+                                                <div className="w-16 h-16 flex items-center justify-center bg-muted rounded shrink-0">
                                                     <VideoIcon className="w-8 h-8 text-purple-500" />
                                                 </div>
                                                 <div className="flex-1 min-w-0 text-left">
