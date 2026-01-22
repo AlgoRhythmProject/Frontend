@@ -1,7 +1,7 @@
 import { Editor, type Monaco, type OnMount } from '@monaco-editor/react';
 import { useEffect, useState } from "react";
 import { useMonacoRoslyn } from "@/hooks/useMonacoRoslynEditor.ts";
-import { useRoslynLanguageServer } from "@/hooks/useRoslynLanguageServer.ts";
+import { useSignalR } from "@/hooks/useSignalR.ts";
 import type { editor } from 'monaco-editor';
 import type { ExecutionError } from "@/types/CodeAnalysis.ts";
 import { useTheme } from '@/hooks/themeContext';
@@ -18,7 +18,7 @@ export function CodeEditor({ value, onChange, language = 'csharp', height = '100
     const [monaco, setMonaco] = useState<Monaco | null>(null);
     const [editorInstance, setEditorInstance] = useState<editor.IStandaloneCodeEditor | null>(null);
 
-    const { isConnected, connection } = useRoslynLanguageServer();
+    const { isConnected, connection } = useSignalR("http://localhost:5095/roslynhub");
     const { runDiagnostics } = useMonacoRoslyn(monaco, editorInstance, connection, isConnected);
 
     const handleEditorDidMount: OnMount = (editor, monacoInstance) => {
