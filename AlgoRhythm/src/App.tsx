@@ -13,6 +13,7 @@ import { EditProfile } from './pages/EditProfile';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { VerifyEmail } from './pages/VerifyEmail';
+import { GraphVisualizer } from './pages/GraphVisualizer';
 import { ResetPassword } from './pages/ResetPassword';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { AchievementNotificationProvider } from './components/AchievementNotification';
@@ -47,6 +48,7 @@ function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
+
 function AppContent() {
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -60,6 +62,8 @@ function AppContent() {
   const shouldShowNavigation = isAuthenticated && !isAuthPage && !isEditProfilePage;
 
   useTokenRefresh();
+
+
 
   return (
     <>
@@ -88,6 +92,7 @@ function AppContent() {
             <Route path="/courses/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
             <Route path="/lectures" element={<ProtectedRoute><Lectures /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/visualize" element={<ProtectedRoute><GraphVisualizer /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<AuthenticatedRoute><EditProfile /></AuthenticatedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
           </Routes>
