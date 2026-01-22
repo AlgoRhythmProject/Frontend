@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Edit, Trash2, MoveUp, MoveDown, Type, Image, Video } from 'lucide-react';
 import { fileApi } from '@/api/file/fileApi';
 import type { Lecture, LectureContent } from '@/types/Lecture';
-import { FileUpload } from './FileUpload';
 import type { LectureContentInputDto } from '@/api/lecture/types';
 import { lectureApi } from '@/api/lecture/lectureApi';
 import { FileSelector } from './FileSelector';
@@ -213,7 +212,7 @@ export function LectureContentModal({ isOpen, onClose, lecture }: LectureContent
                                 <>
                                     <FileSelector
                                         accept="image/*"
-                                        onSelect={(fileName) => setFormData({ ...formData, path: fileName })}
+                                        onSelect={(fileName: any) => setFormData({ ...formData, path: fileName })}
                                         currentFile={formData.path}
                                         label="Image *"
                                     />

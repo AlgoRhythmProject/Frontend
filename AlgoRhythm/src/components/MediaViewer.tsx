@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fileApi } from '@/api/file/fileApi';
+import { Video } from 'lucide-react';
 
 interface MediaViewerProps {
     fileName: string;
