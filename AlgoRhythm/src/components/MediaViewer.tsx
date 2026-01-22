@@ -3,6 +3,7 @@ import { fileApi } from '@/api/file/fileApi';
 
 interface MediaViewerProps {
     fileName: string;
+    fileUrl?: string;
     alt?: string;
     title?: string;
     className?: string;
@@ -66,7 +67,7 @@ export function ImageViewer({ fileName, alt, title, className = '' }: MediaViewe
             <img
                 src={imageUrl}
                 alt={alt || fileName}
-                className="rounded-xl mx-auto max-w-full shadow-lg"
+                className="rounded-xl mx-auto max-w-full max-h-screen object-contain shadow-lg"
                 onError={() => setError('Failed to load image')}
             />
             {title && (
@@ -78,10 +79,10 @@ export function ImageViewer({ fileName, alt, title, className = '' }: MediaViewe
     );
 }
 
-export function VideoViewer({ fileName, title, className = '' }: MediaViewerProps) {
+export function VideoViewer({ fileName, title, className = '', fileUrl }: MediaViewerProps) {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const videoUrl = fileApi.getFileUrl(fileName);
+    const videoUrl = fileUrl || (fileName ? fileApi.getFileUrl(fileName) : '');
 
     const handleLoadedMetadata = () => {
         setLoading(false);
@@ -109,7 +110,7 @@ export function VideoViewer({ fileName, title, className = '' }: MediaViewerProp
             <video
                 controls
                 preload="metadata"
-                className="rounded-xl mx-auto max-w-full shadow-lg"
+                className="rounded-xl mx-auto max-w-full max-h-screen object-contain shadow-lg"
                 onLoadedMetadata={handleLoadedMetadata}
                 onError={handleError}
                 style={{ display: loading ? 'none' : 'block' }}

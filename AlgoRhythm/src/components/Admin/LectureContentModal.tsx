@@ -277,41 +277,6 @@ export function LectureContentModal({ isOpen, onClose, lecture }: LectureContent
                                 </>
                             )}
 
-                            {/* Video Content */}
-                            {formData.type === 'Video' && (
-                                <>
-                                    <FileUpload
-                                        accept="video/*"
-                                        onUploadSuccess={(fileName) => {
-                                            // fileName to już nazwa pliku z GUID z backendu
-                                            // Backend sam wygeneruje streamUrl na podstawie fileName
-                                            setFormData({
-                                                ...formData,
-                                                fileName: fileName,
-                                                // streamUrl może być null - backend go wygeneruje
-                                                // lub możemy go ustawić jako URL do /api/File/get_file
-                                                streamUrl: `/api/File/get_file?fileName=${encodeURIComponent(fileName)}`
-                                            });
-                                        }}
-                                        currentFile={formData.fileName}
-                                        label="Upload Video *"
-                                    />
-
-                                    <div>
-                                        <label className="block font-sans font-medium text-foreground mb-2">
-                                            Caption (optional)
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.title || ''}
-                                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                            className="w-full px-4 py-2 bg-card border border-muted rounded-lg font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                                            placeholder="Caption displayed below the video"
-                                        />
-                                    </div>
-                                </>
-                            )}
-
                             <div className="flex gap-3 pt-2">
                                 <button
                                     type="button"

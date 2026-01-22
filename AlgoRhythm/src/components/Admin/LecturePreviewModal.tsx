@@ -115,6 +115,7 @@ export function LecturePreviewModal({ isOpen, onClose, lecture }: LecturePreview
                                         <VideoViewer
                                             key={content.id}
                                             fileName={content.fileName}
+                                            fileUrl={content.streamUrl}
                                             title={content.title}
                                         />
                                     );
