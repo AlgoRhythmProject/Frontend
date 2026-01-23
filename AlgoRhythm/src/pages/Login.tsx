@@ -25,6 +25,7 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { isDark } = useTheme();
+  const isGoogleEnabled = import.meta.env.VITE_ENABLE_GOOGLE_LOGIN !== "false";
 
   const handleLoginSuccess = async (user: any) => {
     localStorage.setItem("token", user.token);
@@ -185,12 +186,15 @@ export function Login() {
               className="relative my-6"
             />
             {/* Google Sign-In Button */}
-            <GoogleLoginButton
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              text="signin_with"
-              isDark={isDark}
-            />
+            {isGoogleEnabled && (
+              <GoogleLoginButton
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                text="signin_with"
+                isDark={isDark}
+              />
+            )}
+
             <AuthenticationFooter
               promptText="Don't have an account?"
               linkText="Sign up"
