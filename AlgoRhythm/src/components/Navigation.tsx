@@ -7,10 +7,10 @@ export function Navigation() {
 
   const navItems = [
     { name: 'Dashboard', path: '/' },
-    { name: 'Lectures', path: '/lectures' },
     { name: 'Courses', path: '/courses' },
+    { name: 'Lectures', path: '/lectures' },
     { name: 'Tasks', path: '/tasks' },
-    { name: 'Visualizations', path: '/visualize'},
+    { name: 'Visualizations', path: '/visualize' },
   ];
 
   const isActive = (path: string) => {

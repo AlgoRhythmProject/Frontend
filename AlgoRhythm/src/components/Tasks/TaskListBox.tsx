@@ -20,7 +20,7 @@ export function TaskListBox({ tasks }: TaskListBoxProps) {
                     <div key={task.id} className="w-full">
                         <Link
                             to={`/tasks/${task.id}`}
-                            className="flex items-center hover:bg-card-hover transition-colors group"
+                            className="flex items-center hover:bg-card-hover px-8 transition-colors group"
                         >
 
                             {/* Info */}
@@ -29,7 +29,7 @@ export function TaskListBox({ tasks }: TaskListBoxProps) {
                                 <p className="text-foreground text-lg truncate">{task.title}</p>
                             </div>
                             {/* Difficulty */}
-                            <div className="px-4 py-4 flex items-center gap-3">
+                            <div className="py-4 flex items-center gap-3">
                                 <div className="flex items-center gap-2">
                                     <div
                                         className={`w-3 h-3 rounded-full ${DifficultyColor[task.difficulty] ?? 'bg-error'
