@@ -112,6 +112,7 @@ jobs:
         working-directory: AlgoRhythmProject/Frontend/AlgoRhythm
         env:
           CI: true
+          VITE_ENABLE_GOOGLE_LOGIN: "false"
 
       - name: Run Playwright tests (E2E)
         run: npx playwright test --project=E2E --reporter=blob --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
@@ -120,6 +121,7 @@ jobs:
           CI: true
           TEST_MODE: E2E
           BACKEND_PATH: ${{ github.workspace }}/AlgoRhythmProject/Backend/AlgoRhythm
+          VITE_ENABLE_GOOGLE_LOGIN: "false"
 
           SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
