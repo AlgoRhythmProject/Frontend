@@ -1,4 +1,3 @@
-// @/types/CourseProgress.ts
 export interface CourseProgress {
     id: string;
     userId: string;

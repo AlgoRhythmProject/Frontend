@@ -1,6 +1,6 @@
 import { Sun, Moon } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from '@/hooks/themeContext';
 
 export function ThemeToggle() {
     const { toggleTheme, isDark } = useTheme();

@@ -1,5 +1,6 @@
-import type { Task, TaskInputDto, TaskDetailsDto } from "@/types/Task";
-import apiClient from "./apiClient";
+import type { Task } from "@/types/Task";
+import apiClient from "../apiClient";
+import type { TaskDetailsDto, TaskInputDto } from "./types";
 
 export const taskApi = {
     getAll: async (): Promise<Task[]> => {

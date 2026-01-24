@@ -1,16 +1,15 @@
-import type {
-    Lecture,
-    LectureInputDto,
-    LectureContent,
-    LectureContentInputDto,
-    ChangeContentOrderDto
-} from "@/types/Lecture";
-import apiClient from "./apiClient";
+import type { Lecture, LectureContent } from "@/types/Lecture";
+import apiClient from "../apiClient";
+import type { LectureInputDto, LectureContentInputDto, ChangeContentOrderDto } from "./types";
 
 export const lectureApi = {
     // Lecture endpoints
     getAll: async (): Promise<Lecture[]> => {
         const res = await apiClient.get<Lecture[]>("/Lecture");
+        return res.data;
+    },
+    getPublished: async (): Promise<Lecture[]> => {
+        const res = await apiClient.get<Lecture[]>("/Lecture/published");
         return res.data;
     },
     getByCourseId: async (courseId: string): Promise<Lecture[]> => {

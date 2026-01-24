@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Lightbulb } from 'lucide-react';
-import { taskApi } from '@/api/taskApi';
-import { tagApi, type Tag } from '@/api/tagApi';
-import { hintApi, type HintInputDto } from '@/api/hintApi';
-import type { Task, TaskInputDto } from '@/types/Task';
+import { taskApi } from '@/api/task/taskApi';
+import { hintApi } from '@/api/hint/hintApi';
+import type { HintInputDto } from '@/api/hint/types';
+import { tagApi } from '@/api/tag/tagApi';
+import type { TaskInputDto } from '@/api/task/types';
+import { testCaseApi } from '@/api/testcase/testcaseApi';
+import type { CreateTestCaseDto } from '@/api/testcase/types';
 import type { Hint } from '@/types/Hint';
-import { TagManager } from '@/components/Admin/TagManager';
+import type { Tag } from '@/types/Tag';
+import type { Task } from '@/types/Task';
+import { TagManager } from './TagManager';
 import { TestCaseManager } from './TestCaseManager';
-import { testCaseApi, type CreateTestCaseDto, type TestCase } from '@/api/testcaseApi';
+import type { TestCase } from '@/types/TestCase';
 
 interface TaskFormModalProps {
     isOpen: boolean;
@@ -193,8 +198,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                 taskId: '',
                 content: newHintContent,
                 order: hints.length,
-                title: '',
-                createdAt: new Date().toISOString(),
             };
             setHints([...hints, newHint]);
             setNewHintContent('');
@@ -544,7 +547,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                         <button
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : task ? 'Update Task' : 'Create Task'}
                         </button>

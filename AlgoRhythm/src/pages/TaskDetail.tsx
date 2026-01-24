@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Loader2 } from "lucide-react";
-import { submissionApi, type SubmissionResponse } from "../api/submissionApi";
-import { taskApi } from "../api/taskApi";
-import { achievementApi } from "../api/achievementApi";
-import type { UserAchievementDto } from "../api/achievementApi";
+import { submissionApi } from "../api/submission/submissionApi";
+import { taskApi } from "../api/task/taskApi";
+import { achievementApi } from "../api/achievements/achievementApi";
 import { DifficultyColor, DifficultyLabel } from "../utils/difficulty";
 import type { Task } from "@/types/Task";
 import type { TestResult } from "@/types/TestResult";
@@ -13,6 +12,8 @@ import { CodeEditorPanel } from "@/components/Tasks/TaskDetails/CodeEditorPanel"
 import { useAchievementNotification } from "@/components/AchievementNotification";
 import { checkAndShowNewAchievements } from "@/utils/achievementUtils";
 import type { ExecutionError } from "@/types/CodeAnalysis";
+import type { UserAchievementDto } from "@/api/achievements/types";
+import type { SubmissionResponse } from "@/api/submission/types";
 
 
 export function TaskDetail() {

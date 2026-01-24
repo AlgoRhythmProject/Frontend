@@ -1,15 +1,6 @@
-import apiClient from "./apiClient";
-
-export interface Tag {
-    id: string;
-    name: string;
-    description: string;
-}
-
-export interface CreateTagRequest {
-    name: string;
-    description: string;
-}
+import type { Tag } from "@/types/Tag";
+import apiClient from "../apiClient";
+import type { CreateTagRequest } from "./types";
 
 export const tagApi = {
     getAll: async (): Promise<Tag[]> => {

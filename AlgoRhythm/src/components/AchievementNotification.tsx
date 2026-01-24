@@ -61,7 +61,7 @@ function AchievementToast({ achievement, onClose }: AchievementToastProps) {
             className="relative bg-card border-2 border-primary rounded-xl shadow-2xl overflow-hidden min-w-[320px] max-w-md"
         >
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/20 via-transparent to-transparent pointer-events-none" />
 
             {/* Content */}
             <div className="relative p-4 flex items-center gap-4">

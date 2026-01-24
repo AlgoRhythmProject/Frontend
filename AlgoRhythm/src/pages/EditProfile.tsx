@@ -7,8 +7,9 @@ import { type AppDispatch, type RootState } from '../store';
 import { login } from '../store/userSlice';
 import { AuthenticationInput } from '../components/Authentication/AuthenticationInput';
 import { AuthenticationBackground } from '../components/Authentication/AuthenticationBackground';
-import { authApi, ApiError } from '../api/authApi';
 import { validateName, validateEmail, sanitizeInput, validatePassword } from '@/utils/validationUtils';
+import { authApi } from '@/api/auth/authApi';
+import { ApiError } from '@/api/auth/types';
 
 export function EditProfile() {
   const navigate = useNavigate();

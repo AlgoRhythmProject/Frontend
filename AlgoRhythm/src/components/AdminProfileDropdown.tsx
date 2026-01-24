@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import type { RootState } from "../store";
 import { logout as logoutAction } from "../store/userSlice";
-import { authApi } from "../api/authApi";
+import { authApi } from "../api/auth/authApi";
 
 export function AdminProfileDropdown() {
     const [open, setOpen] = useState(false);

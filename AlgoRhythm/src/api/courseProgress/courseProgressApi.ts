@@ -1,24 +1,6 @@
 import type { CourseProgress } from "@/types/CourseProgress";
-import apiClient from "./apiClient";
-
-export interface LectureCompletionResponse {
-    message: string;
-    isCompleted?: boolean;
-    lectureId: string;
-}
-
-export interface LectureCompletionDto {
-    lectureId: string;
-    isCompleted: boolean;
-}
-
-export interface UserCompletedLecturesDto {
-    completedLectureIds: string[];
-}
-
-export interface UserCompletedTasksDto {
-    completedTaskIds: string[];
-}
+import type { LectureCompletionResponse, LectureCompletionDto, UserCompletedLecturesDto, UserCompletedTasksDto } from "./types";
+import apiClient from "../apiClient";
 
 export const courseProgressApi = {
     getAllMyProgress: async (): Promise<CourseProgress[]> => {

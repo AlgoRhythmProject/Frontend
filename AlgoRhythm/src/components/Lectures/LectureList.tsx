@@ -3,8 +3,8 @@ import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react"
 import type { Lecture } from "../../types/Lecture";
 import { motion } from "framer-motion";
 import { PageHeader } from "../PageHeader";
-import { tagApi } from "../../api/tagApi";
-import { courseProgressApi } from "../../api/courseProgressApi";
+import { courseProgressApi } from "@/api/courseProgress/courseProgressApi";
+import { tagApi } from "@/api/tag/tagApi";
 
 interface Tag {
     id: string;

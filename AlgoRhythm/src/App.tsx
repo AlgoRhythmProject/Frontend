@@ -19,6 +19,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { AchievementNotificationProvider } from './components/AchievementNotification';
 import { useTokenRefresh } from './hooks/useTokenRefresh';
 import { Admin } from './pages/Admin';
+import { ThemeProvider } from './hooks/themeContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -105,13 +106,15 @@ function AppContent() {
 export default function App() {
   return (
     <AchievementNotificationProvider>
-      <Router>
-        <div className="bg-primary-background min-h-screen text-foreground">
-          <div className="relative z-10">
-            <AppContent />
+      <ThemeProvider>
+        <Router>
+          <div className="bg-primary-background min-h-screen text-foreground">
+            <div className="relative z-10">
+              <AppContent />
+            </div>
           </div>
-        </div>
-      </Router>
+        </Router>
+      </ThemeProvider>
     </AchievementNotificationProvider>
   );
 }

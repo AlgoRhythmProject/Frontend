@@ -1,11 +1,6 @@
 import type { Hint } from "@/types/Hint";
-import apiClient from "./apiClient";
-
-export interface HintInputDto {
-    taskItemId: string;
-    content: string;
-    order: number;
-}
+import apiClient from "../apiClient";
+import type { HintInputDto } from "./types";
 
 export const hintApi = {
     getByTaskId: async (taskId: string): Promise<Hint[]> => {

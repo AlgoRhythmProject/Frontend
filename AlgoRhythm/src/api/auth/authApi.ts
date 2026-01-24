@@ -1,83 +1,6 @@
-import apiClient from "./apiClient";
-import type { User } from "../types/User";
-
-export interface LoginRequest {
-    email: string;
-    password: string;
-}
-
-export interface RegisterRequest {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-}
-
-export interface LoginResponse {
-    token: string;
-    expiresUtc: string;
-    refreshToken: string;
-    refreshTokenExpiresUtc: string;
-    user: User;
-}
-
-export interface RefreshTokenResponse {
-    accessToken: string;
-    accessTokenExpiresUtc: string;
-    refreshToken: string;
-    refreshTokenExpiresUtc: string;
-}
-
-export interface RegisterResponse {
-    message: string;
-}
-
-export interface ErrorResponse {
-    code: string;
-    message: string;
-}
-
-export interface VerifyEmailRequest {
-    email: string;
-    code: string;
-}
-
-export interface ResendVerificationCodeRequest {
-    email: string;
-}
-
-export interface ForgotPasswordRequest {
-    email: string;
-}
-
-export interface ResetPasswordRequest {
-    email: string;
-    code: string;
-    newPassword: string;
-}
-
-export interface ChangePasswordRequest {
-    currentPassword: string;
-    newPassword: string;
-}
-
-export interface UpdateProfileRequest {
-    firstName: string;
-    lastName: string;
-    email: string;
-}
-
-export class ApiError extends Error {
-    code: string;
-    status?: number;
-
-    constructor(code: string, message: string, status?: number) {
-        super(message);
-        this.name = 'ApiError';
-        this.code = code;
-        this.status = status;
-    }
-}
+import apiClient from "../apiClient";
+import type { User } from "../../types/User";
+import { type LoginRequest, type LoginResponse, type RegisterRequest, type RegisterResponse, type ResetPasswordRequest, type ChangePasswordRequest, type UpdateProfileRequest, type RefreshTokenResponse, type GoogleAuthResponse, type ErrorResponse, ApiError } from "./types";
 
 export const authApi = {
     login: async (credentials: LoginRequest): Promise<User> => {
@@ -221,5 +144,38 @@ export const authApi = {
                 error.response?.status
             );
         }
-    }
+    },
+
+    googleLogin: async (idToken: string, firstName?: string, lastName?: string): Promise<User> => {
+        try {
+            console.log("=== Sending Google Login Request ===");
+            console.log("Token length:", idToken.length);
+            console.log("Request body:", { idToken: idToken.substring(0, 50) + "...", firstName, lastName });
+
+            const response = await apiClient.post<GoogleAuthResponse>("/Authentication/google", {
+                idToken,
+                firstName,
+                lastName
+            });
+
+            console.log("=== Google Login Response ===");
+            console.log("Response status:", response.status);
+            console.log("Response data:", response.data);
+
+            const { token, user } = response.data;
+            return { ...user, token };
+        } catch (error: any) {
+            console.error("=== Google Login API Error ===");
+            console.error("Error response:", error.response);
+            console.error("Error data:", error.response?.data);
+            console.error("Error status:", error.response?.status);
+
+            const errorData = error.response?.data as ErrorResponse;
+            throw new ApiError(
+                errorData?.code || 'GOOGLE_LOGIN_FAILED',
+                errorData?.message || 'Google login failed. Please try again.',
+                error.response?.status
+            );
+        }
+    },
 };

@@ -2,7 +2,7 @@
 import { useEffect, useState as useHintState } from "react";
 import { Lock, ChevronRight, ChevronDown as ChevronDownIcon, Loader2 } from "lucide-react";
 import type { Hint } from "@/types/Hint";
-import { hintApi } from "@/api/hintApi";
+import { hintApi } from "@/api/hint/hintApi";
 
 export function HintsPanelContent({ taskId }: Readonly<{ taskId: string }>) {
     const [hints, setHints] = useHintState<Hint[]>([]);
@@ -68,7 +68,7 @@ export function HintsPanelContent({ taskId }: Readonly<{ taskId: string }>) {
 
     return (
         <div className="space-y-2">
-            {hints.map((hint, idx) => {
+            {hints.map((hint) => {
                 const isUnlocked = unlockedHints.has(hint.id);
                 const isExpanded = expandedHints.has(hint.id);
 
@@ -96,17 +96,6 @@ export function HintsPanelContent({ taskId }: Readonly<{ taskId: string }>) {
                             ) : (
                                 <Lock className="w-4 h-4 text-muted-foreground shrink-0" />
                             )}
-
-                            <div className="flex-1">
-                                <p className="font-sans font-medium text-foreground text-sm">
-                                    Hint {idx + 1}: {hint.title}
-                                </p>
-                                {!isUnlocked && hint.costInPoints && hint.costInPoints > 0 && (
-                                    <p className="font-sans text-muted-foreground text-xs mt-0.5">
-                                        Cost: {hint.costInPoints} points
-                                    </p>
-                                )}
-                            </div>
 
                             {!isUnlocked && (
                                 <span className="text-primary text-xs font-sans font-medium">

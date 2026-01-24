@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import { lectureApi } from "../api/lectureApi";
 import type { Lecture } from "../types/Lecture";
 import { LectureView } from "../components/Lectures/LectureView";
 import LectureList from "@/components/Lectures/LectureList";
 import { LoadingState } from "@/components/LoadingState";
+import { lectureApi } from "@/api/lecture/lectureApi";
 
 export function Lectures() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,9 +13,12 @@ export function Lectures() {
 
   const [selectedLecture, setSelectedLecture] = useState<string | null>(null);
   const [lectures, setLectures] = useState<Lecture[]>([]);
+  const [fullLecture, setFullLecture] = useState<Lecture | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingLecture, setIsLoadingLecture] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
   const fromCourse = location.state?.fromCourse;
   const courseId = location.state?.courseId;
 
@@ -24,7 +27,7 @@ export function Lectures() {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await lectureApi.getAll();
+        const data = await lectureApi.getPublished();
         setLectures(data);
       } catch (err: any) {
         console.error('Failed to load lectures:', err);
@@ -38,7 +41,29 @@ export function Lectures() {
 
   useEffect(() => {
     const lectureId = searchParams.get("id");
-    if (lectureId) setSelectedLecture(lectureId);
+
+    const fetchFullLecture = async (id: string) => {
+      try {
+        setIsLoadingLecture(true);
+        const data = await lectureApi.getById(id);
+        setFullLecture(data);
+        setSelectedLecture(id);
+      } catch (err: any) {
+        console.error('Failed to load lecture:', err);
+        setError(err.response?.data?.message || 'Failed to load lecture.');
+        setSelectedLecture(null);
+        setFullLecture(null);
+      } finally {
+        setIsLoadingLecture(false);
+      }
+    };
+
+    if (lectureId) {
+      fetchFullLecture(lectureId);
+    } else {
+      setSelectedLecture(null);
+      setFullLecture(null);
+    }
   }, [searchParams]);
 
   const handleBack = () => {
@@ -46,6 +71,7 @@ export function Lectures() {
       navigate(`/courses/${courseId}`);
     } else {
       setSelectedLecture(null);
+      setFullLecture(null);
       setSearchParams({});
     }
   };
@@ -54,37 +80,45 @@ export function Lectures() {
     setRefreshKey(prev => prev + 1);
   };
 
-  const activeLecture = selectedLecture
-    ? lectures.find((l) => l.id === selectedLecture)
-    : null;
+  if (isLoading) {
+    return (
+      <LoadingState
+        isLoading={true}
+        loadingText="Loading lectures..." error={null} children={undefined} />
+    );
+  }
+
+  if (error && !selectedLecture) {
+    return (
+      <LoadingState
+        error={error}
+        onRetry={() => setRefreshKey(prev => prev + 1)} isLoading={false} children={undefined} />
+    );
+  }
 
   return (
-    <LoadingState
-      isLoading={isLoading}
-      error={error}
-      loadingText="Loading lectures..."
-      onRetry={() => setRefreshKey(prev => prev + 1)}
-    >
-      <div className="min-h-screen p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
-          {activeLecture ? (
-            <LectureView
-              lecture={activeLecture}
-              courseId={courseId}
-              onBack={handleBack}
-              onProgressUpdate={handleProgressUpdate}
-            />
-          ) : (
-            <LectureList
-              lectures={lectures}
-              onSelectLecture={(id) => {
-                setSelectedLecture(id);
-                setSearchParams({ id });
-              }}
-            />
-          )}
-        </div>
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        {isLoadingLecture ? (
+          <LoadingState
+            isLoading={true}
+            loadingText="Loading lecture..." error={null} children={undefined} />
+        ) : fullLecture ? (
+          <LectureView
+            lecture={fullLecture}
+            courseId={courseId}
+            onBack={handleBack}
+            onProgressUpdate={handleProgressUpdate}
+          />
+        ) : (
+          <LectureList
+            lectures={lectures}
+            onSelectLecture={(id) => {
+              setSearchParams({ id });
+            }}
+          />
+        )}
       </div>
-    </LoadingState>
+    </div>
   );
 }
