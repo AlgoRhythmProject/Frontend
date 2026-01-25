@@ -1,5 +1,8 @@
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { Lecture } from '@/types/Lecture';
+import type { Lecture, LectureContent } from '@/types/Lecture';
+import { ImageViewer, VideoViewer } from '@/components/MediaViewer';
+import { lectureApi } from '@/api/lecture/lectureApi';
 
 interface LecturePreviewModalProps {
     isOpen: boolean;
@@ -8,9 +11,30 @@ interface LecturePreviewModalProps {
 }
 
 export function LecturePreviewModal({ isOpen, onClose, lecture }: LecturePreviewModalProps) {
-    if (!isOpen || !lecture) return null;
+    const [contents, setContents] = useState<LectureContent[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    const sortedContents = [...lecture.contents].sort((a, b) => a.order - b.order);
+    useEffect(() => {
+        if (isOpen && lecture) {
+            loadContents();
+        }
+    }, [isOpen, lecture]);
+
+    const loadContents = async () => {
+        if (!lecture) return;
+
+        setLoading(true);
+        try {
+            const data = await lectureApi.getAllContents(lecture.id);
+            setContents(data.sort((a, b) => a.order - b.order));
+        } catch (error) {
+            console.error('Failed to load contents:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!isOpen || !lecture) return null;
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -50,56 +74,53 @@ export function LecturePreviewModal({ isOpen, onClose, lecture }: LecturePreview
 
                     {/* Lecture Content */}
                     <div className="lecture-content font-sans">
-                        {sortedContents.length === 0 ? (
+                        {loading ? (
+                            <div className="text-center py-12">
+                                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                                <p className="font-sans text-muted-foreground">Loading contents...</p>
+                            </div>
+                        ) : contents.length === 0 ? (
                             <div className="text-center py-12">
                                 <p className="font-sans text-muted-foreground">
                                     This lecture has no content yet.
                                 </p>
                             </div>
                         ) : (
-                            sortedContents.map((content) => {
+                            contents.map((content) => {
+                                // Text content
                                 if (content.type === 'Text' && content.htmlContent) {
                                     return (
                                         <div
                                             key={content.id}
                                             dangerouslySetInnerHTML={{ __html: content.htmlContent }}
-                                            className="mb-6"
                                         />
                                     );
                                 }
+
+                                // Photo content - using ImageViewer component
                                 if (content.type === 'Photo' && content.path) {
                                     return (
-                                        <figure key={content.id} className="my-8">
-                                            <img
-                                                src={content.path}
-                                                alt={content.alt || ''}
-                                                className="rounded-xl mx-auto max-w-full shadow-sm"
-                                            />
-                                            {content.title && (
-                                                <figcaption className="text-center text-muted-foreground mt-3 text-sm">
-                                                    {content.title}
-                                                </figcaption>
-                                            )}
-                                        </figure>
+                                        <ImageViewer
+                                            key={content.id}
+                                            fileName={content.path}
+                                            alt={content.alt || ''}
+                                            title={content.title}
+                                        />
                                     );
                                 }
+
+                                // Video content - using VideoViewer component
                                 if (content.type === 'Video' && content.fileName) {
                                     return (
-                                        <div key={content.id} className="my-8 bg-muted/30 rounded-xl p-6 text-center">
-                                            <p className="font-sans text-foreground font-medium mb-2">
-                                                Video Content
-                                            </p>
-                                            <p className="font-mono text-sm text-muted-foreground">
-                                                {content.fileName}
-                                            </p>
-                                            {content.streamUrl && (
-                                                <p className="text-xs text-muted-foreground mt-2 truncate">
-                                                    Stream URL: {content.streamUrl}
-                                                </p>
-                                            )}
-                                        </div>
+                                        <VideoViewer
+                                            key={content.id}
+                                            fileName={content.fileName}
+                                            fileUrl={content.streamUrl}
+                                            title={content.title}
+                                        />
                                     );
                                 }
+
                                 return null;
                             })
                         )}

@@ -1,9 +1,10 @@
 import { Editor, type Monaco, type OnMount } from '@monaco-editor/react';
 import { useEffect, useState } from "react";
 import { useMonacoRoslyn } from "@/hooks/useMonacoRoslynEditor.ts";
-import { useRoslynLanguageServer } from "@/hooks/useRoslynLanguageServer.ts";
+import { useSignalR } from "@/hooks/useSignalR.ts";
 import type { editor } from 'monaco-editor';
 import type { ExecutionError } from "@/types/CodeAnalysis.ts";
+import { useTheme } from '@/hooks/themeContext';
 
 interface CodeEditorProps {
     value: string;
@@ -17,7 +18,7 @@ export function CodeEditor({ value, onChange, language = 'csharp', height = '100
     const [monaco, setMonaco] = useState<Monaco | null>(null);
     const [editorInstance, setEditorInstance] = useState<editor.IStandaloneCodeEditor | null>(null);
 
-    const { isConnected, connection } = useRoslynLanguageServer();
+    const { isConnected, connection } = useSignalR("http://localhost:5095/roslynhub");
     const { runDiagnostics } = useMonacoRoslyn(monaco, editorInstance, connection, isConnected);
 
     const handleEditorDidMount: OnMount = (editor, monacoInstance) => {
@@ -25,13 +26,11 @@ export function CodeEditor({ value, onChange, language = 'csharp', height = '100
         setMonaco(monacoInstance);
     };
 
-    // Obsługa diagnostyki Roslyn (Debounced)
     useEffect(() => {
         const timer = setTimeout(() => runDiagnostics(value), 600);
         return () => clearTimeout(timer);
     }, [value, runDiagnostics]);
 
-    // Obsługa błędów wykonania
     useEffect(() => {
         if (!monaco || !editorInstance) return;
         const model = editorInstance.getModel();
@@ -49,13 +48,15 @@ export function CodeEditor({ value, onChange, language = 'csharp', height = '100
         monaco.editor.setModelMarkers(model, "judge", markers);
     }, [errors, monaco, editorInstance]);
 
+    const { isDark } = useTheme();
+
     return (
         <Editor
             height={height}
             defaultLanguage={language}
             value={value}
             onChange={onChange}
-            theme="vs-dark"
+            theme={isDark ? 'vs-dark' : 'vs-light'}
             onMount={handleEditorDidMount}
             options={{
                 minimap: { enabled: false },

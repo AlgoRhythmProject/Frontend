@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, Trash2, Edit2, Eye, EyeOff, Save, X } from 'lucide-react';
-import type { TestCase } from '@/api/testcaseApi';
+import type { TestCase } from '@/types/TestCase';
 
 interface TestCaseInputData {
     inputJson: string | null;

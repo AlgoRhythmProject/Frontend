@@ -16,7 +16,7 @@ export function TasksTab({ tasks, onAddTask, onEditTask, onDeleteTask }: TasksTa
                 <h2 className="font-sans font-medium text-foreground text-xl">Task Management</h2>
                 <button
                     onClick={onAddTask}
-                    className="flex items-center cursor-pointer gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
+                    className="flex items-center cursor-pointer gap-2 bg-primary hover:bg-primary-hover  text-on-primary px-4 py-2 rounded-lg transition-colors"
                 >
                     <FileCode className="w-4 h-4" />
                     Add Task

@@ -3,9 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, BookOpen, Code, CheckCircle2, Loader2, Circle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-import { courseApi } from '../api/courseApi';
-import { taskApi } from '../api/taskApi';
-import { courseProgressApi } from '../api/courseProgressApi';
+import { courseApi } from '../api/course/courseApi';
+import { taskApi } from '../api/task/taskApi';
 import { ProgressBar } from '../components/ProgressBar';
 import { TaskCard } from '@/components/TaskCard';
 
@@ -13,6 +12,7 @@ import type { Course } from '@/types/Course';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
 import type { CourseProgress } from '@/types/CourseProgress';
+import { courseProgressApi } from '@/api/courseProgress/courseProgressApi';
 
 export function CourseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -29,11 +29,9 @@ export function CourseDetail() {
       const progressData = await courseProgressApi.getMyCourseProgress(courseId);
       setProgress(progressData);
     } catch (err: any) {
-      // 404 to OK - użytkownik jeszcze nie zaczął kursu
       if (err.response?.status !== 404) {
         console.error('Failed to load progress:', err);
       }
-      // Jeśli 404, progress pozostaje null
       setProgress(null);
     }
   };
@@ -62,7 +60,6 @@ export function CourseDetail() {
         );
         setCourseTasks(tasksForThisCourse);
 
-        // Pobierz progress
         await fetchCourseProgress(id);
       } catch (err: any) {
         console.error('Failed to load course:', err);
@@ -220,7 +217,7 @@ export function CourseDetail() {
                 </div>
               </div>
 
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+              <div className="space-y-2 max-h-150 overflow-y-auto">
                 {courseLectures.length > 0 ? (
                   courseLectures.map((lecture, index) => (
                     <LectureCard
@@ -262,7 +259,7 @@ export function CourseDetail() {
                 </div>
               </div>
 
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+              <div className="space-y-2 max-h-150 overflow-y-auto">
                 {courseTasks.length > 0 ? (
                   courseTasks.map((task) => (
                     <TaskCard

@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./lectureContent.css";
+@import "./scrollbar.css";
 
 /* ============================================
    DARK THEME (Default)
@@ -99,17 +101,92 @@
   --fallback-8-to: #e11d48;
 }
 
+@layer components {
+  .driver-popover.driverjs-theme {
+    background-color: #020617;
+    color: #b8adad;
+    border: 1px solid #312e81;
+    /* Ciemny Indigo border */
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-title {
+    color: #a5b4fc;
+    font-weight: 800;
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Opis - lekko przygaszony szary Slate-300 */
+  .driver-popover.driverjs-theme .driver-popover-description {
+    color: #3e4757;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* Tekst postępu (np. 1/4) */
+  .driver-popover.driverjs-theme .driver-popover-progress-text {
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  /* Przyciski nawigacji */
+  .driver-popover.driverjs-theme .driver-popover-next-btn,
+  .driver-popover.driverjs-theme .driver-popover-prev-btn {
+    background-color: #4338ca;
+    /* Indigo-700 */
+    color: #ffffff;
+    text-shadow: none;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-next-btn:hover {
+    background-color: #3730a3;
+    /* Indigo-800 */
+    transform: translateY(-1px);
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-close-btn {
+    color: #94a3b8;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-close-btn:hover {
+    color: #f1f5f9;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-arrow-side-top {
+    border-top-color: #020617;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-arrow-side-bottom {
+    border-bottom-color: #020617;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-arrow-side-left {
+    border-left-color: #020617;
+  }
+
+  .driver-popover.driverjs-theme .driver-popover-arrow-side-right {
+    border-right-color: #020617;
+  }
+}
+
 /* ============================================
    LIGHT THEME
    ============================================ */
 [data-theme="light"] {
-  /* Brand Colors - pozostają takie same */
   --primary: #9072e0;
   --primary-hover: rgb(121, 83, 226);
   --primary-foreground: #ffffff;
   --primary-light: #9072e0;
   --primary-light-hover: #9c6cf7;
-  --primary-foreground: #ffffff;
 
   /* Backgrounds */
   --primary-background: #eeeeee;
@@ -150,7 +227,6 @@
   --course-8-from: #34d399;
   --course-8-to: #2dd4bf;
 
-  /* Fallback Gradients - bardziej nasycone wersje */
   --fallback-1-from: #818cf8;
   --fallback-1-to: #a78bfa;
   --fallback-2-from: #fb7185;
@@ -253,5 +329,14 @@ body {
   font-family: var(--font-sans);
 }
 
-@import "./lectureContent.css";
-@import "./scrollbar.css";
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-alt {
+  font-family: var(--font-alt);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

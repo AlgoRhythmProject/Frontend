@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { lectureApi } from '@/api/lectureApi';
-import { tagApi, type Tag } from '@/api/tagApi';
-import type { Lecture, LectureInputDto } from '@/types/Lecture';
-import type { CourseListItem } from '@/api/courseApi';
 import { TagManager } from '@/components/Admin/TagManager';
+import type { CourseListItem } from '@/api/course/types';
+import { lectureApi } from '@/api/lecture/lectureApi';
+import type { LectureInputDto } from '@/api/lecture/types';
+import { tagApi } from '@/api/tag/tagApi';
+import type { Lecture } from '@/types/Lecture';
+import type { Tag } from '@/types/Tag';
 
 interface LectureFormModalProps {
     isOpen: boolean;
@@ -217,7 +219,7 @@ export function LectureFormModal({ isOpen, onClose, onSuccess, lecture, courses 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : lecture ? 'Update Lecture' : 'Create Lecture'}
                         </button>

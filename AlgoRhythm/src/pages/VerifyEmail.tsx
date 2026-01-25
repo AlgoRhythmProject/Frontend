@@ -6,7 +6,7 @@ import { AuthenticationButton } from "../components/Authentication/Authenticatio
 import { AuthenticationHeader } from "../components/Authentication/AuthenticationHeader";
 import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
 import { Particles } from "../components/ui/shadcn-io/particles";
-import { authApi, ApiError } from "../api/authApi";
+import { authApi } from "../api/auth/authApi";
 import {
     InputOTP,
     InputOTPGroup,
@@ -15,6 +15,7 @@ import {
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store";
 import { login } from "../store/userSlice";
+import { ApiError } from "@/api/auth/types";
 
 
 export function VerifyEmail() {

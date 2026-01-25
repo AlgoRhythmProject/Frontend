@@ -1,15 +1,19 @@
-import { Award, TrendingUp, Code, CheckCircle2, XCircle, Settings, LogOut, BookOpen } from 'lucide-react';
+import { Award, TrendingUp, Code, CheckCircle2, Settings, LogOut, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { ProgressBar } from '../components/ProgressBar';
-import { authApi } from '../api/authApi';
-import { achievementApi, type UserAchievementDto } from '../api/achievementApi';
-import { courseProgressApi } from '../api/courseProgressApi';
-import { taskApi } from '../api/taskApi';
+import { authApi } from '../api/auth/authApi';
+import { taskApi } from '../api/task/taskApi';
 import { useState, useEffect } from 'react';
 import type { Task } from '@/types/Task';
+import { RecentSubmissions } from '@/components/RecentSubmissions';
+import { achievementApi } from '@/api/achievements/achievementApi';
+import type { UserAchievementDto } from '@/api/achievements/types';
+import { courseProgressApi } from '@/api/courseProgress/courseProgressApi';
+import type { UserStreakDto } from '@/api/userStreak/types';
+import { userStreakApi } from '@/api/userStreak/userStreakApi';
 
 export function Profile() {
   const navigate = useNavigate();
@@ -20,35 +24,31 @@ export function Profile() {
   const [achievementError, setAchievementError] = useState<string | null>(null);
 
   const [completedTasksCount, setCompletedTasksCount] = useState<number>(0);
-  const [completedLecturesCount, setCompletedLecturesCount] = useState<number>(0);
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  // Mock data dla streaks (na razie)
-  const userStats = {
-    currentStreak: 12,
-  };
+  const [streak, setStreak] = useState<UserStreakDto | null>(null);
+  const [isLoadingStreak, setIsLoadingStreak] = useState(true);
 
-  const recentActivity: Array<{ task: string; completed: boolean; date: string }> = [];
 
-  // Załaduj wszystkie dane
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoadingStats(true);
         setIsLoadingAchievements(true);
+        setIsLoadingStreak(true);
 
-        const [completedTasksResp, completedLecturesResp, tasksResp, achievementsResp] = await Promise.all([
+        const [completedTasksResp, tasksResp, achievementsResp, streakResp] = await Promise.all([
           courseProgressApi.getMyCompletedTasks(),
-          courseProgressApi.getMyCompletedLectures(),
-          taskApi.getAll(),
+          taskApi.getPublished(),
           achievementApi.getMyAchievements(),
+          userStreakApi.getMyStreak(),
         ]);
 
         setCompletedTasksCount(completedTasksResp.completedTaskIds.length);
-        setCompletedLecturesCount(completedLecturesResp.completedLectureIds.length);
         setAllTasks(tasksResp);
         setAchievements(achievementsResp);
+        setStreak(streakResp);
 
         setAchievementError(null);
       } catch (error) {
@@ -57,6 +57,7 @@ export function Profile() {
       } finally {
         setIsLoadingStats(false);
         setIsLoadingAchievements(false);
+        setIsLoadingStreak(false);
       }
     };
 
@@ -142,27 +143,27 @@ export function Profile() {
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-4 h-4 text-info" />
-                  <p className="font-sans text-muted-foreground text-sm">Streak</p>
+                  <p className="font-sans text-muted-foreground text-sm">Current Streak</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
-                  {userStats.currentStreak}
+                  {isLoadingStreak ? '...' : streak?.currentStreak || 0}
                 </p>
               </div>
 
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <BookOpen className="w-4 h-4 text-success" />
-                  <p className="font-sans text-muted-foreground text-sm">Lectures</p>
+                  <Zap className="w-4 h-4 text-warning" />
+                  <p className="font-sans text-muted-foreground text-sm">Longest Streak</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
-                  {isLoadingStats ? '...' : completedLecturesCount}
+                  {isLoadingStreak ? '...' : streak?.longestStreak || 0}
                 </p>
               </div>
 
               <div className="bg-card border border-muted rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Award className="w-4 h-4 text-warning" />
-                  <p className="font-sans text-muted-foreground text-sm">Badges</p>
+                  <Award className="w-4 h-4 text-success" />
+                  <p className="font-sans text-muted-foreground text-sm">Achievements</p>
                 </div>
                 <p className="font-sans font-medium text-foreground text-2xl">
                   {isLoadingAchievements ? '...' : earnedAchievementsCount}
@@ -219,48 +220,51 @@ export function Profile() {
               )}
             </motion.div>
 
-            {/* Recent Activity */}
+            {/* Recent Submissions */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <RecentSubmissions limit={5} />
+            </motion.div>
+          </div>
+
+          {/* Right Column - Settings & Achievements */}
+          <div className="space-y-6">
+            {/* Settings */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               className="bg-card border border-muted rounded-xl p-6"
             >
               <h2 className="font-sans font-medium text-foreground text-xl mb-4">
-                Recent Activity
+                Settings
               </h2>
-              {recentActivity.length > 0 ? (
-                <div className="space-y-3">
-                  {recentActivity.map((activity, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3 bg-background rounded-lg">
-                      {activity.completed ? (
-                        <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-error shrink-0" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-sans font-medium text-foreground truncate">
-                          {activity.task}
-                        </p>
-                        <p className="font-sans text-muted-foreground text-sm">
-                          {activity.date}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="font-sans text-muted-foreground text-sm">
-                    No recent activity yet. Start solving tasks!
-                  </p>
-                </div>
-              )}
+              <div className="space-y-2">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate('/profile/edit')}
+                  className="w-full text-left px-4 py-3 bg-background hover:bg-card-hover cursor-pointer rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4 text-primary" />
+                  <p className="font-sans font-medium text-foreground">Edit Profile</p>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-3 bg-background hover:bg-error/20 cursor-pointer rounded-lg transition-colors flex items-center gap-2 group"
+                >
+                  <LogOut className="w-4 h-4 text-error" />
+                  <p className="font-sans font-medium text-error">Logout</p>
+                </motion.button>
+              </div>
             </motion.div>
-          </div>
 
-          {/* Right Column - Badges */}
-          <div className="space-y-6">
+            {/* Achievements */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -336,38 +340,6 @@ export function Profile() {
                   ))}
                 </div>
               )}
-            </motion.div>
-
-            {/* Settings */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-card border border-muted rounded-xl p-6"
-            >
-              <h2 className="font-sans font-medium text-foreground text-xl mb-4">
-                Settings
-              </h2>
-              <div className="space-y-2">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate('/profile/edit')}
-                  className="w-full text-left px-4 py-3 bg-background hover:bg-card-hover cursor-pointer rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <Settings className="w-4 h-4 text-primary" />
-                  <p className="font-sans font-medium text-foreground">Edit Profile</p>
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-3 bg-background hover:bg-error/20 cursor-pointer rounded-lg transition-colors flex items-center gap-2 group"
-                >
-                  <LogOut className="w-4 h-4 text-error" />
-                  <p className="font-sans font-medium text-error">Logout</p>
-                </motion.button>
-              </div>
             </motion.div>
           </div>
         </div>

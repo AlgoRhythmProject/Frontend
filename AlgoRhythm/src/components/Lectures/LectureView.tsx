@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import type { Lecture } from "../../types/Lecture";
-import { courseProgressApi } from "@/api/courseProgressApi";
-import { achievementApi } from "@/api/achievementApi";
-import type { UserAchievementDto } from "@/api/achievementApi";
+import { achievementApi } from "@/api/achievements/achievementApi";
 import { useState, useEffect } from "react";
 import { useAchievementNotification } from "@/components/AchievementNotification";
 import { checkAndShowNewAchievements } from "@/utils/achievementUtils";
+import { ImageViewer, VideoViewer } from "@/components/MediaViewer";
+import type { UserAchievementDto } from "@/api/achievements/types";
+import { courseProgressApi } from "@/api/courseProgress/courseProgressApi";
 
 interface LectureViewProps {
     lecture: Lecture;
@@ -119,7 +120,6 @@ export function LectureView({
             transition={{ duration: 0.4 }}
             key={lecture.id}
         >
-
             <button
                 onClick={onBack}
                 className="mb-6 text-primary hover:text-primary-hover cursor-pointer font-sans transition-colors"
@@ -129,7 +129,6 @@ export function LectureView({
             <div className="max-w-7xl mx-auto bg-card border border-muted rounded-2xl p-8 md:p-12">
 
                 <div className="mb-6 flex items-center gap-2">
-
                     <span className="inline-block bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-sans">
                         Lecture
                     </span>
@@ -150,22 +149,28 @@ export function LectureView({
                                 />
                             );
                         }
+
                         if (content.type === "Photo" && content.path) {
                             return (
-                                <figure key={content.id} className="my-8">
-                                    <img
-                                        src={content.path}
-                                        alt={content.alt || ""}
-                                        className="rounded-xl mx-auto max-w-full"
-                                    />
-                                    {content.title && (
-                                        <figcaption className="text-center text-muted-foreground mt-2 text-sm">
-                                            {content.title}
-                                        </figcaption>
-                                    )}
-                                </figure>
+                                <ImageViewer
+                                    key={content.id}
+                                    fileName={content.path}
+                                    alt={content.alt || ""}
+                                    title={content.title}
+                                />
                             );
                         }
+
+                        if (content.type === "Video" && content.fileName) {
+                            return (
+                                <VideoViewer
+                                    key={content.id}
+                                    fileName={content.fileName}
+                                    title={content.title}
+                                />
+                            );
+                        }
+
                         return null;
                     })}
                 </div>

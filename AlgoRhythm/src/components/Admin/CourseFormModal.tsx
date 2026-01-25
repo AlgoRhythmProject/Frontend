@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { courseApi, type CourseInputDto } from '@/api/courseApi';
-import { lectureApi } from '@/api/lectureApi';
-import { taskApi } from '@/api/taskApi';
+import { taskApi } from '@/api/task/taskApi';
 import type { Course } from '@/types/Course';
 import type { Lecture } from '@/types/Lecture';
 import type { Task } from '@/types/Task';
+import { courseApi } from '@/api/course/courseApi';
+import type { CourseInputDto } from '@/api/course/types';
+import { lectureApi } from '@/api/lecture/lectureApi';
 
 interface CourseFormModalProps {
     isOpen: boolean;
@@ -61,8 +62,8 @@ export function CourseFormModal({ isOpen, onClose, onSuccess, course }: CourseFo
         setLoadingResources(true);
         try {
             const [lectures, tasks] = await Promise.all([
-                lectureApi.getAll(),
-                taskApi.getAll()
+                lectureApi.getPublished(),
+                taskApi.getPublished()
             ]);
             setAllLectures(lectures);
             setAllTasks(tasks);
@@ -397,7 +398,7 @@ export function CourseFormModal({ isOpen, onClose, onSuccess, course }: CourseFo
                         <button
                             type="submit"
                             disabled={loading || loadingResources}
-                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
+                            className="cursor-pointer flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary rounded-lg font-sans font-medium transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : course ? 'Update Course' : 'Create Course'}
                         </button>

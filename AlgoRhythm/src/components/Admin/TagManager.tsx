@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Plus, Tag as TagIcon } from 'lucide-react';
-import type { Tag } from '@/api/tagApi';
-import { tagApi } from '@/api/tagApi';
+import { tagApi } from '@/api/tag/tagApi';
+import type { Tag } from '@/types/Tag';
 
 interface TagManagerProps {
     selectedTags: Tag[];
@@ -53,7 +53,6 @@ export function TagManager({
         } catch (err: any) {
             console.error('Failed to create tag:', err);
 
-            // Wyświetl konkretny błąd z backendu
             if (err.response?.data?.message) {
                 setError(err.response.data.message);
             } else if (err.response?.data?.errors) {

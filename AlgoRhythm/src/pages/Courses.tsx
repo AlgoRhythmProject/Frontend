@@ -7,11 +7,11 @@ import { StatBox } from "../components/StatBox";
 import { ProgressBar } from "../components/ProgressBar";
 import { LoadingState } from "../components/LoadingState";
 
-import { courseApi } from "@/api/courseApi";
-import { courseProgressApi } from "@/api/courseProgressApi";
+import { courseApi } from "@/api/course/courseApi";
 import type { Course } from "@/types/Course";
 import { getCourseVisualConfig } from "@/config/courseConfig";
 import type { CourseProgress } from "@/types/CourseProgress";
+import { courseProgressApi } from "@/api/courseProgress/courseProgressApi";
 
 type UICourse = Course & {
   progress?: CourseProgress | null;
@@ -28,7 +28,7 @@ export function Courses() {
       setError(null);
 
       try {
-        const allCourses = await courseApi.getAll();
+        const allCourses = await courseApi.getPublished();
 
         const settled = await Promise.allSettled(
           allCourses.map((c) => courseProgressApi.getMyCourseProgress(c.id))
