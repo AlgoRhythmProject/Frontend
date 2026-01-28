@@ -1,0 +1,5 @@
+window.ENV = {
+    API_BASE_URL: '__API_BASE_URL__',
+    ANALYZER_URL: '__ANALYZER_URL__',
+    VISUALIZER_URL: '__VISUALIZER_URL__'
+};
