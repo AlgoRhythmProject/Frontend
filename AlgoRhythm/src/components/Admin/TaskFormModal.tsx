@@ -13,6 +13,7 @@ import type { Task } from '@/types/Task';
 import { TagManager } from './TagManager';
 import { TestCaseManager } from './TestCaseManager';
 import type { TestCase } from '@/types/TestCase';
+import { ExpandableTextarea } from './ExpandableTextArea';
 
 interface TaskFormModalProps {
     isOpen: boolean;
@@ -345,16 +346,15 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                     </div>
 
                     <div>
-                        <label className="block font-sans font-medium text-foreground mb-2">
-                            Description
-                        </label>
-                        <textarea
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            rows={4}
-                            className="w-full px-4 py-2 bg-background border border-muted rounded-lg font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                            placeholder="Enter task description"
+                        <ExpandableTextarea
+                            value={formData.description || ''}
+                            onChange={(value) => setFormData({ ...formData, description: value })}
+                            label="Description"
+                            placeholder="<p>Enter HTML content here...</p>"
+                            rows={8}
+                            helperText="You can use HTML tags like <h1>, <p>, <strong>, <em>, <ul>, <ol>, etc."
                         />
+
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -368,7 +368,6 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                                 className="w-full px-4 py-2 bg-background border border-muted rounded-lg font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                             >
                                 <option value={0}>Programming</option>
-                                <option value={1}>Interactive</option>
                             </select>
                         </div>
 
@@ -474,15 +473,13 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                     {formData.taskType === 0 && (
                         <>
                             <div>
-                                <label className="block font-sans font-medium text-foreground mb-2">
-                                    Template Code
-                                </label>
-                                <textarea
-                                    value={formData.templateCode}
-                                    onChange={(e) => setFormData({ ...formData, templateCode: e.target.value })}
-                                    rows={8}
-                                    className="w-full px-4 py-2 bg-background border border-muted rounded-lg font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                <ExpandableTextarea
+                                    value={formData.templateCode ?? ""}
+                                    onChange={(value) => setFormData({ ...formData, templateCode: value })}
+                                    label="Template Code"
                                     placeholder="public class Solution { }"
+                                    rows={8}
+                                    isCode={true}
                                 />
                             </div>
 

@@ -64,9 +64,10 @@ export function TaskDescription({ task }: TaskDescriptionProps) {
                         <h2 className="font-sans font-medium text-foreground text-2xl mb-4">
                             Description
                         </h2>
-                        <p className="font-sans text-foreground mb-6 whitespace-pre-wrap">
-                            {task.description}
-                        </p>
+                        <div
+                            key={task.id}
+                            dangerouslySetInnerHTML={{ __html: task.description ?? "" }}
+                        />
                     </div>
                 ) : activeTab === "discussion" ? (
                     <div className="max-w-2xl">

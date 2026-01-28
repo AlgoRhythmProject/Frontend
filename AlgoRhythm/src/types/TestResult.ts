@@ -7,5 +7,10 @@ export interface TestResult {
     executionTimeMs: number;
     stdOut: string | null;
     stdErr: string | null;
-    errors: ExecutionError[] | null
+    errors: ExecutionError[] | null;
+    isVisible: boolean;
+    inputJson: string | null;
+    expectedJson: string | null;
+    returnedValue: string | null;
+    exitCode: number;
 }

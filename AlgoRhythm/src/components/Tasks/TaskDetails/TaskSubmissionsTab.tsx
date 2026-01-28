@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, XCircle, Clock, Code, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Code, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react';
 import { submissionApi } from '@/api/submission/submissionApi';
 import type { TestResult } from '@/types/TestResult';
 import type { SubmissionResponse } from '@/api/submission/types';
@@ -13,6 +13,7 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [expandedSubmissionId, setExpandedSubmissionId] = useState<string | null>(null);
+    const [showCodeForSubmission, setShowCodeForSubmission] = useState<string | null>(null);
 
     useEffect(() => {
         loadSubmissions();
@@ -61,7 +62,10 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
     };
 
     const formatDate = (dateString: string) => {
+        // Parse the date and add 1 hour
         const date = new Date(dateString);
+        date.setHours(date.getHours() + 1);
+
         const now = new Date();
         const diffMs = now.getTime() - date.getTime();
         const diffMins = Math.floor(diffMs / 60000);
@@ -72,6 +76,7 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
         if (diffMins < 60) return `${diffMins}m ago`;
         if (diffHours < 24) return `${diffHours}h ago`;
         if (diffDays < 7) return `${diffDays}d ago`;
+
         return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
@@ -79,11 +84,58 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
         setExpandedSubmissionId(expandedSubmissionId === submissionId ? null : submissionId);
     };
 
+    const toggleCodeVisibility = (submissionId: string) => {
+        setShowCodeForSubmission(showCodeForSubmission === submissionId ? null : submissionId);
+    };
+
     const getTestStatusIcon = (test: TestResult) => {
         if (test.passed) {
             return <CheckCircle2 className="w-4 h-4 text-success" />;
         }
         return <XCircle className="w-4 h-4 text-error" />;
+    };
+
+
+    const renderJsonValue = (jsonString: string | null) => {
+        if (!jsonString) return null;
+
+        try {
+            const parsed = JSON.parse(jsonString);
+
+            if (typeof parsed !== 'object' || parsed === null) {
+                return (
+                    <span className="font-mono text-sm font-semibold">
+                        {String(parsed)}
+                    </span>
+                );
+            }
+
+            if (Array.isArray(parsed)) {
+                return (
+                    <div className="space-y-1">
+                        {parsed.map((item, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                                <span className="text-muted-foreground">[{idx}]</span>
+                                <span className="font-mono text-sm font-semibold">{JSON.stringify(item)}</span>
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+
+            return (
+                <div className="space-y-1">
+                    {Object.entries(parsed).map(([key, value]) => (
+                        <div key={key} className="flex items-start gap-2">
+                            <span className="text-muted-foreground font-mono text-xs">{key}:</span>
+                            <span className="font-mono text-sm font-semibold">{JSON.stringify(value)}</span>
+                        </div>
+                    ))}
+                </div>
+            );
+        } catch {
+            return <span className="font-mono text-sm">{jsonString}</span>;
+        }
     };
 
     if (isLoading) {
@@ -132,6 +184,7 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
 
             {submissions.map((submission) => {
                 const isExpanded = expandedSubmissionId === submission.submissionId;
+                const isCodeVisible = showCodeForSubmission === submission.submissionId;
                 const hasTests = submission.testResults && submission.testResults.length > 0;
                 const passedTests = hasTests
                     ? submission.testResults.filter(t => t.passed).length
@@ -190,6 +243,43 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
                         {/* Expanded Details */}
                         {isExpanded && (
                             <div className="border-t border-current/20 bg-background/30">
+                                {/* Code Section */}
+                                {submission.code && (
+                                    <div className="p-4 border-b border-current/20">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <p className="font-sans text-sm font-medium text-foreground">
+                                                Submitted Code:
+                                            </p>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleCodeVisibility(submission.submissionId);
+                                                }}
+                                                className="flex items-center gap-2 px-3 py-1 text-xs font-sans text-primary-light bg-primary/30 hover:bg-primary/50 cursor-pointer rounded transition-colors"
+                                            >
+                                                {isCodeVisible ? (
+                                                    <>
+                                                        <EyeOff className="w-4 h-4" />
+                                                        Hide code
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Eye className="w-4 h-4" />
+                                                        Show code
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                        {isCodeVisible && (
+                                            <div className="bg-background/80 border border-muted rounded p-3 max-h-96 overflow-auto">
+                                                <pre className="font-mono text-sm text-foreground whitespace-pre-wrap">
+                                                    {submission.code}
+                                                </pre>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 {/* Error Message */}
                                 {submission.errorMessage && (
                                     <div className="p-4 border-b border-current/20">
@@ -220,9 +310,17 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
                                                     <div className="flex items-start gap-2">
                                                         {getTestStatusIcon(test)}
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="font-sans text-sm font-medium text-foreground mb-1">
-                                                                Test Case {idx + 1} {test.testCaseId ? `(ID: ${test.testCaseId.slice(0, 8)})` : ''}
-                                                            </p>
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <p className="font-sans text-sm font-medium text-foreground">
+                                                                    Test Case {idx + 1}
+                                                                </p>
+
+                                                                {!test.isVisible && (
+                                                                    <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs font-sans rounded">
+                                                                        Hidden
+                                                                    </span>
+                                                                )}
+                                                            </div>
 
                                                             {/* Points and Execution Time */}
                                                             <div className="flex items-center gap-4 mb-2 text-xs text-muted-foreground">
@@ -234,11 +332,31 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
                                                                 </span>
                                                             </div>
 
+                                                            {/* Input JSON */}
+                                                            {test.inputJson && test.isVisible && (
+                                                                <div className="mt-2">
+                                                                    <p className="font-sans text-xs font-medium text-muted-foreground mb-1">Input:</p>
+                                                                    <div className="text-foreground bg-background/50 border border-muted p-2 rounded">
+                                                                        {renderJsonValue(test.inputJson)}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Expected JSON */}
+                                                            {test.expectedJson && test.isVisible && (
+                                                                <div className="mt-2">
+                                                                    <p className="font-sans text-xs font-medium text-muted-foreground mb-1">Expected:</p>
+                                                                    <div className="text-foreground bg-background/50 border border-muted p-2 rounded">
+                                                                        {renderJsonValue(test.expectedJson)}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
                                                             {/* Standard Output */}
                                                             {test.stdOut && (
                                                                 <div className="mt-2">
-                                                                    <p className="font-sans text-xs text-muted-foreground mb-1">Output:</p>
-                                                                    <div className={`font-mono text-xs p-2 rounded max-h-32 overflow-auto ${test.passed
+                                                                    <p className="font-sans text-xs font-medium text-muted-foreground mb-1">Output:</p>
+                                                                    <div className={`font-mono text-xs p-2 rounded ${test.passed
                                                                         ? 'text-success bg-success/10 border border-success/20'
                                                                         : 'text-foreground bg-background/50 border border-muted'
                                                                         }`}>
@@ -250,8 +368,8 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
                                                             {/* Standard Error */}
                                                             {test.stdErr && (
                                                                 <div className="mt-2">
-                                                                    <p className="font-sans text-xs text-error mb-1">Error Output:</p>
-                                                                    <div className="font-mono text-xs text-error bg-error/10 border border-error/20 p-2 rounded max-h-32 overflow-auto">
+                                                                    <p className="font-sans text-xs font-medium text-error mb-1">Error Output:</p>
+                                                                    <div className="font-mono text-xs text-error bg-error/10 border border-error/20 p-2 rounded">
                                                                         <pre className="whitespace-pre-wrap">{test.stdErr}</pre>
                                                                     </div>
                                                                 </div>
@@ -260,7 +378,7 @@ export function TaskSubmissionsTab({ taskId }: TaskSubmissionsTabProps) {
                                                             {/* Execution Errors */}
                                                             {test.errors && test.errors.length > 0 && (
                                                                 <div className="mt-2">
-                                                                    <p className="font-sans text-xs text-error mb-1">Errors:</p>
+                                                                    <p className="font-sans text-xs font-medium text-error mb-1">Errors:</p>
                                                                     <div className="space-y-1">
                                                                         {test.errors.map((error, errorIdx) => (
                                                                             <div
