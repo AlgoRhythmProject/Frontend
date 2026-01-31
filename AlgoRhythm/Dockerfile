@@ -5,12 +5,20 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build # Tworzy skompilowane pliki w /app/dist
+RUN npm run build # Built files in /app/dist
 
-# --- STAGE 2: Serve the Static Files with Nginx ---
+# --- STAGE 2: Serve the static files with Nginx ---
 FROM nginx:stable-alpine AS final
-# Kopiujemy skompilowane pliki z fazy 'build' do domyślnego katalogu Nginx
+
+# Copy built files
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Copy shell script to set envs
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 80
+
+# Entry point
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

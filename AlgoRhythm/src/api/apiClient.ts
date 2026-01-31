@@ -1,7 +1,8 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+import {config} from "@/config/global.ts";
 
 const apiClient = axios.create({
-    baseURL: "http://localhost:7062/api",
+    baseURL: config.apiBaseUrl,
     headers: {
         "Content-Type": "application/json",
         accept: "*/*",
