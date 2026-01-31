@@ -71,7 +71,7 @@ test.describe("Register Component Tests", () => {
     });
 
     test("should show generic error message on API failure", async ({ page }) => {
-        await page.route("**/api/authentication/register", async (route) => {
+        await page.route("**/api/Authentication/register", async (route) => {
             await route.fulfill({
                 status: 500,
                 contentType: "application/json",
@@ -90,7 +90,7 @@ test.describe("Register Component Tests", () => {
 
         const errorMsg = page.locator(ERROR_SELECTOR);
         await expect(errorMsg).toBeVisible();
-        await expect(errorMsg).toHaveText("An account with this email already exists.");
+        await expect(errorMsg).toHaveText("Internal Error");
     });
 
     test("should register successfully and redirect to verify-email page", async ({ page }) => {
