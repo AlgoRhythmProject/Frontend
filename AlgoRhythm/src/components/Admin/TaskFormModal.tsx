@@ -254,6 +254,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                                 expectedJson: testCase.expectedJson || null,
                                 isVisible: testCase.isVisible,
                                 maxPoints: testCase.maxPoints,
+                                timeoutMs: testCase.timeoutMs,
                             };
                             await testCaseApi.create(dto);
                         } else if (existingIds.has(testCase.id)) {
@@ -262,6 +263,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                                 expectedJson: testCase.expectedJson || null,
                                 isVisible: testCase.isVisible,
                                 maxPoints: testCase.maxPoints,
+                                timeoutMs: testCase.timeoutMs,
                             });
                         }
                     }
@@ -289,6 +291,7 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                             expectedJson: testCase.expectedJson || null,
                             isVisible: testCase.isVisible,
                             maxPoints: testCase.maxPoints,
+                            timeoutMs: testCase.timeoutMs,
                         };
                         await testCaseApi.create(dto);
                     }

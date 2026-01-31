@@ -4,6 +4,7 @@ export interface CreateTestCaseDto {
     expectedJson: string | null;
     isVisible: boolean;
     maxPoints: number;
+    timeoutMs: number | null;
 }
 
 export interface UpdateTestCaseDto {
@@ -11,4 +12,5 @@ export interface UpdateTestCaseDto {
     expectedJson: string | null;
     isVisible: boolean;
     maxPoints: number;
+    timeoutMs: number | null;
 }
