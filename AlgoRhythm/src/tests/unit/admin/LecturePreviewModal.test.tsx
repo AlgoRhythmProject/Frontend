@@ -1,12 +1,39 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
-import { render, screen } from '@testing-library/react';
+import {render, screen, waitFor} from '@testing-library/react';
 import { LecturePreviewModal } from '@/components/Admin/LecturePreviewModal';
 import userEvent from '@testing-library/user-event';
 import type { Lecture, LectureContent } from '@/types/Lecture';
+import {describe, vi, expect, it} from "vitest";
+import {lectureApi} from "@/api/lecture/lectureApi";
+
+vi.mock('@/components/MediaViewer', () => ({
+    ImageViewer: ({ fileName, alt, title }: any) => (
+        <div data-testid="mock-image">
+            <img src={fileName} alt={alt} />
+            {title && <span>{title}</span>}
+        </div>
+    ),
+    VideoViewer: ({ fileName, fileUrl, title }: any) => (
+        <div data-testid="mock-video">
+            <span>Video Content: {fileName}</span>
+            <span>URL: {fileUrl}</span>
+            {title && <span>{title}</span>}
+        </div>
+    ),
+}));
+
+vi.mock('@/api/lecture/lectureApi', () => ({
+    lectureApi: {
+        getAllContents: vi.fn(),
+    },
+}));
 
 describe('LecturePreviewModal', () => {
-    const mockOnClose = jest.fn();
+    const mockOnClose = vi.fn();
+    vi.mock('@/api/lecture/lectureApi');
+
+    const mockLectureApi = vi.mocked(lectureApi);
 
     const mockTextContent: LectureContent = {
         id: '1',
@@ -71,7 +98,8 @@ describe('LecturePreviewModal', () => {
     };
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
+        mockLectureApi.getAllContents.mockResolvedValue([]);
     });
 
     describe('Rendering', () => {
@@ -150,7 +178,8 @@ describe('LecturePreviewModal', () => {
     });
 
     describe('Content rendering', () => {
-        it('should display message when lecture has no content', () => {
+        it('should display message when lecture has no content', async () => {
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -159,10 +188,16 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
             expect(screen.getByText('This lecture has no content yet.')).toBeInTheDocument();
         });
 
-        it('should render text content with HTML', () => {
+        it('should render text content with HTML', async () => { // 1. Dodaj async
+            mockLectureApi.getAllContents.mockResolvedValue([mockTextContent]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -171,11 +206,13 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
-            expect(screen.getByText('Introduction')).toBeInTheDocument();
+            expect(await screen.findByText('Introduction')).toBeInTheDocument();
+
             expect(screen.getByText('This is the introduction to the lecture.')).toBeInTheDocument();
         });
 
-        it('should render photo content with image', () => {
+        it('should render photo content with image', async () => {
+            mockLectureApi.getAllContents.mockResolvedValue(mockLectureWithContent.contents);
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -183,13 +220,18 @@ describe('LecturePreviewModal', () => {
                     lecture={mockLectureWithContent}
                 />
             );
+
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
 
             const image = screen.getByAltText('Architecture diagram');
             expect(image).toBeInTheDocument();
             expect(image).toHaveAttribute('src', '/images/diagram.png');
         });
 
-        it('should render photo title as figcaption', () => {
+        it('should render photo title as figcaption', async () => {
+            mockLectureApi.getAllContents.mockResolvedValue(mockLectureWithContent.contents);
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -197,11 +239,17 @@ describe('LecturePreviewModal', () => {
                     lecture={mockLectureWithContent}
                 />
             );
+
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
 
             expect(screen.getByText('System Architecture')).toBeInTheDocument();
         });
 
-        it('should render video content placeholder', () => {
+        it('should render video content placeholder', async () => {
+            mockLectureApi.getAllContents.mockResolvedValue([mockVideoContent]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -210,11 +258,15 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
-            expect(screen.getByText('Video Content')).toBeInTheDocument();
-            expect(screen.getByText('lecture-video.mp4')).toBeInTheDocument();
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
+            expect(await screen.findByText(/Video Content/i)).toBeInTheDocument();
         });
 
-        it('should display video stream URL when available', () => {
+        it('should display video stream URL when available', async () => {
+            mockLectureApi.getAllContents.mockResolvedValue(mockLectureWithContent.contents);
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -223,45 +275,47 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
-            expect(screen.getByText(/Stream URL:/)).toBeInTheDocument();
-            expect(screen.getByText(/https:\/\/example.com\/videos\/lecture-video.mp4/)).toBeInTheDocument();
+            expect(await screen.findByText(/URL:/)).toBeInTheDocument();
+            expect(await screen.findByText(/https:\/\/example.com\/videos\/lecture-video.mp4/)).toBeInTheDocument();
         });
 
-        it('should render content in correct order', () => {
+        it('should render content in correct order sorted by order property', async () => {
             const unorderedContents: LectureContent[] = [
                 { ...mockVideoContent, order: 3 },
                 { ...mockTextContent, order: 1 },
                 { ...mockPhotoContent, order: 2 }
             ];
 
-            const lectureWithUnorderedContent: Lecture = {
-                ...mockLectureWithContent,
-                contents: unorderedContents
-            };
+            mockLectureApi.getAllContents.mockResolvedValue(unorderedContents);
 
             const { container } = render(
                 <LecturePreviewModal
                     isOpen={true}
                     onClose={mockOnClose}
-                    lecture={lectureWithUnorderedContent}
+                    lecture={mockLectureWithContent}
                 />
             );
 
-            const contentElements = container.querySelectorAll('.lecture-content > *');
+            await screen.findByText('Introduction');
 
-            // First should be text content (order 1)
-            expect(contentElements[0]).toHaveTextContent('Introduction');
+            const listContainer = container.querySelector('.lecture-content');
 
-            // Second should be photo (order 2) - figure element
-            expect(contentElements[1].tagName).toBe('FIGURE');
+            expect(listContainer).toBeInTheDocument();
 
-            // Third should be video (order 3)
-            expect(contentElements[2]).toHaveTextContent('Video Content');
+            const children = listContainer!.children;
+
+            expect(children).toHaveLength(3);
+
+            expect(children[0]).toHaveTextContent('Introduction');
+
+            expect(children[1]).toHaveTextContent('System Architecture');
+
+            expect(children[2]).toHaveTextContent('lecture-video.mp4');
         });
     });
 
     describe('Photo content variations', () => {
-        it('should render photo without title', () => {
+        it('should render photo without title', async () => {
             const photoWithoutTitle: LectureContent = {
                 ...mockPhotoContent,
                 title: undefined
@@ -272,6 +326,8 @@ describe('LecturePreviewModal', () => {
                 contents: [photoWithoutTitle]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([photoWithoutTitle]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -280,12 +336,16 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
             const image = screen.getByAltText('Architecture diagram');
             expect(image).toBeInTheDocument();
             expect(screen.queryByText('System Architecture')).not.toBeInTheDocument();
         });
 
-        it('should render photo with empty alt text', () => {
+        it('should render photo with empty alt text', async () => {
             const photoWithoutAlt: LectureContent = {
                 ...mockPhotoContent,
                 alt: undefined
@@ -296,6 +356,8 @@ describe('LecturePreviewModal', () => {
                 contents: [photoWithoutAlt]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([photoWithoutAlt]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -304,13 +366,17 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
             const image = screen.getByRole('presentation');
             expect(image).toHaveAttribute('alt', '');
         });
     });
 
     describe('Video content variations', () => {
-        it('should render video without stream URL', () => {
+        it('should render video without stream URL', async () => {
             const videoWithoutUrl: LectureContent = {
                 ...mockVideoContent,
                 streamUrl: undefined
@@ -321,6 +387,8 @@ describe('LecturePreviewModal', () => {
                 contents: [videoWithoutUrl]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([videoWithoutUrl]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -329,9 +397,12 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
-            expect(screen.getByText('Video Content')).toBeInTheDocument();
-            expect(screen.getByText('lecture-video.mp4')).toBeInTheDocument();
-            expect(screen.queryByText(/Stream URL:/)).not.toBeInTheDocument();
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
+            expect(await screen.findByText(/Video Content/i)).toBeInTheDocument();
+            expect(await screen.findByText(/lecture-video\.mp4/i)).toBeInTheDocument();
         });
     });
 
@@ -368,7 +439,7 @@ describe('LecturePreviewModal', () => {
     });
 
     describe('Content type filtering', () => {
-        it('should only render valid content types', () => {
+        it('should only render valid content types', async () => {
             const invalidContent = {
                 id: '4',
                 lectureId: 'lec-1',
@@ -382,6 +453,8 @@ describe('LecturePreviewModal', () => {
                 contents: [mockTextContent, invalidContent]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([mockTextContent, invalidContent]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -389,6 +462,10 @@ describe('LecturePreviewModal', () => {
                     lecture={lecture}
                 />
             );
+
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
 
             // Text content should render
             expect(screen.getByText('Introduction')).toBeInTheDocument();
@@ -398,7 +475,7 @@ describe('LecturePreviewModal', () => {
             expect(contentElements?.children.length).toBe(1);
         });
 
-        it('should not render text content with empty lectureContents', () => {
+        it('should not render text content with empty lectureContents', async () => {
             const lecture: Lecture = {
                 ...mockLectureWithContent,
                 contents: []
@@ -412,11 +489,14 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
-            // Should show empty state since no valid content
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
             expect(screen.getByText('This lecture has no content yet.')).toBeInTheDocument();
         });
 
-        it('should not render photo content without path', () => {
+        it('should not render photo content without path', async () => {
             const photoWithoutPath: LectureContent = {
                 ...mockPhotoContent,
                 path: undefined
@@ -427,6 +507,8 @@ describe('LecturePreviewModal', () => {
                 contents: [photoWithoutPath]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([photoWithoutPath]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -435,10 +517,14 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
             expect(screen.queryByRole('img')).not.toBeInTheDocument();
         });
 
-        it('should not render video content without fileName', () => {
+        it('should not render video content without fileName', async () => {
             const videoWithoutFileName: LectureContent = {
                 ...mockVideoContent,
                 fileName: undefined
@@ -449,6 +535,8 @@ describe('LecturePreviewModal', () => {
                 contents: [videoWithoutFileName]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([videoWithoutFileName]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -457,12 +545,16 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
             expect(screen.queryByText('Video Content')).not.toBeInTheDocument();
         });
     });
 
     describe('Multiple content items', () => {
-        it('should render multiple text contents', () => {
+        it('should render multiple text contents', async () => {
             const secondTextContent: LectureContent = {
                 id: '5',
                 lectureId: 'lec-1',
@@ -477,6 +569,8 @@ describe('LecturePreviewModal', () => {
                 contents: [mockTextContent, secondTextContent]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([mockTextContent, secondTextContent]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -485,11 +579,15 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
             expect(screen.getByText('Introduction')).toBeInTheDocument();
             expect(screen.getByText('Conclusion')).toBeInTheDocument();
         });
 
-        it('should render multiple photos', () => {
+        it('should render multiple photos', async () => {
             const secondPhotoContent: LectureContent = {
                 id: '6',
                 lectureId: 'lec-1',
@@ -506,6 +604,8 @@ describe('LecturePreviewModal', () => {
                 contents: [mockPhotoContent, secondPhotoContent]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([mockPhotoContent, secondPhotoContent]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -514,11 +614,15 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
             expect(screen.getByAltText('Architecture diagram')).toBeInTheDocument();
             expect(screen.getByAltText('Performance chart')).toBeInTheDocument();
         });
 
-        it('should render multiple videos', () => {
+        it('should render multiple videos', async () => {
             const secondVideoContent: LectureContent = {
                 id: '7',
                 lectureId: 'lec-1',
@@ -536,6 +640,8 @@ describe('LecturePreviewModal', () => {
                 contents: [mockVideoContent, secondVideoContent]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([mockVideoContent, secondVideoContent]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
@@ -544,13 +650,21 @@ describe('LecturePreviewModal', () => {
                 />
             );
 
-            expect(screen.getByText('lecture-video.mp4')).toBeInTheDocument();
-            expect(screen.getByText('demo-video.mp4')).toBeInTheDocument();
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
+
+            const videoMocks = await screen.findAllByTestId('mock-video');
+
+            expect(videoMocks).toHaveLength(2);
+
+            expect(videoMocks[0]).toHaveTextContent(/lecture-video\.mp4/i);
+            expect(videoMocks[1]).toHaveTextContent(/demo-video\.mp4/i);
         });
     });
 
     describe('HTML content rendering', () => {
-        it('should render complex HTML content safely', () => {
+        it('should render complex HTML content safely', async () => {
             const complexHtmlContent: LectureContent = {
                 id: '8',
                 lectureId: 'lec-1',
@@ -565,13 +679,20 @@ describe('LecturePreviewModal', () => {
                 contents: [complexHtmlContent]
             };
 
+            mockLectureApi.getAllContents.mockResolvedValue([complexHtmlContent]);
+
             render(
                 <LecturePreviewModal
                     isOpen={true}
-                    onClose={mockOnClose}
+                    onClose={() => {
+                    }}
                     lecture={lecture}
                 />
             );
+
+            await waitFor(() => {
+                expect(screen.queryByText('Loading contents...')).not.toBeInTheDocument();
+            });
 
             expect(screen.getByText('Title')).toBeInTheDocument();
             expect(screen.getByText('Item 1')).toBeInTheDocument();

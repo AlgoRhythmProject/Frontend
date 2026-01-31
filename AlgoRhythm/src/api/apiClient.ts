@@ -1,5 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
-import {config} from "@/config/global.ts";
+import {config} from "@/config/global";
 
 const apiClient = axios.create({
     baseURL: config.apiBaseUrl,

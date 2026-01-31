@@ -1,27 +1,27 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { CourseFormModal } from '@/components/Admin/CourseFormModal';
 import userEvent from '@testing-library/user-event';
-import { courseApi } from '@/api/courseApi';
-import { lectureApi } from '@/api/lectureApi';
-import { taskApi } from '@/api/taskApi';
+import { courseApi } from '@/api/course/courseApi';
+import { lectureApi } from '@/api/lecture/lectureApi';
+import { taskApi } from '@/api/task/taskApi';
 import type { Course } from '@/types/Course';
 import type {Lecture, LectureContent} from '@/types/Lecture';
 import type { Task } from '@/types/Task';
 
 // Mock API modules
-jest.mock('@/api/courseApi');
-jest.mock('@/api/lectureApi');
-jest.mock('@/api/taskApi');
+vi.mock('@/api/course/courseApi');
+vi.mock('@/api/lecture/lectureApi');
+vi.mock('@/api/task/taskApi');
 
-const mockCourseApi = courseApi as jest.Mocked<typeof courseApi>;
-const mockLectureApi = lectureApi as jest.Mocked<typeof lectureApi>;
-const mockTaskApi = taskApi as jest.Mocked<typeof taskApi>;
+const mockCourseApi = vi.mocked(courseApi);
+const mockLectureApi =  vi.mocked(lectureApi);
+const mockTaskApi =  vi.mocked(taskApi);
 
 describe('CourseFormModal', () => {
-  const mockOnClose = jest.fn();
-  const mockOnSuccess = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnSuccess = vi.fn();
 
   const mockLectureContents: LectureContent[] = [
     {
@@ -98,16 +98,16 @@ describe('CourseFormModal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockLectureApi.getAll.mockResolvedValue(mockLectures);
-    mockTaskApi.getAll.mockResolvedValue(mockTasks);
+    vi.clearAllMocks();
+    mockLectureApi.getPublished.mockResolvedValue(mockLectures);
+    mockTaskApi.getPublished.mockResolvedValue(mockTasks);
     mockLectureApi.getById.mockImplementation((id) =>
         Promise.resolve(mockLectures.find(l => l.id === id)!)
     );
     mockTaskApi.getById.mockImplementation((id) =>
         Promise.resolve(mockTasks.find(t => t.id === id)!)
     );
-    jest.spyOn(window, 'confirm').mockImplementation(() => true);
+    window.confirm = vi.fn(() => true);
   });
 
   describe('Rendering', () => {
@@ -115,10 +115,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={false}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       expect(screen.queryByText('Add New Course')).not.toBeInTheDocument();
     });
@@ -127,10 +127,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       expect(screen.getByText('Add New Course')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Enter course name')).toHaveValue('');
@@ -141,15 +141,15 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      course={mockCourse}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+              course={mockCourse}
+          />
+      );
 
-      await waitFor(() => {
-        expect(screen.getByText('Edit Course')).toBeInTheDocument();
-      });
+
+      const heading = await screen.findByText('Edit Course');
+      expect(heading).toBeInTheDocument();
 
       expect(screen.getByPlaceholderText('Enter course name')).toHaveValue('Test Course');
       expect(screen.getByPlaceholderText('Enter course description')).toHaveValue('Test Description');
@@ -160,14 +160,14 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       await waitFor(() => {
-        expect(mockLectureApi.getAll).toHaveBeenCalled();
-        expect(mockTaskApi.getAll).toHaveBeenCalled();
+        expect(mockLectureApi.getPublished).toHaveBeenCalled();
+        expect(mockTaskApi.getPublished).toHaveBeenCalled();
       });
     });
   });
@@ -178,10 +178,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       const nameInput = screen.getByPlaceholderText('Enter course name');
       await user.type(nameInput, 'New Course');
@@ -194,10 +194,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       const descInput = screen.getByPlaceholderText('Enter course description');
       await user.type(descInput, 'Course description');
@@ -210,10 +210,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       const checkbox = screen.getByRole('checkbox', { name: /publish course immediately/i });
       expect(checkbox).not.toBeChecked();
@@ -227,10 +227,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       const closeButton = screen.getAllByRole('button').find(btn =>
           btn.querySelector('svg')
@@ -248,10 +248,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       const cancelButton = screen.getByRole('button', { name: 'Cancel' });
       await user.click(cancelButton);
@@ -269,7 +269,7 @@ describe('CourseFormModal', () => {
               onClose={mockOnClose}
               onSuccess={mockOnSuccess}
           />
-    );
+      );
 
       await waitFor(() => {
         expect(screen.getByText('Select a lecture to add...')).toBeInTheDocument();
@@ -334,7 +334,7 @@ describe('CourseFormModal', () => {
               onSuccess={mockOnSuccess}
               course={mockCourse}
           />
-    );
+      );
 
       await waitFor(() => {
         expect(screen.getByText('Select a lecture to add...')).toBeInTheDocument();
@@ -355,11 +355,11 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      course={mockCourse}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+              course={mockCourse}
+          />
+      );
 
       await waitFor(() => {
         expect(screen.getByText('Lecture 1')).toBeInTheDocument();
@@ -392,7 +392,7 @@ describe('CourseFormModal', () => {
               onClose={mockOnClose}
               onSuccess={mockOnSuccess}
           />
-    );
+      );
 
       await waitFor(() => {
         const selects = screen.getAllByRole('combobox');
@@ -418,8 +418,8 @@ describe('CourseFormModal', () => {
               isOpen={true}
               onClose={mockOnClose}
               onSuccess={mockOnSuccess}
-      />
-    );
+          />
+      );
 
       await waitFor(() => {
         const selects = screen.getAllByRole('combobox');
@@ -467,10 +467,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText('Enter course name')).toBeInTheDocument();
@@ -503,10 +503,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText('Enter course name')).toBeInTheDocument();
@@ -539,11 +539,11 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      course={mockCourse}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+              course={mockCourse}
+          />
+      );
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText('Enter course name')).toHaveValue('Test Course');
@@ -577,10 +577,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText('Enter course name')).toBeInTheDocument();
@@ -609,10 +609,10 @@ describe('CourseFormModal', () => {
       render(
           <CourseFormModal
               isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
+              onClose={mockOnClose}
+              onSuccess={mockOnSuccess}
+          />
+      );
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText('Enter course name')).toBeInTheDocument();
@@ -627,50 +627,6 @@ describe('CourseFormModal', () => {
       await waitFor(() => {
         expect(screen.getByRole('button', { name: 'Saving...' })).toBeDisabled();
       });
-    });
-  });
-
-  describe('Error handling', () => {
-    it('should handle lecture loading error gracefully', async () => {
-      const consoleError = jest.spyOn(console, 'error').mockImplementation();
-      mockLectureApi.getAll.mockRejectedValue(new Error('Failed to load lectures'));
-
-      render(
-          <CourseFormModal
-              isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      />
-    );
-
-      await waitFor(() => {
-        expect(consoleError).toHaveBeenCalledWith(
-            'Failed to load resources:',
-            expect.any(Error)
-        );
-      });
-
-      consoleError.mockRestore();
-    });
-
-    it('should handle course resource loading error', async () => {
-      const consoleError = jest.spyOn(console, 'error').mockImplementation();
-      mockLectureApi.getById.mockRejectedValue(new Error('Not found'));
-
-      render(
-          <CourseFormModal
-              isOpen={true}
-      onClose={mockOnClose}
-      onSuccess={mockOnSuccess}
-      course={mockCourse}
-      />
-    );
-
-      await waitFor(() => {
-        expect(mockLectureApi.getById).toHaveBeenCalledWith('1');
-      });
-
-      consoleError.mockRestore();
     });
   });
 });

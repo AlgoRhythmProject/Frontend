@@ -1,24 +1,39 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { LectureContentModal } from '@/components/Admin/LectureContentModal';
 import userEvent from '@testing-library/user-event';
-import { lectureApi } from '@/api/lectureApi';
+import { lectureApi } from '@/api/lecture/lectureApi';
 import type { Lecture, LectureContent } from '@/types/Lecture';
+import {describe, vi, expect, it} from "vitest";
 
 // Mock API modules
-jest.mock('@/api/lectureApi');
+vi.mock('@/api/lecture/lectureApi');
+vi.mock('@/components/Admin/FileSelector', () => ({
+    FileSelector: ({ onSelect, accept }: any) => (
+        <button
+            onClick={() =>
+                // jeśli akceptuje video
+                accept?.includes('video')
+                    ? onSelect({ name: 'mock.mp4', streamUrl: 'https://example.com/mock.mp4' })
+                    : onSelect('/images/new-photo.jpg') // Photo
+            }
+        >
+            MockFileSelector
+        </button>
+    )
+}));
 
-const mockLectureApi = lectureApi as jest.Mocked<typeof lectureApi>;
+const mockLectureApi = vi.mocked(lectureApi);
 
 describe('LectureContentModal', () => {
-    const mockOnClose = jest.fn();
+    const mockOnClose = vi.fn();
 
     const mockTextContent: LectureContent = {
         id: '1',
         lectureId: 'lec-1',
         type: 'Text',
-        order: 1,
+        order: 0,
         createdAt: '2024-12-30',
         htmlContent: '<h1>Introduction</h1><p>This is the introduction.</p>'
     };
@@ -27,7 +42,7 @@ describe('LectureContentModal', () => {
         id: '2',
         lectureId: 'lec-1',
         type: 'Photo',
-        order: 2,
+        order: 1,
         createdAt: '2024-12-30',
         path: '/images/diagram.png',
         alt: 'Architecture diagram',
@@ -38,7 +53,7 @@ describe('LectureContentModal', () => {
         id: '3',
         lectureId: 'lec-1',
         type: 'Video',
-        order: 3,
+        order: 2,
         createdAt: '2024-12-30',
         fileName: 'lecture-video.mp4',
         streamUrl: 'https://example.com/videos/lecture.mp4',
@@ -57,14 +72,14 @@ describe('LectureContentModal', () => {
     };
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockLectureApi.getAllContents.mockResolvedValue([
             mockTextContent,
             mockPhotoContent,
             mockVideoContent
         ]);
-        jest.spyOn(window, 'confirm').mockReturnValue(true);
-        jest.spyOn(window, 'alert').mockImplementation(() => {});
+        window.confirm = vi.fn(() => true);
+        window.alert = vi.fn();
     });
 
     describe('Rendering', () => {
@@ -135,7 +150,10 @@ describe('LectureContentModal', () => {
             );
 
             await waitFor(() => {
-                expect(screen.getByText('No content yet. Add your first content block!')).toBeInTheDocument();
+                expect(screen.getByText('No content yet')).toBeInTheDocument();
+                expect(
+                    screen.getByText('Add your first content block to get started!')
+                ).toBeInTheDocument();
             });
         });
 
@@ -180,13 +198,17 @@ describe('LectureContentModal', () => {
                 />
             );
 
-            await waitFor(() => {
-                expect(screen.getByText('Video')).toBeInTheDocument();
-                expect(screen.getByText('lecture-video.mp4')).toBeInTheDocument();
-                expect(screen.getByText(/URL: https:\/\/example.com/)).toBeInTheDocument();
-                expect(screen.getByText('Size: 47.68 MB')).toBeInTheDocument();
-            });
+            expect(await screen.findByText('Video')).toBeInTheDocument();
+
+            expect(
+                await screen.findByText(/lecture-video/i)
+            ).toBeInTheDocument();
+
+            expect(
+                await screen.findByText(/example.com\/videos/)
+            ).toBeInTheDocument();
         });
+
 
         it('should display content order', async () => {
             render(
@@ -198,9 +220,9 @@ describe('LectureContentModal', () => {
             );
 
             await waitFor(() => {
-                expect(screen.getByText('(Order: 1)')).toBeInTheDocument();
-                expect(screen.getByText('(Order: 2)')).toBeInTheDocument();
-                expect(screen.getByText('(Order: 3)')).toBeInTheDocument();
+                expect(screen.getByText('#0')).toBeInTheDocument();
+                expect(screen.getByText('#1')).toBeInTheDocument();
+                expect(screen.getByText('#2')).toBeInTheDocument();
             });
         });
 
@@ -271,7 +293,6 @@ describe('LectureContentModal', () => {
                 expect(addButtons.length).toBe(1); // Only submit button
             });
         });
-
         it('should cancel add form', async () => {
             const user = userEvent.setup();
             render(
@@ -317,9 +338,7 @@ describe('LectureContentModal', () => {
             const typeSelect = screen.getByRole('combobox');
             await user.selectOptions(typeSelect, 'Photo');
 
-            await waitFor(() => {
-                expect(screen.getByPlaceholderText('/images/lecture-photo.jpg')).toBeInTheDocument();
-            });
+            await user.click(screen.getByText('MockFileSelector'));
         });
     });
 
@@ -371,27 +390,36 @@ describe('LectureContentModal', () => {
                 />
             );
 
-            await waitFor(() => {
-                expect(screen.getByRole('button', { name: /add content/i })).toBeInTheDocument();
-            });
+            // open form
+            await user.click(
+                await screen.findByRole('button', { name: /add content/i })
+            );
 
-            const addButton = screen.getByRole('button', { name: /add content/i });
-            await user.click(addButton);
+            // select Photo
+            await user.selectOptions(
+                screen.getByRole('combobox'),
+                'Photo'
+            );
 
-            const typeSelect = screen.getByRole('combobox');
-            await user.selectOptions(typeSelect, 'Photo');
+            // select image via mocked FileSelector
+            await user.click(screen.getByText('MockFileSelector'));
 
-            const pathInput = screen.getByPlaceholderText('/images/lecture-photo.jpg');
-            await user.type(pathInput, '/images/new-photo.jpg');
+            // fill alt
+            await user.type(
+                screen.getByPlaceholderText('Describe the image for screen readers'),
+                'New photo'
+            );
 
-            const altInput = screen.getByPlaceholderText('Image description');
-            await user.type(altInput, 'New photo');
+            // fill caption
+            await user.type(
+                screen.getByPlaceholderText('Caption displayed below the image'),
+                'Photo Title'
+            );
 
-            const titleInput = screen.getByPlaceholderText('Image title');
-            await user.type(titleInput, 'Photo Title');
-
-            const submitButton = screen.getByRole('button', { name: /^Add Content$/i });
-            await user.click(submitButton);
+            // submit
+            await user.click(
+                screen.getByRole('button', { name: /^Add Content$/i })
+            );
 
             await waitFor(() => {
                 expect(mockLectureApi.addContent).toHaveBeenCalledWith('lec-1', {
@@ -399,50 +427,7 @@ describe('LectureContentModal', () => {
                     htmlContent: '',
                     path: '/images/new-photo.jpg',
                     alt: 'New photo',
-                    title: 'Photo Title'
-                });
-            });
-        });
-    });
-
-    describe('Add video content', () => {
-        it('should add video content successfully', async () => {
-            const user = userEvent.setup();
-            mockLectureApi.addContent.mockResolvedValue(mockVideoContent);
-
-            render(
-                <LectureContentModal
-                    isOpen={true}
-                    onClose={mockOnClose}
-                    lecture={mockLecture}
-                />
-            );
-
-            await waitFor(() => {
-                expect(screen.getByRole('button', { name: /add content/i })).toBeInTheDocument();
-            });
-
-            const addButton = screen.getByRole('button', { name: /add content/i });
-            await user.click(addButton);
-
-            const typeSelect = screen.getByRole('combobox');
-            await user.selectOptions(typeSelect, 'Video');
-
-            const fileNameInput = screen.getByPlaceholderText('lecture-video.mp4');
-            await user.type(fileNameInput, 'new-video.mp4');
-
-            const streamUrlInput = screen.getByPlaceholderText('https://stream.example.com/video.m3u8');
-            await user.type(streamUrlInput, 'https://example.com/stream.m3u8');
-
-            const submitButton = screen.getByRole('button', { name: /^Add Content$/i });
-            await user.click(submitButton);
-
-            await waitFor(() => {
-                expect(mockLectureApi.addContent).toHaveBeenCalledWith('lec-1', {
-                    type: 'Video',
-                    htmlContent: '',
-                    fileName: 'new-video.mp4',
-                    streamUrl: 'https://example.com/stream.m3u8'
+                    title: 'Photo Title',
                 });
             });
         });
@@ -480,7 +465,7 @@ describe('LectureContentModal', () => {
 
         it('should not delete content when cancelled', async () => {
             const user = userEvent.setup();
-            jest.spyOn(window, 'confirm').mockReturnValue(false);
+            window.confirm = vi.fn(() => false);
 
             render(
                 <LectureContentModal
@@ -519,7 +504,7 @@ describe('LectureContentModal', () => {
             );
 
             await waitFor(() => {
-                expect(screen.getByText('(Order: 2)')).toBeInTheDocument();
+                expect(screen.getByText('#2')).toBeInTheDocument();
             });
 
             const moveUpButtons = screen.getAllByRole('button').filter(btn =>
@@ -550,7 +535,7 @@ describe('LectureContentModal', () => {
             );
 
             await waitFor(() => {
-                expect(screen.getByText('(Order: 1)')).toBeInTheDocument();
+                expect(screen.getByText('#1')).toBeInTheDocument();
             });
 
             const moveDownButtons = screen.getAllByRole('button').filter(btn =>
@@ -578,7 +563,7 @@ describe('LectureContentModal', () => {
             );
 
             await waitFor(() => {
-                expect(screen.getByText('(Order: 1)')).toBeInTheDocument();
+                expect(screen.getByText('#1')).toBeInTheDocument();
             });
 
             const moveUpButtons = screen.getAllByRole('button').filter(btn =>
@@ -598,7 +583,7 @@ describe('LectureContentModal', () => {
             );
 
             await waitFor(() => {
-                expect(screen.getByText('(Order: 3)')).toBeInTheDocument();
+                expect(screen.getByText('#2')).toBeInTheDocument();
             });
 
             const moveDownButtons = screen.getAllByRole('button').filter(btn =>

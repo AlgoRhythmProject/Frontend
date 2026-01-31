@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { AdminStats } from '@/components/Admin/AdminPanel/AdminStats';
-import type { UserWithRoles } from '@/api/adminApi';
+import type { UserWithRoles } from '@/api/admin/types';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
+import {AdminStats} from "@/components/Admin/AdminPanel/AdminStats.tsx";
+
 
 describe('AdminStats Component', () => {
     const mockUsers: UserWithRoles[] = [

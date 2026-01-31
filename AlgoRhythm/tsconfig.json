@@ -1,21 +1,28 @@
 {
   "files": [],
   "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
-    }
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.vitest.json" }
   ],
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
       ]
     },
+    "types": ["vitest/globals", "vite/client"],
+    "moduleResolution": "bundler"
   },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/tests/**/*.spec.ts"
+  ]
 }

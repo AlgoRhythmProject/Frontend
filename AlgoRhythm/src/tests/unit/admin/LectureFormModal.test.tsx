@@ -1,24 +1,25 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { LectureFormModal } from '@/components/Admin/LectureFormModal';
 import userEvent from '@testing-library/user-event';
-import { lectureApi } from '@/api/lectureApi';
-import { tagApi } from '@/api/tagApi';
+import { lectureApi } from '@/api/lecture/lectureApi';
+import { tagApi } from '@/api/tag/tagApi';
 import type { Lecture } from '@/types/Lecture';
-import type { Tag } from '@/api/tagApi';
-import type { CourseListItem } from '@/api/courseApi';
+import type { Tag } from '@/types/Tag';
+import type { CourseListItem } from '@/api/course/types';
+import {describe, vi, expect, it} from "vitest";
 
 // Mock API modules
-jest.mock('@/api/lectureApi');
-jest.mock('@/api/tagApi');
+vi.mock('@/api/lecture/lectureApi');
+vi.mock('@/api/tag/tagApi');
 
-const mockLectureApi = lectureApi as jest.Mocked<typeof lectureApi>;
-const mockTagApi = tagApi as jest.Mocked<typeof tagApi>;
+const mockLectureApi = vi.mocked(lectureApi);
+const mockTagApi = vi.mocked(tagApi);
 
 describe('LectureFormModal', () => {
-    const mockOnClose = jest.fn();
-    const mockOnSuccess = jest.fn();
+    const mockOnClose = vi.fn();
+    const mockOnSuccess = vi.fn();
 
     const mockTags: Tag[] = [
         { id: '1', name: 'Basics', description: 'Basic concepts' },
@@ -42,12 +43,12 @@ describe('LectureFormModal', () => {
     };
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockTagApi.getAll.mockResolvedValue(mockTags);
         mockTagApi.getById.mockImplementation((id) =>
             Promise.resolve(mockTags.find(t => t.id === id)!)
         );
-        jest.spyOn(window, 'alert').mockImplementation(() => {});
+        window.alert = vi.fn();
     });
 
     describe('Rendering', () => {
@@ -629,7 +630,7 @@ describe('LectureFormModal', () => {
 
     describe('Error handling', () => {
         it('should handle tag loading error gracefully', async () => {
-            const consoleError = jest.spyOn(console, 'error').mockImplementation();
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
             mockTagApi.getAll.mockRejectedValue(new Error('Failed to load tags'));
 
             render(
@@ -652,7 +653,7 @@ describe('LectureFormModal', () => {
         });
 
         it('should handle selected tags loading error gracefully', async () => {
-            const consoleError = jest.spyOn(console, 'error').mockImplementation();
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
             mockTagApi.getById.mockRejectedValue(new Error('Tag not found'));
 
             render(
@@ -675,7 +676,7 @@ describe('LectureFormModal', () => {
         it('should handle tag addition error for existing lecture', async () => {
             const user = userEvent.setup();
             mockLectureApi.addTag.mockRejectedValue(new Error('Failed to add tag'));
-            const consoleError = jest.spyOn(console, 'error').mockImplementation();
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
             render(
                 <LectureFormModal
@@ -716,7 +717,7 @@ describe('LectureFormModal', () => {
         it('should handle tag removal error for existing lecture', async () => {
             const user = userEvent.setup();
             mockLectureApi.removeTag.mockRejectedValue(new Error('Failed to remove tag'));
-            const consoleError = jest.spyOn(console, 'error').mockImplementation();
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
             render(
                 <LectureFormModal

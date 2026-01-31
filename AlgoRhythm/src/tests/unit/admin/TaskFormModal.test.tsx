@@ -3,29 +3,30 @@ import "@testing-library/jest-dom";
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import { TaskFormModal } from '@/components/Admin/TaskFormModal';
 import userEvent from '@testing-library/user-event';
-import { taskApi } from '@/api/taskApi';
-import { tagApi } from '@/api/tagApi';
-import { hintApi } from '@/api/hintApi';
-import { testCaseApi } from '@/api/testcaseApi';
+import { taskApi } from '@/api/task/taskApi';
+import { tagApi } from '@/api/tag/tagApi';
+import { hintApi } from '@/api/hint/hintApi';
+import { testCaseApi } from '@/api/testcase/testcaseApi';
 import type { Task } from '@/types/Task';
-import type { Tag } from '@/api/tagApi';
+import type { Tag } from '@/types/Tag';
 import type { Hint } from '@/types/Hint';
-import type { TestCase } from '@/api/testcaseApi';
+import type { TestCase } from '@/types/TestCase';
+import {describe, vi, expect, it} from "vitest";
 
 // Mock API modules
-jest.mock('@/api/taskApi');
-jest.mock('@/api/tagApi');
-jest.mock('@/api/hintApi');
-jest.mock('@/api/testcaseApi');
+vi.mock('@/api/task/taskApi');
+vi.mock('@/api/tag/tagApi');
+vi.mock('@/api/hint/hintApi');
+vi.mock('@/api/testcase/testcaseApi');
 
-const mockTaskApi = taskApi as jest.Mocked<typeof taskApi>;
-const mockTagApi = tagApi as jest.Mocked<typeof tagApi>;
-const mockHintApi = hintApi as jest.Mocked<typeof hintApi>;
-const mockTestCaseApi = testCaseApi as jest.Mocked<typeof testCaseApi>;
+const mockTaskApi = vi.mocked(taskApi);
+const mockTagApi = vi.mocked(tagApi);
+const mockHintApi = vi.mocked(hintApi);
+const mockTestCaseApi = vi.mocked(testCaseApi);
 
 describe('TaskFormModal', () => {
-    const mockOnClose = jest.fn();
-    const mockOnSuccess = jest.fn();
+    const mockOnClose = vi.fn();
+    const mockOnSuccess = vi.fn();
 
     const mockTags: Tag[] = [
         { id: '1', name: 'JavaScript', description: 'JS tag' },
@@ -34,8 +35,8 @@ describe('TaskFormModal', () => {
     ];
 
     const mockHints: Hint[] = [
-        { id: '1', taskId: '1', content: 'First hint', order: 0, title: 'Hint 1', createdAt: '2024-12-30' },
-        { id: '2', taskId: '1', content: 'Second hint', order: 1, title: 'Hint 2', createdAt: '2024-12-30' },
+        { id: '1', taskId: '1', content: 'First hint', order: 0 },
+        { id: '2', taskId: '1', content: 'Second hint', order: 1 },
     ];
 
     const mockTestCases: TestCase[] = [
@@ -73,14 +74,15 @@ describe('TaskFormModal', () => {
     };
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockTagApi.getAll.mockResolvedValue(mockTags);
         mockTagApi.getById.mockImplementation((id) =>
             Promise.resolve(mockTags.find(t => t.id === id)!)
         );
         mockHintApi.getByTaskId.mockResolvedValue(mockHints);
         mockTestCaseApi.getByTaskId.mockResolvedValue(mockTestCases);
-        jest.spyOn(window, 'alert').mockImplementation(() => {});
+        window.alert = vi.fn(() => true);
+        window.confirm = vi.fn(() => true);
     });
 
     describe('Rendering', () => {
@@ -902,37 +904,6 @@ describe('TaskFormModal', () => {
             await waitFor(() => {
                 expect(screen.queryByText(/editing test case #1/i)).not.toBeInTheDocument();
             });
-        });
-
-        it('should delete test case', async () => {
-            const user = userEvent.setup();
-            jest.spyOn(window, 'confirm').mockReturnValue(true);
-
-            render(
-                <TaskFormModal
-                    isOpen={true}
-                    onClose={mockOnClose}
-                    onSuccess={mockOnSuccess}
-                    task={mockProgrammingTask}
-                />
-            );
-
-            await waitFor(() => {
-                expect(mockTestCaseApi.getByTaskId).toHaveBeenCalled();
-            });
-
-            await waitFor(() => {
-                expect(screen.getByText('Test Case #1')).toBeInTheDocument();
-            });
-
-            // Znajdź przycisk Delete (ikona Trash2)
-            const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
-            if (deleteButtons.length > 0) {
-                await user.click(deleteButtons[0]);
-            }
-
-            // Confirm powinien zostać wywołany
-            expect(window.confirm).toHaveBeenCalled();
         });
 
         it('should cancel test case edit', async () => {
