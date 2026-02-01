@@ -63,7 +63,6 @@ export function LoadingState({
         );
     }
 
-    // SUCCESS - render children
     return <>{children}</>;
 }
 

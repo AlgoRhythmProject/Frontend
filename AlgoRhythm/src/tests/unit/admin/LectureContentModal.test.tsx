@@ -5,7 +5,7 @@ import { LectureContentModal } from '@/components/Admin/LectureContentModal';
 import userEvent from '@testing-library/user-event';
 import { lectureApi } from '@/api/lecture/lectureApi';
 import type { Lecture, LectureContent } from '@/types/Lecture';
-import {describe, vi, expect, it} from "vitest";
+import { describe, vi, expect, it } from "vitest";
 
 // Mock API modules
 vi.mock('@/api/lecture/lectureApi');
@@ -13,7 +13,6 @@ vi.mock('@/components/Admin/FileSelector', () => ({
     FileSelector: ({ onSelect, accept }: any) => (
         <button
             onClick={() =>
-                // jeśli akceptuje video
                 accept?.includes('video')
                     ? onSelect({ name: 'mock.mp4', streamUrl: 'https://example.com/mock.mp4' })
                     : onSelect('/images/new-photo.jpg') // Photo
