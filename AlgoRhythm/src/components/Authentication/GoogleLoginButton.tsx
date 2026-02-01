@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { config } from "@/config/global.ts";
+import { config } from "@/config/global";
 
 interface GoogleLoginButtonProps {
     onSuccess: (credential: string) => void;

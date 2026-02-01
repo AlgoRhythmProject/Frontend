@@ -1,12 +1,12 @@
 import {useEffect, useState} from 'react';
 import { Panel, Group } from "react-resizable-panels";
-import { CodeEditor } from "@/components/CodeEditor.tsx";
+import { CodeEditor } from "@/components/CodeEditor";
 import { Play, Code2, Eraser, RefreshCcw, X } from 'lucide-react';
 import { useGraph } from '@/hooks/useGraph';
-import { useAlgorithmRunner } from '@/hooks/useAlgorithmRunner.ts';
+import { useAlgorithmRunner } from '@/hooks/useAlgorithmRunner';
 import { GraphCanvas } from '@/components/Visualizations/GraphCanvas';
 import { Toolbar } from '@/components/Visualizations/Toolbar';
-import { useGraphTour } from "@/hooks/useGraphVisualizerTour.ts";
+import { useGraphTour } from "@/hooks/useGraphVisualizerTour";
 
 const DEFAULT_CODE = `using Graph;
 /*
