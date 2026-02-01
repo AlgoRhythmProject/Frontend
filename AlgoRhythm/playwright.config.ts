@@ -33,7 +33,7 @@ export default defineConfig({
     ],
 
     // Run tests in parallel
-    fullyParallel: true,
+    fullyParallel: false,
 
     // Fail the build on CI if you accidentally left test.only
     forbidOnly: !!process.env.CI,
@@ -89,7 +89,7 @@ export default defineConfig({
     // Run local dev server before starting the tests
     webServer: [isE2E ?
         {
-            command: `cd ${BACKEND_DIR} && docker compose -f docker-compose.dev.yml up`,
+            command: `cd ${BACKEND_DIR} && docker compose -f docker-compose.dev.yml up -d && npx wait-on http://localhost:5173 -t 300000`,
             url: 'http://localhost:5173',
             reuseExistingServer: !process.env.CI,
             stdout: 'pipe',

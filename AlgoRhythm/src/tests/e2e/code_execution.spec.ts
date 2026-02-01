@@ -62,7 +62,7 @@ test.describe("Correct tasks flow", () => {
             const resultsHeader = page.locator('h3', { hasText: /Results/i });
             await expect(resultsHeader).toBeVisible({ timeout: 20000 });
             const firstTestResult = page.locator('div').filter({ hasText: /Test 1/i }).first();
-            await expect(firstTestResult).toContainText('Accepted');
+            await expect(firstTestResult).toContainText('Passed');
             const error = firstTestResult.locator('svg.text-success').first();
             await expect(error).toBeVisible();
         });
@@ -99,7 +99,7 @@ test.describe("Incorrect tasks flow", () => {
             const resultsHeader = page.locator('h3', { hasText: /Results/i });
             await expect(resultsHeader).toBeVisible({ timeout: 20000 });
             const firstTestResult = page.locator('div').filter({ hasText: /Test 1/i }).first();
-            await expect(firstTestResult).toContainText('Rejected');
+            await expect(firstTestResult).toContainText('Failed');
             const successIcon = firstTestResult.locator('svg.text-error').first();
             await expect(successIcon).toBeVisible();
         });
