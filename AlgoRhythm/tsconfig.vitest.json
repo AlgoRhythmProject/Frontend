@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.node.json",
   "compilerOptions": {
+    "target": "ESNext",
     "composite": true,
     "module": "ESNext",
     "moduleResolution": "bundler",

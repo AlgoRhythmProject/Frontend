@@ -4,7 +4,7 @@ export type Theme = 'dark' | 'light';
 
 const THEME_STORAGE_KEY = 'algorhythm-theme';
 
-interface ThemeContextType {
+export interface ThemeContextType {
     theme: Theme;
     setTheme: (theme: Theme) => void;
     toggleTheme: () => void;
@@ -12,7 +12,7 @@ interface ThemeContextType {
     isLight: boolean;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setThemeState] = useState<Theme>(() => {
