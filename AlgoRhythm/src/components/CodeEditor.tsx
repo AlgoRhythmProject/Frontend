@@ -5,6 +5,7 @@ import { useSignalR } from "@/hooks/useSignalR.ts";
 import type { editor } from 'monaco-editor';
 import type { ExecutionError } from "@/types/CodeAnalysis.ts";
 import { useTheme } from '@/hooks/themeContext';
+import { config } from "@/config/global.ts";
 
 interface CodeEditorProps {
     value: string;
@@ -18,7 +19,7 @@ export function CodeEditor({ value, onChange, language = 'csharp', height = '100
     const [monaco, setMonaco] = useState<Monaco | null>(null);
     const [editorInstance, setEditorInstance] = useState<editor.IStandaloneCodeEditor | null>(null);
 
-    const { isConnected, connection } = useSignalR("http://localhost:5095/roslynhub");
+    const { isConnected, connection } = useSignalR(config.analyzerUrl);
     const { runDiagnostics } = useMonacoRoslyn(monaco, editorInstance, connection, isConnected);
 
     const handleEditorDidMount: OnMount = (editor, monacoInstance) => {
