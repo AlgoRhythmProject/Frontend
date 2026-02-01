@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Edge, Node } from "@/types/visualizations/Graph";
 import { useSignalR } from "@/hooks/useSignalR.ts";
+import {config} from "@/config/global.ts";
 
 export interface VisualState {
     nodeColors: Record<string, string>;
@@ -19,7 +20,7 @@ export const useAlgorithmRunner = () => {
         logs: []
     });
 
-    const { connection: visualizerConn } = useSignalR('http://localhost:5148/visualizerhub');
+    const { connection: visualizerConn } = useSignalR(config.visualizerUrl);
     const sessionId = visualizerConn?.connectionId;
 
 

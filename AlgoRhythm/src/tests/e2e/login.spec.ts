@@ -6,7 +6,9 @@ const ERROR_SELECTOR = ".text-error";
 const LOGIN_BUTTON_NAME = "Login";
 
 test.beforeEach(async ({ page }) => {
-    await page.route("**/accounts.google.com/gsi/client", route => route.abort());
+    await page.route('https://accounts.google.com/**', route =>
+        route.abort()
+    );
     await page.goto("/login");
 });
 
@@ -21,7 +23,7 @@ test("unsuccessful login with invalid credentials", async ({ page }) => {
     await loginBtn.click();
 
     await expect(page.locator(ERROR_SELECTOR))
-        .toBeVisible();
+        .toHaveText("Invalid password. Try again.");
 
     const isAuth = await page.evaluate(() =>
         localStorage.getItem("isAuthenticated")

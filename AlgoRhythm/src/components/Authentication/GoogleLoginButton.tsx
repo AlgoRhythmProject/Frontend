@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
+import { config } from "@/config/global.ts";
 
 interface GoogleLoginButtonProps {
     onSuccess: (credential: string) => void;
@@ -77,7 +78,7 @@ export function GoogleLoginButton({
 
     const initializeGoogleButton = () => {
         if (window.google && googleButtonRef.current) {
-            const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+            const clientId = config.googleClientId;
 
             if (!clientId) {
                 console.error('VITE_GOOGLE_CLIENT_ID is not defined');
