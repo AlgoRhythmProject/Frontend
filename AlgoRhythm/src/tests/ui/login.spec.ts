@@ -49,7 +49,7 @@ test.describe("Login component - adapted tests", () => {
 
         const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
 
-        const [response] = await Promise.all([
+        const [] = await Promise.all([
             page.waitForResponse("**/api/Authentication/login"),
             loginBtn.click(),
         ]);
