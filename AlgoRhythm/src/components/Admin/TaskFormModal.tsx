@@ -14,6 +14,7 @@ import { TagManager } from './TagManager';
 import { TestCaseManager } from './TestCaseManager';
 import type { TestCase } from '@/types/TestCase';
 import { ExpandableTextarea } from './ExpandableTextArea';
+import { CodeEditor } from '@/components/CodeEditor';
 
 interface TaskFormModalProps {
     isOpen: boolean;
@@ -476,14 +477,16 @@ export function TaskFormModal({ isOpen, onClose, onSuccess, task }: TaskFormModa
                     {formData.taskType === 0 && (
                         <>
                             <div>
-                                <ExpandableTextarea
-                                    value={formData.templateCode ?? ""}
-                                    onChange={(value) => setFormData({ ...formData, templateCode: value })}
-                                    label="Template Code"
-                                    placeholder="public class Solution { }"
-                                    rows={8}
-                                    isCode={true}
-                                />
+                                <label className="block font-sans font-medium text-foreground mb-2">
+                                    Template Code
+                                </label>
+                                <div className="border border-muted rounded-lg h-60 overflow-hidden">
+                                    <CodeEditor
+                                        value={formData.templateCode || ''}
+                                        onChange={(value: any) => setFormData({ ...formData, templateCode: value || '' })}
+                                        language="csharp"
+                                    />
+                                </div>
                             </div>
 
                             <TestCaseManager
