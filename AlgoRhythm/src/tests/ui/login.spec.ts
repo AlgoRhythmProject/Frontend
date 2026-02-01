@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
     await page.getByPlaceholder(PASSWORD_PLACEHOLDER).waitFor({ state: "visible" });
 });
 
-test.describe("Login component - adapted tests", () => {
+test.describe("Login component tests", () => {
     test("renders login form correctly", async ({ page }) => {
         await expect(page.getByRole("heading", { name: HEADER_TEXT })).toBeVisible();
 

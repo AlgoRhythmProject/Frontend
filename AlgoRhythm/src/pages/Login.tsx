@@ -5,7 +5,7 @@ import { Lock, Mail } from "lucide-react";
 import { AuthenticationInput } from "../components/Authentication/AuthenticationInput";
 import { AuthenticationHeader } from "../components/Authentication/AuthenticationHeader";
 import { AuthenticationBackground } from "../components/Authentication/AuthenticationBackground";
-import { AuthenticationButton } from "../components/Authentication/AuthenticationButton";
+import { AuthenticationButton } from "@/components/Authentication/AuthenticationButton";
 import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
 import { GoogleLoginButton } from "../components/Authentication/GoogleLoginButton";
 import { useDispatch } from "react-redux";
@@ -25,7 +25,7 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { isDark } = useTheme();
-  const isGoogleEnabled = import.meta.env.VITE_ENABLE_GOOGLE_LOGIN !== "false";
+  const isGoogleEnabled = true;//import.meta.env.VITE_ENABLE_GOOGLE_LOGIN !== "false";
 
   const handleLoginSuccess = async (user: any) => {
     localStorage.setItem("token", user.token);
