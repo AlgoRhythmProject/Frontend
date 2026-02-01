@@ -136,7 +136,7 @@ test.describe("Parse error tasks flow", () => {
             const resultsHeader = page.locator('h3', { hasText: /Results/i });
             await expect(resultsHeader).toBeVisible({ timeout: 20000 });
             const firstTestResult = page.locator('div').filter({ hasText: /Test 1/i }).first();
-            await expect(firstTestResult).toContainText('Error');
+            await expect(firstTestResult).toContainText('expected');
             const errorIcon = firstTestResult.locator('svg.text-error').first();
             await expect(errorIcon).toBeVisible();
         });
