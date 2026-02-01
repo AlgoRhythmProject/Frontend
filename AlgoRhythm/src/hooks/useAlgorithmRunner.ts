@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Edge, Node } from "@/types/visualizations/Graph";
 import { useSignalR } from "@/hooks/useSignalR.ts";
-import {config} from "@/config/global.ts";
+import { config } from "@/config/global.ts";
 
 export interface VisualState {
     nodeColors: Record<string, string>;
@@ -27,7 +27,6 @@ export const useAlgorithmRunner = () => {
     useEffect(() => {
         if (!visualizerConn) return;
 
-        // Aktualizacja koloru węzła
         visualizerConn.on("UpdateNodeColor", (nodeId: string, color: string) => {
             setVisualState(prev => ({
                 ...prev,
@@ -35,7 +34,6 @@ export const useAlgorithmRunner = () => {
             }));
         });
 
-        // Aktualizacja krawędzi (kolor)
         visualizerConn.on("UpdateEdgeColor", (from: string, to: string, color: string) => {
             setVisualState(prev => ({
                 ...prev,
@@ -43,7 +41,6 @@ export const useAlgorithmRunner = () => {
             }));
         });
 
-        // Aktualizacja etykiety krawędzi (np. flow/capacity)
         visualizerConn.on("UpdateEdgeLabel", (from: string, to: string, label: string) => {
             setVisualState(prev => ({
                 ...prev,
@@ -51,7 +48,6 @@ export const useAlgorithmRunner = () => {
             }));
         });
 
-        // Nowy log
         visualizerConn.on("AddLog", (message: string) => {
             setVisualState(prev => ({
                 ...prev,
@@ -59,13 +55,11 @@ export const useAlgorithmRunner = () => {
             }));
         });
 
-        // Koniec algorytmu
         visualizerConn.on("ExecutionFinished", () => {
             setIsRunning(false);
             setIsPaused(false);
         });
 
-        // Błąd wykonania
         visualizerConn.on("ExecutionError", (error: string) => {
             setVisualState(prev => ({
                 ...prev,

@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TaskFormModal } from '@/components/Admin/TaskFormModal';
 import userEvent from '@testing-library/user-event';
 import { taskApi } from '@/api/task/taskApi';
@@ -11,7 +11,7 @@ import type { Task } from '@/types/Task';
 import type { Tag } from '@/types/Tag';
 import type { Hint } from '@/types/Hint';
 import type { TestCase } from '@/types/TestCase';
-import {describe, vi, expect, it} from "vitest";
+import { describe, vi, expect, it } from "vitest";
 
 // Mock API modules
 vi.mock('@/api/task/taskApi');
@@ -40,8 +40,14 @@ describe('TaskFormModal', () => {
     ];
 
     const mockTestCases: TestCase[] = [
-        { id: '1', programmingTaskItemId: '1', inputJson: '{"x": 1}', expectedJson: '{"y": 2}', isVisible: true, maxPoints: 10 },
-        { id: '2', programmingTaskItemId: '1', inputJson: '{"x": 5}', expectedJson: '{"y": 10}', isVisible: false, maxPoints: 20 },
+        {
+            id: '1', programmingTaskItemId: '1', inputJson: '{"x": 1}', expectedJson: '{"y": 2}', isVisible: true, maxPoints: 10,
+            timeoutMs: null
+        },
+        {
+            id: '2', programmingTaskItemId: '1', inputJson: '{"x": 5}', expectedJson: '{"y": 10}', isVisible: false, maxPoints: 20,
+            timeoutMs: null
+        },
     ];
 
     const mockProgrammingTask: Task = {
