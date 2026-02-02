@@ -7,7 +7,7 @@ import { courseApi } from '@/api/course/courseApi';
 import { lectureApi } from '@/api/lecture/lectureApi';
 import { taskApi } from '@/api/task/taskApi';
 import type { Course } from '@/types/Course';
-import type {Lecture, LectureContent} from '@/types/Lecture';
+import type { Lecture, LectureContent } from '@/types/Lecture';
 import type { Task } from '@/types/Task';
 
 // Mock API modules
@@ -16,8 +16,8 @@ vi.mock('@/api/lecture/lectureApi');
 vi.mock('@/api/task/taskApi');
 
 const mockCourseApi = vi.mocked(courseApi);
-const mockLectureApi =  vi.mocked(lectureApi);
-const mockTaskApi =  vi.mocked(taskApi);
+const mockLectureApi = vi.mocked(lectureApi);
+const mockTaskApi = vi.mocked(taskApi);
 
 describe('CourseFormModal', () => {
   const mockOnClose = vi.fn();
@@ -50,7 +50,7 @@ describe('CourseFormModal', () => {
       createdAt: new Date().toISOString(),
       fileName: "lecture1-part1.mp4",
       streamUrl: "https://example.com/videos/lecture1-part1.mp4",
-      fileSize: 102_400_000, // w bajtach (np. 102 MB)
+      fileSize: 102_400_000,
       lastModified: new Date().toISOString()
     },
     {
@@ -74,17 +74,25 @@ describe('CourseFormModal', () => {
   ];
 
   const mockLectures: Lecture[] = [
-    { id: '1', title: 'Lecture 1', contents: mockLectureContents.slice(0, 2),
-      courseIds: [], tagIds: [], isPublished: true, createdAt: '2024-12-30' },
-    { id: '2', title: 'Lecture 2',  contents: mockLectureContents.slice(2, 4),
-      courseIds: [], tagIds: [], isPublished: true, createdAt: '2024-12-30' },
+    {
+      id: '1', title: 'Lecture 1', contents: mockLectureContents.slice(0, 2),
+      courseIds: [], tagIds: [], isPublished: true, createdAt: '2024-12-30'
+    },
+    {
+      id: '2', title: 'Lecture 2', contents: mockLectureContents.slice(2, 4),
+      courseIds: [], tagIds: [], isPublished: true, createdAt: '2024-12-30'
+    },
   ];
 
   const mockTasks: Task[] = [
-    { id: '1', title: 'Task 1', description: 'Task desc 1', difficulty: 1, taskType: 0,
-      isPublished: true, isDeleted: false, createdAt: '2024-12-30' },
-    { id: '2', title: 'Task 2', description: 'Task desc 2', difficulty: 2, taskType: 1,
-      isPublished: true, isDeleted: false, createdAt: '2024-12-30' },
+    {
+      id: '1', title: 'Task 1', description: 'Task desc 1', difficulty: 1, taskType: 0,
+      isPublished: true, isDeleted: false, createdAt: '2024-12-30'
+    },
+    {
+      id: '2', title: 'Task 2', description: 'Task desc 2', difficulty: 2, taskType: 1,
+      isPublished: true, isDeleted: false, createdAt: '2024-12-30'
+    },
   ];
 
   const mockCourse: Course = {
@@ -102,10 +110,10 @@ describe('CourseFormModal', () => {
     mockLectureApi.getPublished.mockResolvedValue(mockLectures);
     mockTaskApi.getPublished.mockResolvedValue(mockTasks);
     mockLectureApi.getById.mockImplementation((id) =>
-        Promise.resolve(mockLectures.find(l => l.id === id)!)
+      Promise.resolve(mockLectures.find(l => l.id === id)!)
     );
     mockTaskApi.getById.mockImplementation((id) =>
-        Promise.resolve(mockTasks.find(t => t.id === id)!)
+      Promise.resolve(mockTasks.find(t => t.id === id)!)
     );
     window.confirm = vi.fn(() => true);
   });
@@ -113,11 +121,11 @@ describe('CourseFormModal', () => {
   describe('Rendering', () => {
     it('should not render when isOpen is false', () => {
       render(
-          <CourseFormModal
-              isOpen={false}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={false}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       expect(screen.queryByText('Add New Course')).not.toBeInTheDocument();
@@ -125,11 +133,11 @@ describe('CourseFormModal', () => {
 
     it('should render create mode when no course is provided', async () => {
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       expect(screen.getByText('Add New Course')).toBeInTheDocument();
@@ -139,12 +147,12 @@ describe('CourseFormModal', () => {
 
     it('should render edit mode when course is provided', async () => {
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-              course={mockCourse}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+          course={mockCourse}
+        />
       );
 
 
@@ -158,11 +166,11 @@ describe('CourseFormModal', () => {
 
     it('should load and display resources on open', async () => {
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {
@@ -176,11 +184,11 @@ describe('CourseFormModal', () => {
     it('should update name field', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       const nameInput = screen.getByPlaceholderText('Enter course name');
@@ -192,11 +200,11 @@ describe('CourseFormModal', () => {
     it('should update description field', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       const descInput = screen.getByPlaceholderText('Enter course description');
@@ -208,11 +216,11 @@ describe('CourseFormModal', () => {
     it('should toggle published checkbox', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       const checkbox = screen.getByRole('checkbox', { name: /publish course immediately/i });
@@ -225,15 +233,15 @@ describe('CourseFormModal', () => {
     it('should close modal on close button click', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       const closeButton = screen.getAllByRole('button').find(btn =>
-          btn.querySelector('svg')
+        btn.querySelector('svg')
       );
 
       if (closeButton) {
@@ -246,11 +254,11 @@ describe('CourseFormModal', () => {
     it('should close modal on cancel button click', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       const cancelButton = screen.getByRole('button', { name: 'Cancel' });
@@ -264,11 +272,11 @@ describe('CourseFormModal', () => {
     it('should add lecture', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {
@@ -286,11 +294,11 @@ describe('CourseFormModal', () => {
     it('should remove lecture', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {
@@ -307,11 +315,11 @@ describe('CourseFormModal', () => {
 
       // Remove lecture
       const removeButtons = screen.getAllByRole('button').filter(btn =>
-          btn.querySelector('svg') && btn.className.includes('cursor-pointer')
+        btn.querySelector('svg') && btn.className.includes('cursor-pointer')
       );
 
       const lectureRemoveButton = removeButtons.find(btn =>
-          btn.closest('.bg-primary\\/20')
+        btn.closest('.bg-primary\\/20')
       );
 
       if (lectureRemoveButton) {
@@ -328,12 +336,12 @@ describe('CourseFormModal', () => {
       mockCourseApi.addLecture.mockResolvedValue(undefined);
 
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-              course={mockCourse}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+          course={mockCourse}
+        />
       );
 
       await waitFor(() => {
@@ -353,12 +361,12 @@ describe('CourseFormModal', () => {
       mockCourseApi.removeLecture.mockResolvedValue(undefined);
 
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-              course={mockCourse}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+          course={mockCourse}
+        />
       );
 
       await waitFor(() => {
@@ -366,11 +374,11 @@ describe('CourseFormModal', () => {
       });
 
       const removeButtons = screen.getAllByRole('button').filter(btn =>
-          btn.querySelector('svg') && btn.className.includes('cursor-pointer')
+        btn.querySelector('svg') && btn.className.includes('cursor-pointer')
       );
 
       const lectureRemoveButton = removeButtons.find(btn =>
-          btn.closest('.bg-primary\\/20')
+        btn.closest('.bg-primary\\/20')
       );
 
       if (lectureRemoveButton) {
@@ -387,11 +395,11 @@ describe('CourseFormModal', () => {
     it('should remove task from selection', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {
@@ -399,26 +407,26 @@ describe('CourseFormModal', () => {
         expect(selects.length).toBeGreaterThan(0);
       });
 
-      expect(screen.queryByRole('option', { name: 'Task 1'})).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Task 1' })).toBeInTheDocument();
 
       const selects = screen.getAllByRole('combobox');
-      const taskSelect = selects[1]; // Second select is for tasks
+      const taskSelect = selects[1];
 
       await user.selectOptions(taskSelect, '1');
 
       await waitFor(() => {
-        expect(screen.queryByRole('option', { name: 'Task 1'})).not.toBeInTheDocument();
+        expect(screen.queryByRole('option', { name: 'Task 1' })).not.toBeInTheDocument();
       });
     });
 
     it('should add task to selection', async () => {
       const user = userEvent.setup();
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {
@@ -431,7 +439,7 @@ describe('CourseFormModal', () => {
       const taskSelect = selects[1];
       await user.selectOptions(taskSelect, '1');
 
-      expect(screen.queryByRole('option', {name: 'Task 1'})).not.toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: 'Task 1' })).not.toBeInTheDocument();
 
       await waitFor(() => {
         expect(screen.getByText('Task 1')).toBeInTheDocument();
@@ -439,11 +447,11 @@ describe('CourseFormModal', () => {
 
       // Remove task
       const removeButtons = screen.getAllByRole('button').filter(btn =>
-          btn.querySelector('svg') && btn.className.includes('cursor-pointer')
+        btn.querySelector('svg') && btn.className.includes('cursor-pointer')
       );
 
       const taskRemoveButton = removeButtons.find(btn =>
-          btn.closest('.bg-info\\/20')
+        btn.closest('.bg-info\\/20')
       );
 
       if (taskRemoveButton) {
@@ -451,7 +459,7 @@ describe('CourseFormModal', () => {
       }
 
       await waitFor(() => {
-        expect(screen.queryByRole('option', {name: 'Task 1'})).toBeInTheDocument();
+        expect(screen.queryByRole('option', { name: 'Task 1' })).toBeInTheDocument();
       });
     });
   });
@@ -465,11 +473,11 @@ describe('CourseFormModal', () => {
       mockCourseApi.addTask.mockResolvedValue(undefined);
 
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {
@@ -501,11 +509,11 @@ describe('CourseFormModal', () => {
       mockCourseApi.addTask.mockResolvedValue(undefined);
 
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {
@@ -537,12 +545,12 @@ describe('CourseFormModal', () => {
       mockCourseApi.update.mockResolvedValue();
 
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-              course={mockCourse}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+          course={mockCourse}
+        />
       );
 
       await waitFor(() => {
@@ -575,11 +583,11 @@ describe('CourseFormModal', () => {
       });
 
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {
@@ -603,15 +611,15 @@ describe('CourseFormModal', () => {
     it('should disable submit button while loading', async () => {
       const user = userEvent.setup();
       mockCourseApi.create.mockImplementation(() =>
-          new Promise(resolve => setTimeout(resolve, 1000))
+        new Promise(resolve => setTimeout(resolve, 1000))
       );
 
       render(
-          <CourseFormModal
-              isOpen={true}
-              onClose={mockOnClose}
-              onSuccess={mockOnSuccess}
-          />
+        <CourseFormModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+        />
       );
 
       await waitFor(() => {

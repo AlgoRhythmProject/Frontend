@@ -59,7 +59,6 @@ export function ProfileDropdown() {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* --- Avatar Button z animacją --- */}
             <motion.button
                 onClick={() => setOpen((prev) => !prev)}
                 whileHover={{ scale: 1.05 }}
@@ -69,7 +68,6 @@ export function ProfileDropdown() {
                 <User className="w-5 h-5 text-on-primary" />
             </motion.button>
 
-            {/* --- Dropdown Panel z animacją rozwijania --- */}
             <AnimatePresence>
                 {open && (
                     <motion.div

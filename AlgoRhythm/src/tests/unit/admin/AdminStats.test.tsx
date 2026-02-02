@@ -3,17 +3,23 @@ import type { UserWithRoles } from '@/api/admin/types';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
 import "@testing-library/jest-dom/vitest";
-import {AdminStats} from "@/components/Admin/AdminPanel/AdminStats.tsx";
+import { AdminStats } from "@/components/Admin/AdminPanel/AdminStats";
 
 
 describe('AdminStats Component', () => {
     const mockUsers: UserWithRoles[] = [
-        { id: '1', email: 'admin@test.com', roles: ['Admin', 'User'], firstName: 'admin', lastName: 'admin',
-            emailConfirmed: true, createdAt: Date.now().toString(), updatedAt: Date.now().toString() },
-        { id: '2', email: 'user1@test.com', roles: ['User'], firstName: 'user', lastName: 'user',
-            emailConfirmed: true, createdAt: Date.now().toString(), updatedAt: Date.now().toString() },
-        { id: '3', email: 'admin2@test.com', roles: ['User'], firstName: 'admin2', lastName: 'admin2',
-            emailConfirmed: true, createdAt: Date.now().toString(), updatedAt: Date.now().toString() },
+        {
+            id: '1', email: 'admin@test.com', roles: ['Admin', 'User'], firstName: 'admin', lastName: 'admin',
+            emailConfirmed: true, createdAt: Date.now().toString(), updatedAt: Date.now().toString()
+        },
+        {
+            id: '2', email: 'user1@test.com', roles: ['User'], firstName: 'user', lastName: 'user',
+            emailConfirmed: true, createdAt: Date.now().toString(), updatedAt: Date.now().toString()
+        },
+        {
+            id: '3', email: 'admin2@test.com', roles: ['User'], firstName: 'admin2', lastName: 'admin2',
+            emailConfirmed: true, createdAt: Date.now().toString(), updatedAt: Date.now().toString()
+        },
     ];
 
     const mockTasks: Partial<Task>[] = [
@@ -62,7 +68,6 @@ describe('AdminStats Component', () => {
             />
         );
 
-        // W mockUsers mamy 2 osoby z rolą 'Admin'
         const adminCount = screen.getByText('1');
         expect(adminCount).toBeInTheDocument();
     });
