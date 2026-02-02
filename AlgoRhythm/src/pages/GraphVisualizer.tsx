@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { Panel, Group } from "react-resizable-panels";
 import { CodeEditor } from "@/components/CodeEditor";
 import { Play, Code2, Eraser, RefreshCcw, X } from 'lucide-react';
@@ -8,7 +8,9 @@ import { GraphCanvas } from '@/components/Visualizations/GraphCanvas';
 import { Toolbar } from '@/components/Visualizations/Toolbar';
 import { useGraphTour } from "@/hooks/useGraphVisualizerTour";
 
-const DEFAULT_CODE = `using Graph;
+const DEFAULT_CODE = `using System.Threading.Tasks;
+using System.Collections.Generic;
+using Graph;
 /*
     API:
     public interface IGraph
@@ -226,7 +228,7 @@ export const GraphVisualizer = () => {
                                         shadow-soft animate-in fade-in flex items-center">
                                     Start: <span className="text-bold text-primary-light">
                                         {graph.nodes.find(n => n.id === startNodeId)?.label}</span>
-                                    <X size={16} className="pt-0.5 pl-1 ml-1"/>
+                                    <X size={16} className="pt-0.5 pl-1 ml-1" />
                                 </button>
                             )}
                             {endNodeId && (
@@ -237,7 +239,7 @@ export const GraphVisualizer = () => {
                                         shadow-soft animate-in fade-in flex items-center">
                                     End: <span className="text-bold text-primary-light">
                                         {graph.nodes.find(n => n.id === endNodeId)?.label}</span>
-                                    <X size={16} className="pt-0.5 pl-1 ml-1"/>
+                                    <X size={16} className="pt-0.5 pl-1 ml-1" />
                                 </button>
                             )}
 
@@ -245,13 +247,13 @@ export const GraphVisualizer = () => {
                                 onClick={() => runner.reset()}
                                 className="p-2 ml-auto bg-background hover:bg-muted text-muted-foreground hover:text-foreground border border-border rounded-lg text-xs flex items-center gap-2 transition-all opacity-70 hover:opacity-100 shadow-sm"
                                 title="Reset graph to original state">
-                                <RefreshCcw size={14}/> Reset
+                                <RefreshCcw size={14} /> Reset
                             </button>
                             <button
                                 onClick={clear}
                                 className="p-2 bg-background hover:bg-muted text-muted-foreground hover:text-foreground border border-border rounded-lg text-xs flex items-center gap-2 transition-all opacity-70 hover:opacity-100 shadow-sm"
                                 title="Clear canvas">
-                                <Eraser size={14}/> Clear
+                                <Eraser size={14} /> Clear
                             </button>
                         </div>
 
@@ -316,9 +318,9 @@ export const GraphVisualizer = () => {
                                     className={`
                                         flex items-center gap-2 px-6 py-1.5 font-semibold text-xs uppercase tracking-wider rounded-lg transition-all shadow-lg 
                                         ${runner.isRunning
-                                        ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-70 shadow-none'
-                                        : 'bg-success hover:brightness-110 text-white shadow-success/20'
-                                    }
+                                            ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-70 shadow-none'
+                                            : 'bg-success hover:brightness-110 text-white shadow-success/20'
+                                        }
                                     `}
                                 >
                                     <Play size={14} fill="currentColor" />
