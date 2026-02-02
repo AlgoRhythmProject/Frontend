@@ -3,7 +3,7 @@ FROM node:20-slim AS build
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production=false
+RUN npm install --ignore-scripts
 COPY . .
 RUN npm run build # Built files in /app/dist
 
