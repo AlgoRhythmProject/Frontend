@@ -11,6 +11,7 @@ import { useGraphTour } from "@/hooks/useGraphVisualizerTour";
 const DEFAULT_CODE = `using System.Threading.Tasks;
 using System.Collections.Generic;
 using Graph;
+
 /*
     API:
     public interface IGraph
