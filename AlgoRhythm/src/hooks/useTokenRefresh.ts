@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { authApi } from '@/api/authApi';
+import { authApi } from '@/api/auth/authApi';
 
 
 export function useTokenRefresh() {

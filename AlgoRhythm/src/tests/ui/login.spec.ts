@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
     await page.getByPlaceholder(PASSWORD_PLACEHOLDER).waitFor({ state: "visible" });
 });
 
-test.describe("Login component - adapted tests", () => {
+test.describe("Login component tests", () => {
     test("renders login form correctly", async ({ page }) => {
         await expect(page.getByRole("heading", { name: HEADER_TEXT })).toBeVisible();
 
@@ -48,7 +48,16 @@ test.describe("Login component - adapted tests", () => {
         await page.getByPlaceholder(PASSWORD_PLACEHOLDER).fill("password123");
 
         const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
-        await loginBtn.click();
+
+        const [] = await Promise.all([
+            page.waitForResponse("**/api/Authentication/login"),
+            loginBtn.click(),
+        ]);
+
+        await page.waitForFunction(() => {
+            const btn = document.querySelector('button[type="submit"]');
+            return btn?.hasAttribute('disabled');
+        });
 
         await expect(loginBtn).toBeDisabled();
     });

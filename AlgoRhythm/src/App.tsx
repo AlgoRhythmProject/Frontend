@@ -13,13 +13,15 @@ import { EditProfile } from './pages/EditProfile';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { VerifyEmail } from './pages/VerifyEmail';
+import { GraphVisualizer } from './pages/GraphVisualizer';
 import { ResetPassword } from './pages/ResetPassword';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { AchievementNotificationProvider } from './components/AchievementNotification';
 import { useTokenRefresh } from './hooks/useTokenRefresh';
 import { Admin } from './pages/Admin';
+import { ThemeProvider } from './hooks/themeContext';
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function UserRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
@@ -30,15 +32,11 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  return <>{children}</>;
+  return !isAuthenticated
+    ? <Navigate to="/login" replace />
+    : !isAdmin
+      ? <Navigate to="/" replace />
+      : <>{children}</>;
 }
 
 function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
@@ -46,6 +44,7 @@ function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
+
 
 function AppContent() {
   const location = useLocation();
@@ -81,13 +80,14 @@ function AppContent() {
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/tasks" element={<ProtectedRoute><TaskList /></ProtectedRoute>} />
-            <Route path="/tasks/:id" element={<ProtectedRoute><TaskDetail /></ProtectedRoute>} />
-            <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
-            <Route path="/courses/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
-            <Route path="/lectures" element={<ProtectedRoute><Lectures /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/" element={<UserRoute><Dashboard /></UserRoute>} />
+            <Route path="/tasks" element={<UserRoute><TaskList /></UserRoute>} />
+            <Route path="/tasks/:id" element={<UserRoute><TaskDetail /></UserRoute>} />
+            <Route path="/courses" element={<UserRoute><Courses /></UserRoute>} />
+            <Route path="/courses/:id" element={<UserRoute><CourseDetail /></UserRoute>} />
+            <Route path="/lectures" element={<UserRoute><Lectures /></UserRoute>} />
+            <Route path="/profile" element={<UserRoute><Profile /></UserRoute>} />
+            <Route path="/visualize" element={<UserRoute><GraphVisualizer /></UserRoute>} />
             <Route path="/profile/edit" element={<AuthenticatedRoute><EditProfile /></AuthenticatedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
           </Routes>
@@ -100,13 +100,15 @@ function AppContent() {
 export default function App() {
   return (
     <AchievementNotificationProvider>
-      <Router>
-        <div className="bg-primary-background min-h-screen text-foreground">
-          <div className="relative z-10">
-            <AppContent />
+      <ThemeProvider>
+        <Router>
+          <div className="bg-primary-background min-h-screen text-foreground">
+            <div className="relative z-10">
+              <AppContent />
+            </div>
           </div>
-        </div>
-      </Router>
+        </Router>
+      </ThemeProvider>
     </AchievementNotificationProvider>
   );
 }

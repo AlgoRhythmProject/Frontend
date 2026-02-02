@@ -7,8 +7,9 @@ import { type AppDispatch, type RootState } from '../store';
 import { login } from '../store/userSlice';
 import { AuthenticationInput } from '../components/Authentication/AuthenticationInput';
 import { AuthenticationBackground } from '../components/Authentication/AuthenticationBackground';
-import { authApi, ApiError } from '../api/authApi';
 import { validateName, validateEmail, sanitizeInput, validatePassword } from '@/utils/validationUtils';
+import { authApi } from '@/api/auth/authApi';
+import { ApiError } from '@/api/auth/types';
 
 export function EditProfile() {
   const navigate = useNavigate();
@@ -103,7 +104,7 @@ export function EditProfile() {
 
       if (sanitizedData.email !== userState.user?.email) {
         setTimeout(() => {
-          setSuccessMessage("Profile updated! Please verify your new email address.");
+          setSuccessMessage("Profile updated successfully!");
         }, 1000);
       }
     } catch (err: any) {
@@ -282,9 +283,6 @@ export function EditProfile() {
                 delay={0.2}
               />
 
-              <p className="font-sans text-secondary-foreground text-sm">
-                If you change your email, you'll need to verify the new address.
-              </p>
             </div>
 
             <motion.button

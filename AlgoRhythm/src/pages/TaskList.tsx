@@ -5,10 +5,8 @@ import { Loader2 } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { StatBox } from '../components/StatBox';
 
-import { taskApi } from '../api/taskApi';
-import { courseApi } from '../api/courseApi';
-import { tagApi, type Tag } from '../api/tagApi';
-import { courseProgressApi } from '../api/courseProgressApi';
+import { taskApi } from '../api/task/taskApi';
+import { courseApi } from '../api/course/courseApi';
 import type { Course } from '@/types/Course';
 import type { Task } from '@/types/Task';
 import { DifficultyLabel, type Difficulty } from '@/utils/difficulty';
@@ -16,6 +14,9 @@ import { FilterButton } from '@/components/Tasks/FilterButton';
 import { Pagination } from '@/components/Tasks/Pagination';
 import { SearchBox } from '@/components/Tasks/SearchBox';
 import { TaskListBox } from '@/components/Tasks/TaskListBox';
+import { courseProgressApi } from '@/api/courseProgress/courseProgressApi';
+import { tagApi } from '@/api/tag/tagApi';
+import type { Tag } from '@/types/Tag';
 
 type TaskWithCourses = Task & {
   courseIds: string[];
@@ -47,7 +48,7 @@ export function TaskList() {
 
         const [taskResp, courseResp, tagResp, completedResp] = await Promise.all([
           taskApi.getPublished(),
-          courseApi.getAll(),
+          courseApi.getPublished(),
           tagApi.getAll(),
           courseProgressApi.getMyCompletedTasks(),
         ]);

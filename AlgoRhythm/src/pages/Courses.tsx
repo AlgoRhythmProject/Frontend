@@ -7,11 +7,11 @@ import { StatBox } from "../components/StatBox";
 import { ProgressBar } from "../components/ProgressBar";
 import { LoadingState } from "../components/LoadingState";
 
-import { courseApi } from "@/api/courseApi";
-import { courseProgressApi } from "@/api/courseProgressApi";
+import { courseApi } from "@/api/course/courseApi";
 import type { Course } from "@/types/Course";
 import { getCourseVisualConfig } from "@/config/courseConfig";
 import type { CourseProgress } from "@/types/CourseProgress";
+import { courseProgressApi } from "@/api/courseProgress/courseProgressApi";
 
 type UICourse = Course & {
   progress?: CourseProgress | null;
@@ -28,7 +28,7 @@ export function Courses() {
       setError(null);
 
       try {
-        const allCourses = await courseApi.getAll();
+        const allCourses = await courseApi.getPublished();
 
         const settled = await Promise.allSettled(
           allCourses.map((c) => courseProgressApi.getMyCourseProgress(c.id))
@@ -111,10 +111,9 @@ export function Courses() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {continueLearning.map((course, idx) => {
-                  const { icon: Icon, gradient } = getCourseVisualConfig(course.id);
+                  const { icon: Icon, gradient } = getCourseVisualConfig(course.name);
                   const percentage = course.progress?.percentage ?? 0;
                   const totalLectures = course.lectures?.length ?? 0;
-
                   return (
                     <motion.div
                       key={course.id}
@@ -127,23 +126,26 @@ export function Courses() {
                         className={`relative h-80 rounded-2xl overflow-hidden block group bg-linear-to-br ${gradient} hover:shadow-2xl transition-shadow`}
                       >
                         <div className="relative h-full p-6 flex flex-col">
-                          <div className="mb-4">
+                          <div className="mb-4 shrink-0">
                             <div className="inline-flex p-3 bg-primary-foreground/20 rounded-xl">
                               <Icon className="w-6 h-6 text-on-primary" />
                             </div>
                           </div>
 
                           <p
-                            className="font-sans font-bold text-on-primary text-2xl md:text-3xl mb-3 tracking-[-1.2px]"
+                            className="font-sans font-bold text-on-primary text-2xl md:text-3xl mb-3 tracking-[-1.2px] shrink-0"
                             style={{ fontVariationSettings: "'wdth' 100" }}
                           >
                             {course.name}
                           </p>
-                          <p className="font-sans font-light text-on-primary/90 text-base mb-6 flex-1 line-clamp-2">
-                            {course.description}
-                          </p>
 
-                          <div>
+                          <div className="flex-1 mb-6 min-h-0">
+                            <p className="font-sans font-light text-on-primary/90 text-base line-clamp-2">
+                              {course.description}
+                            </p>
+                          </div>
+
+                          <div className="shrink-0">
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-sans text-on-primary/80 text-sm">
                                 Progress
@@ -152,7 +154,6 @@ export function Courses() {
                                 {Math.round(percentage)}%
                               </span>
                             </div>
-
                             <ProgressBar
                               value={percentage}
                               total={100}
@@ -160,7 +161,6 @@ export function Courses() {
                               backgroundClassName="bg-[rgba(248,248,248,0.3)]"
                               delay={0.5 + idx * 0.05}
                             />
-
                             <p className="font-sans text-on-primary/70 text-xs mt-2">
                               {percentage}% • {totalLectures} lectures
                             </p>
@@ -188,7 +188,7 @@ export function Courses() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {courses.map((course, idx) => {
-                const { icon: Icon, gradient } = getCourseVisualConfig(course.id);
+                const { icon: Icon, gradient } = getCourseVisualConfig(course.name);
                 const isAvailable =
                   course.progress === null || course.progress === undefined;
                 const totalLectures = course.lectures?.length ?? 0;

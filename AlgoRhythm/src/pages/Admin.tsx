@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { taskApi } from '@/api/taskApi';
-import { lectureApi } from '@/api/lectureApi';
-import { courseApi } from '@/api/courseApi';
-import { adminApi, type UserWithRoles } from '@/api/adminApi';
+import { taskApi } from '@/api/task/taskApi';
+import { courseApi } from '@/api/course/courseApi';
 import type { Task } from '@/types/Task';
 import type { Lecture } from '@/types/Lecture';
 import type { Course } from '@/types/Course';
@@ -17,13 +15,17 @@ import { UsersTab } from '@/components/Admin/AdminPanel/UsersTab';
 import { TasksTab } from '@/components/Admin/AdminPanel/TasksTab';
 import { LecturesTab } from '@/components/Admin/AdminPanel/LecturesTab';
 import { CoursesTab } from '@/components/Admin/AdminPanel/CoursesTab';
-import { ActivityTab } from '@/components/Admin/AdminPanel/ActivityTab';
-import { commentApi } from '@/api/commentApi';
+import { commentApi } from '@/api/comment/commentApi';
 import type { Comment } from '@/types/Comment';
 import { CommentsTab } from '@/components/Admin/AdminPanel/CommentsTab';
+import { SubmissionsTab } from '@/components/Admin/AdminPanel/SubmissionsTab';
+import { adminApi } from '@/api/admin/adminApi';
+import type { UserWithRoles } from '@/api/admin/types';
+import { submissionApi } from '@/api/submission/submissionApi';
+import type { SubmissionResponse } from '@/api/submission/types';
+import { lectureApi } from '@/api/lecture/lectureApi';
 
-type TabType = 'users' | 'tasks' | 'lectures' | 'courses' | 'activity' | 'comments';
-
+type TabType = 'users' | 'tasks' | 'lectures' | 'courses' | 'comments' | 'submissions';
 export function Admin() {
   const [activeTab, setActiveTab] = useState<TabType>('users');
   const [users, setUsers] = useState<UserWithRoles[]>([]);
@@ -40,6 +42,7 @@ export function Admin() {
   const [selectedLecture, setSelectedLecture] = useState<Lecture | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [submissions, setSubmissions] = useState<SubmissionResponse[]>([]);
 
   useEffect(() => {
     loadCourses();
@@ -206,7 +209,6 @@ export function Admin() {
 
   const loadComments = async () => {
     try {
-      // Pobierz komentarze dla wszystkich zadań
       const allComments: Comment[] = [];
       for (const task of tasks) {
         const taskComments = await commentApi.getByTaskId(task.id);
@@ -230,6 +232,24 @@ export function Admin() {
     }
   }, [activeTab, tasks]);
 
+  const loadSubmissions = async () => {
+    try {
+      const data = await submissionApi.getAllSubmissions();
+      setSubmissions(data);
+    } catch (error) {
+      console.error('Failed to load submissions:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadSubmissions();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'submissions' && submissions.length === 0) {
+      loadSubmissions();
+    }
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -282,7 +302,9 @@ export function Admin() {
           {activeTab === 'comments' && (
             <CommentsTab comments={comments} tasks={tasks} loading={loading} />
           )}
-          {activeTab === 'activity' && <ActivityTab />}
+          {activeTab === 'submissions' && (
+            <SubmissionsTab submissions={submissions} tasks={tasks} loading={loading} />
+          )}
         </div>
       </div>
 

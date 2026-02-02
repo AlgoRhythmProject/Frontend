@@ -1,7 +1,8 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+import { config } from "@/config/global";
 
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: config.apiBaseUrl,
     headers: {
         "Content-Type": "application/json",
         accept: "*/*",

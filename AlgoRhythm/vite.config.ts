@@ -4,15 +4,20 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from "node:path"
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), sentryVitePlugin({
-    org: "algorhythm",
-    project: "frontend"
-  })],
+  plugins: [
+    react(),
+    tailwindcss(),
+    sentryVitePlugin({
+      org: "algorhythm",
+      project: "frontend"
+    })
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      react: path.resolve(__dirname, './node_modules/react'),
+      'react-dom': path.resolve(__dirname, './node_modules/react-dom')
     },
   },
   server: {
@@ -24,8 +29,7 @@ export default defineConfig({
       },
     },
   },
-
   build: {
     sourcemap: true
-  }
+  },
 })

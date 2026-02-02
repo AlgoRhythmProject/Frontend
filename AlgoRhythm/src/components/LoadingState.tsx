@@ -63,11 +63,9 @@ export function LoadingState({
         );
     }
 
-    // SUCCESS - render children
     return <>{children}</>;
 }
 
-// Alternatywnie - wersja inline dla mniejszych komponentów
 interface InlineLoadingProps {
     isLoading: boolean;
     error: string | null;

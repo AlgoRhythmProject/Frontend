@@ -1,4 +1,4 @@
-import type { UserAchievementDto } from '@/api/achievementApi';
+import type { UserAchievementDto } from "@/api/achievements/types";
 
 
 export function getNewlyEarnedAchievements(

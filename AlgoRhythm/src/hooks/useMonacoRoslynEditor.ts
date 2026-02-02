@@ -89,7 +89,6 @@ export function useMonacoRoslyn(
         return cleanUp;
     }, [monaco, connection, isConnected]);
 
-    // Funkcja do wyzwalania diagnostyki
     const runDiagnostics = async (code: string) => {
         if (!connection || !isConnected || !monaco || !editor) return;
 

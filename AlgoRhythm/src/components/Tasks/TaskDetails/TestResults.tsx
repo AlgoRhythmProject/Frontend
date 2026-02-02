@@ -17,7 +17,7 @@ export function TestResults({ testResults, runStatus }: TestResultsProps) {
             <div className="space-y-2">
                 {testResults.map((r, idx) => (
                     <div
-                        key={idx}
+                        key={r.testCaseId}
                         className={`flex items-start gap-3 p-3 rounded-lg ${r.passed
                             ? "bg-success/10 border border-success/30"
                             : "bg-error/10 border border-error/30"
@@ -29,16 +29,18 @@ export function TestResults({ testResults, runStatus }: TestResultsProps) {
                             <X className="w-5 h-5 text-error mt-0.5" />
                         )}
                         <div className="flex flex-col flex-1 gap-1">
-                            <p className="font-sans text-sm text-foreground">
-                                Test {idx + 1} • {r.executionTimeMs.toFixed(2)}ms
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <p className="font-sans text-sm text-foreground">
+                                    Test {idx + 1} • {r.executionTimeMs.toFixed(2)}ms
+                                </p>
+
+                            </div>
                             <p
                                 className={`font-sans text-sm ${r.passed ? "text-success" : "text-error"
                                     }`}
                             >
                                 {r.passed ? "Passed" : "Failed"} • {r.points} points
                             </p>
-
                             {/* Display execution errors */}
                             {r.errors && r.errors.length > 0 && (
                                 <div className="mt-2 space-y-1">
@@ -57,14 +59,12 @@ export function TestResults({ testResults, runStatus }: TestResultsProps) {
                                     ))}
                                 </div>
                             )}
-
                             {/* Display stderr */}
                             {r.stdErr && (
                                 <p className="font-mono text-error text-xs mt-1 p-2 bg-error/10 rounded">
                                     Error: {r.stdErr}
                                 </p>
                             )}
-
                             {/* Display stdout */}
                             {r.stdOut && (
                                 <p className="font-mono text-success text-xs mt-1 p-2 bg-success/10 rounded">

@@ -15,7 +15,7 @@ export function CoursesTab({ courses, onAddCourse, onEditCourse, onDeleteCourse 
                 <h2 className="font-sans font-medium text-foreground text-xl">Course Management</h2>
                 <button
                     onClick={onAddCourse}
-                    className="flex items-center cursor-pointer gap-2 bg-primary hover:bg-primary-hover text-foreground px-4 py-2 rounded-lg transition-colors"
+                    className="flex items-center cursor-pointer gap-2 bg-primary hover:bg-primary-hover text-on-primary px-4 py-2 rounded-lg transition-colors"
                 >
                     <Plus className="w-4 h-4" />
                     Add Course
@@ -55,8 +55,8 @@ export function CoursesTab({ courses, onAddCourse, onEditCourse, onDeleteCourse 
                                     <td className="p-4">
                                         <span
                                             className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${course.isPublished
-                                                    ? 'bg-success/20 text-success'
-                                                    : 'bg-muted text-muted-foreground'
+                                                ? 'bg-success/20 text-success'
+                                                : 'bg-muted text-muted-foreground'
                                                 }`}
                                         >
                                             {course.isPublished ? 'Published' : 'Draft'}

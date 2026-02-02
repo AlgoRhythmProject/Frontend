@@ -1,5 +1,5 @@
+import type { UserWithRoles } from '@/api/admin/types';
 import { Shield, ShieldOff } from 'lucide-react';
-import type { UserWithRoles } from '@/api/adminApi';
 
 interface UsersTabProps {
     users: UserWithRoles[];
@@ -52,8 +52,8 @@ export function UsersTab({ users, loading, onToggleAdminRole }: UsersTabProps) {
                                                     <span
                                                         key={role}
                                                         className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${role === 'Admin'
-                                                                ? 'bg-primary/20 text-primary'
-                                                                : 'bg-muted text-muted-foreground'
+                                                            ? 'bg-primary/20 text-primary'
+                                                            : 'bg-muted text-muted-foreground'
                                                             }`}
                                                     >
                                                         {role}
@@ -64,8 +64,8 @@ export function UsersTab({ users, loading, onToggleAdminRole }: UsersTabProps) {
                                         <td className="p-4">
                                             <span
                                                 className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${user.emailConfirmed
-                                                        ? 'bg-success/20 text-success'
-                                                        : 'bg-warning/20 text-warning'
+                                                    ? 'bg-success/20 text-success'
+                                                    : 'bg-warning/20 text-warning'
                                                     }`}
                                             >
                                                 {user.emailConfirmed ? 'Verified' : 'Pending'}
@@ -78,8 +78,8 @@ export function UsersTab({ users, loading, onToggleAdminRole }: UsersTabProps) {
                                             <button
                                                 onClick={() => onToggleAdminRole(user)}
                                                 className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg transition-colors ${isAdmin
-                                                        ? 'bg-error/10 hover:bg-error/20 text-error'
-                                                        : 'bg-primary/10 hover:bg-primary/20 text-primary'
+                                                    ? 'bg-error/10 hover:bg-error/20 text-error'
+                                                    : 'bg-primary/10 hover:bg-primary/20 text-primary'
                                                     }`}
                                                 title={isAdmin ? 'Revoke Admin' : 'Grant Admin'}
                                             >

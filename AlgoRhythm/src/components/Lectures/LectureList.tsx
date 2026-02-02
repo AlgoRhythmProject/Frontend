@@ -1,16 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
-import type { Lecture } from "../../types/Lecture";
+import type { Lecture } from "@/types/Lecture.ts";
 import { motion } from "framer-motion";
 import { PageHeader } from "../PageHeader";
-import { tagApi } from "../../api/tagApi";
-import { courseProgressApi } from "../../api/courseProgressApi";
-
-interface Tag {
-    id: string;
-    name: string;
-    description?: string;
-}
+import { courseProgressApi } from "@/api/courseProgress/courseProgressApi";
+import { tagApi } from "@/api/tag/tagApi";
+import type { Tag } from "@/types/Tag.ts";
 
 interface LectureListProps {
     lectures: Lecture[];

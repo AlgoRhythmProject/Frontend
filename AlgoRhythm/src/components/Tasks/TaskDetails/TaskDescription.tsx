@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { MessageSquare } from "lucide-react";
-import type { Task } from "@/types/Task";
+import { MessageSquare, Code } from "lucide-react";
 import { CommentsSection } from "./CommentSection";
+import { TaskSubmissionsTab } from "./TaskSubmissionsTab";
+import type { Task } from "@/types/Task";
 
 interface TaskDescriptionProps {
     task: Task;
 }
 
-type TabType = "description" | "discussion";
+type TabType = "description" | "discussion" | "submissions";
 
 export function TaskDescription({ task }: TaskDescriptionProps) {
     const [activeTab, setActiveTab] = useState<TabType>("description");
@@ -41,6 +42,19 @@ export function TaskDescription({ task }: TaskDescriptionProps) {
                         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                     )}
                 </button>
+                <button
+                    onClick={() => setActiveTab("submissions")}
+                    className={`flex-1 px-6 py-3 font-sans cursor-pointer font-medium transition-colors relative flex items-center justify-center gap-2 ${activeTab === "submissions"
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
+                >
+                    <Code className="w-4 h-4" />
+                    Submissions
+                    {activeTab === "submissions" && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                </button>
             </div>
 
             {/* Tab Content */}
@@ -50,42 +64,18 @@ export function TaskDescription({ task }: TaskDescriptionProps) {
                         <h2 className="font-sans font-medium text-foreground text-2xl mb-4">
                             Description
                         </h2>
-                        <p className="font-sans text-foreground mb-6 whitespace-pre-wrap">
-                            {task.description}
-                        </p>
-
-                        {task.examples && task.examples.length > 0 && (
-                            <>
-                                <h3 className="font-sans font-medium text-foreground text-xl mb-3">
-                                    Examples
-                                </h3>
-                                <div className="space-y-4 mb-6">
-                                    {task.examples.map((example, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="bg-background border border-muted rounded-lg p-4"
-                                        >
-                                            <p className="font-mono text-success mb-2">
-                                                Input: {example.input}
-                                            </p>
-                                            <p className="font-mono text-warning mb-2">
-                                                Output: {example.output}
-                                            </p>
-                                            {example.explanation && (
-                                                <p className="font-sans text-muted-foreground text-sm">
-                                                    {example.explanation}
-                                                </p>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-
+                        <div
+                            key={task.id}
+                            dangerouslySetInnerHTML={{ __html: task.description ?? "" }}
+                        />
+                    </div>
+                ) : activeTab === "discussion" ? (
+                    <div className="max-w-2xl">
+                        <CommentsSection taskId={task.id} />
                     </div>
                 ) : (
                     <div className="max-w-2xl">
-                        <CommentsSection taskId={task.id} />
+                        <TaskSubmissionsTab taskId={task.id} />
                     </div>
                 )}
             </div>
