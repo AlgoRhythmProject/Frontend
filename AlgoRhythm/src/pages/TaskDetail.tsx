@@ -132,8 +132,8 @@ export function TaskDetail() {
       const submissionId = submission.submissionId;
       let finalResult: SubmissionResponse | null = null;
 
-      for (let i = 0; i < 30; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+      for (let i = 0; i < 100; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
 
         finalResult = await submissionApi.getResult(submissionId);
 

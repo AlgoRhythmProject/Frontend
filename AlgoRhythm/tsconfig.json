@@ -10,6 +10,7 @@
     "module": "ESNext",
     "jsx": "react-jsx",
     "esModuleInterop": true,
+    "allowImportingTsExtensions": false,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {

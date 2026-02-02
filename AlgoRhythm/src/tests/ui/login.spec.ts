@@ -48,7 +48,16 @@ test.describe("Login component tests", () => {
         await page.getByPlaceholder(PASSWORD_PLACEHOLDER).fill("password123");
 
         const loginBtn = page.getByRole("button", { name: LOGIN_BUTTON_NAME });
-        await loginBtn.click();
+
+        const [] = await Promise.all([
+            page.waitForResponse("**/api/Authentication/login"),
+            loginBtn.click(),
+        ]);
+
+        await page.waitForFunction(() => {
+            const btn = document.querySelector('button[type="submit"]');
+            return btn?.hasAttribute('disabled');
+        });
 
         await expect(loginBtn).toBeDisabled();
     });

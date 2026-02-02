@@ -40,7 +40,6 @@ export function LecturesTab({
                         <thead className="bg-background">
                             <tr>
                                 <th className="text-left p-4 font-sans font-medium text-muted-foreground">Title</th>
-                                <th className="text-left p-4 font-sans font-medium text-muted-foreground">Contents</th>
                                 <th className="text-left p-4 font-sans font-medium text-muted-foreground">Status</th>
                                 <th className="text-left p-4 font-sans font-medium text-muted-foreground">Created</th>
                                 <th className="text-left p-4 font-sans font-medium text-muted-foreground">Actions</th>
@@ -50,9 +49,6 @@ export function LecturesTab({
                             {lectures.map((lecture, idx) => (
                                 <tr key={lecture.id} className={idx % 2 === 0 ? 'bg-background/50' : ''}>
                                     <td className="p-4 font-sans text-foreground">{lecture.title}</td>
-                                    <td className="p-4 font-sans text-muted-foreground">
-                                        {lecture.contents?.length || 0} items
-                                    </td>
                                     <td className="p-4">
                                         <span
                                             className={`px-3 py-1 rounded-full text-sm font-sans font-medium ${lecture.isPublished ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'

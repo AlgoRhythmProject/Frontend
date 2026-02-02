@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { User } from '../types/User';
 
-interface UserState {
+export interface UserState {
     user: User | null;
     isAuthenticated: boolean;
 }
@@ -21,7 +21,7 @@ const userSlice = createSlice({
             state.user = action.payload;
             state.isAuthenticated = true;
             localStorage.setItem('user', JSON.stringify(action.payload));
-            localStorage.setItem('token', action.payload.token || ''); // <-- zapisz token osobno też
+            localStorage.setItem('token', action.payload.token || '');
         },
         logout(state) {
             state.user = null;

@@ -13,6 +13,7 @@ export interface SubmissionResponse {
     score: number | null;
     isSolved: boolean;
     submittedAt: string;
+    code: string;
     testResults: TestResult[];
     errorMessage: string | null;
 }

@@ -5,4 +5,5 @@ export interface TestCase {
     expectedJson: string | null;
     isVisible: boolean;
     maxPoints: number;
+    timeoutMs: number | null;
 }

@@ -1,11 +1,11 @@
 import { Editor, type Monaco, type OnMount } from '@monaco-editor/react';
 import { useEffect, useState } from "react";
-import { useMonacoRoslyn } from "@/hooks/useMonacoRoslynEditor.ts";
-import { useSignalR } from "@/hooks/useSignalR.ts";
+import { useMonacoRoslyn } from "@/hooks/useMonacoRoslynEditor";
+import { useSignalR } from "@/hooks/useSignalR";
 import type { editor } from 'monaco-editor';
 import type { ExecutionError } from "@/types/CodeAnalysis.ts";
 import { useTheme } from '@/hooks/themeContext';
-import { config } from "@/config/global.ts";
+import { config } from "@/config/global";
 
 interface CodeEditorProps {
     value: string;

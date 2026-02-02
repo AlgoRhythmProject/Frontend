@@ -22,10 +22,10 @@ interface GraphCanvasProps {
 const NODE_RADIUS = 30;
 
 export const GraphCanvas = ({
-                                nodes, edges, visualState,
-                                selectedNodeId, mode, edgePreview,
-                                onNodeClick, onEdgeClick, onNodeMouseDown, onNodeMouseUp, onCanvasClick, onMouseMove,
-                            }: GraphCanvasProps) => {
+    nodes, edges, visualState,
+    selectedNodeId, mode, edgePreview,
+    onNodeClick, onEdgeClick, onNodeMouseDown, onNodeMouseUp, onCanvasClick, onMouseMove,
+}: GraphCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +50,7 @@ export const GraphCanvas = ({
         });
     };
 
-    const distToSegment = (p: {x: number, y: number}, a: {x: number, y: number}, b: {x: number, y: number}) => {
+    const distToSegment = (p: { x: number, y: number }, a: { x: number, y: number }, b: { x: number, y: number }) => {
         const l2 = Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2);
         if (l2 === 0) return Math.hypot(p.x - a.x, p.y - a.y);
 
@@ -125,11 +125,11 @@ export const GraphCanvas = ({
             } else if (node.isStart) {
                 fillColor = '#1086b9';
                 glowColor = '#104bb9';
-                strokeColor =  '#107eb9';
+                strokeColor = '#107eb9';
             } else if (node.isEnd) {
                 fillColor = '#ef4444';
                 glowColor = '#f62626';
-                strokeColor =  '#ed3535';
+                strokeColor = '#ed3535';
             }
 
             if (selectedNodeId === node.id) {
@@ -147,7 +147,6 @@ export const GraphCanvas = ({
             ctx.beginPath();
             ctx.arc(node.x, node.y, NODE_RADIUS, 0, Math.PI * 2);
 
-            // Gradient dla efektu 3D
             const grad = ctx.createRadialGradient(node.x - 8, node.y - 8, 4, node.x, node.y, NODE_RADIUS);
             grad.addColorStop(0, lightenColor(fillColor, 40));
             grad.addColorStop(1, fillColor);
@@ -201,7 +200,6 @@ export const GraphCanvas = ({
             ctx.quadraticCurveTo(cpX, cpY, endX, endY);
             ctx.stroke();
 
-            // Grot strzałki
             drawHead(ctx, endX, endY, arrowAngle, headLength, color);
         } else {
             const startX = x1 + NODE_RADIUS * Math.cos(angle);
@@ -228,13 +226,13 @@ export const GraphCanvas = ({
 
 
     const lightenColor = (hex: string, percent: number) => {
-        const num = Number.parseInt(hex.replace("#",""), 16),
+        const num = Number.parseInt(hex.replace("#", ""), 16),
             amt = Math.round(2.55 * percent),
             R = (num >> 16) + amt,
             G = (num >> 8 & 0x00FF) + amt,
             B = (num & 0x0000FF) + amt;
         return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-            (G < 255 ? G < 1 ? 0 : G : 255 ) * 0x100 + ( B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+            (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
     };
 
     const drawEdgeLabel = (ctx: CanvasRenderingContext2D, from: any, to: any, edge: any, isCurved: boolean) => {
