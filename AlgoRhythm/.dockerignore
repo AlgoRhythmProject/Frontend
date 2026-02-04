@@ -47,4 +47,3 @@ docker-compose.override.yml
 
 yarn.lock
 pnpm-lock.yaml
-# ALE NIE package-lock.json!

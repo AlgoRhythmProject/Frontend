@@ -2,12 +2,8 @@
 FROM node:20-slim AS build
 
 WORKDIR /app
-
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 COPY package*.json ./
-
-RUN npm ci --only=production=false
+RUN npm install --ignore-scripts
 COPY . .
 RUN npm run build # Built files in /app/dist
 

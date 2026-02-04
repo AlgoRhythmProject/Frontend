@@ -2,17 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Mail } from "lucide-react";
-import { AuthenticationInput } from "../components/Authentication/AuthenticationInput";
-import { AuthenticationHeader } from "../components/Authentication/AuthenticationHeader";
-import { AuthenticationBackground } from "../components/Authentication/AuthenticationBackground";
+import { AuthenticationInput } from "@/components/Authentication/AuthenticationInput";
+import { AuthenticationHeader } from "@/components/Authentication/AuthenticationHeader";
+import { AuthenticationBackground } from "@/components/Authentication/AuthenticationBackground";
 import { AuthenticationButton } from "@/components/Authentication/AuthenticationButton";
-import { AuthenticationFooter } from "../components/Authentication/AuthenticationFooter";
-import { GoogleLoginButton } from "../components/Authentication/GoogleLoginButton";
+import { AuthenticationFooter } from "@/components/Authentication/AuthenticationFooter";
+import { GoogleLoginButton } from "@/components/Authentication/GoogleLoginButton";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store";
-import { login } from "../store/userSlice";
-import { authApi } from "../api/auth/authApi";
-import { adminApi } from "../api/admin/adminApi";
+import { login } from "@/store/userSlice";
+import { authApi } from "@/api/auth/authApi";
+import { adminApi } from "@/api/admin/adminApi";
 import { Particles } from "@/components/ui/shadcn-io/particles";
 import { useTheme } from "@/hooks/themeContext";
 import { ApiError } from "@/api/auth/types";
@@ -25,7 +25,6 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { isDark } = useTheme();
-  const isGoogleEnabled = true;//import.meta.env.VITE_ENABLE_GOOGLE_LOGIN !== "false";
 
   const handleLoginSuccess = async (user: any) => {
     localStorage.setItem("token", user.token);
@@ -185,15 +184,15 @@ export function Login() {
               transition={{ delay: 1.0 }}
               className="relative my-6"
             />
+
             {/* Google Sign-In Button */}
-            {isGoogleEnabled && (
-              <GoogleLoginButton
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                text="signin_with"
-                isDark={isDark}
-              />
-            )}
+            <GoogleLoginButton
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="signin_with"
+              isDark={isDark}
+            />
+
 
             <AuthenticationFooter
               promptText="Don't have an account?"
